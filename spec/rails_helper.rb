@@ -11,7 +11,7 @@ require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 
 # Shoulda Matchers Configuration
-require 'shoulda/matchers'
+require 'shoulda-matchers'
 
 Shoulda::Matchers.configure do |config|
   config.integrate do |with|
@@ -47,6 +47,10 @@ end
 RSpec.configure do |config|
   # FactoryBot configuration
   config.include FactoryBot::Syntax::Methods
+  
+  # Include Shoulda Matchers
+  config.include(Shoulda::Matchers::ActiveModel, type: :model)
+  config.include(Shoulda::Matchers::ActiveRecord, type: :model)
 
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
