@@ -5,6 +5,7 @@ ruby '3.4.2'
 gem "rails", "~> 8.0.2", ">= 8.0.2.1"
 
 gem "awesome_print", groups: %i[development production]
+gem "dotenv-rails", groups: %i[development test]
 gem "bootsnap", require: false
 gem "brakeman", require: false, groups: %i[development test]
 gem "byebug", groups: %i[development test]
