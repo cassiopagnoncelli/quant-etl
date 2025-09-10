@@ -8,9 +8,11 @@ require 'csv'
 
 module Etl
   module Import
-    # Service class to download and process Polygon.io flat files
-    # Uses AWS S3 CLI to interact with Polygon's S3-compatible endpoint
-    class PolygonFlatFile
+    module Flat
+      module Polygon
+        # Service class to download and process Polygon.io flat files
+        # Uses AWS S3 CLI to interact with Polygon's S3-compatible endpoint
+        class FlatFile
       ENDPOINT_URL = 'https://files.polygon.io'
       BUCKET_NAME = 'flatfiles'
       
@@ -241,6 +243,8 @@ module Etl
         end
         
         Rails.logger.info "Successfully downloaded: #{local_path}"
+      end
+        end
       end
     end
   end

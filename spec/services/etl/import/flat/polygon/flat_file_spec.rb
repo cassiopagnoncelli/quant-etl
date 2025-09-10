@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Etl::Import::PolygonFlatFile do
+RSpec.describe Etl::Import::Flat::Polygon::FlatFile do
   let(:ticker) { 'AAPL' }
   let(:download_dir) { Rails.root.join('tmp', 'test_polygon_files') }
   let(:service) { described_class.new(ticker, download_dir: download_dir) }

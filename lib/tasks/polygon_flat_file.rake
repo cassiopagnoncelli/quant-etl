@@ -56,7 +56,7 @@ namespace :polygon do
       
       # Now try with credentials
       puts "Testing authenticated access..."
-      service = Etl::Import::PolygonFlatFile.new('TEST')
+      service = Etl::Import::Flat::Polygon::FlatFile.new('TEST')
       
       begin
         # Try to list files in stocks
@@ -101,7 +101,7 @@ namespace :polygon do
       end
       
       begin
-        service = Etl::Import::PolygonFlatFile.new(ticker)
+        service = Etl::Import::Flat::Polygon::FlatFile.new(ticker)
         file_path = service.download(
           date: date,
           asset_class: asset_class,
@@ -150,7 +150,7 @@ namespace :polygon do
       end
       
       begin
-        service = Etl::Import::PolygonFlatFile.new(ticker)
+        service = Etl::Import::Flat::Polygon::FlatFile.new(ticker)
         files = service.download_range(
           start_date: start_date,
           end_date: end_date,
@@ -180,7 +180,7 @@ namespace :polygon do
       
       begin
         # Using a dummy ticker since list_files doesn't filter by ticker
-        service = Etl::Import::PolygonFlatFile.new('DUMMY')
+        service = Etl::Import::Flat::Polygon::FlatFile.new('DUMMY')
         files = service.list_files(
           asset_class: asset_class,
           data_type: data_type,
@@ -209,7 +209,7 @@ namespace :polygon do
       end
       
       begin
-        service = Etl::Import::PolygonFlatFile.new(ticker)
+        service = Etl::Import::Flat::Polygon::FlatFile.new(ticker)
         
         puts "Downloading and processing trades for #{ticker} on #{date}..."
         
