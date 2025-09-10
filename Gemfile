@@ -9,6 +9,7 @@ gem "dotenv-rails", groups: %i[development test]
 gem "bootsnap", require: false
 gem "brakeman", require: false, groups: %i[development test]
 gem "byebug", groups: %i[development test]
+gem "csv"
 gem "debug", platforms: %i[ mri windows ], require: "debug/prelude", groups: %i[development test]
 gem "factory_bot_rails", ">= 6.4", groups: %i[development test]
 gem "faraday"

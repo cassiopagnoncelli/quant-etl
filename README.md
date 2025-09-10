@@ -1,24 +1,9 @@
-# README
+# Spectrader ETL
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Fetch financial timeseries and provide means to serve in R.
 
-Things you may want to cover:
+Consists of periodic aggregates (bars in M1, ..., MN1) and ticks,
+each series is connected to a data source (flat file or API) and serves
+streaming and REST API.
 
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Series can be stocks, options, futures, indices, forex, and crypto.
