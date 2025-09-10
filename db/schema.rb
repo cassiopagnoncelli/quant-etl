@@ -15,6 +15,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_10_074950) do
   enable_extension "pg_catalog.plpgsql"
 
   create_table "bars", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "timeframe", null: false
     t.string "ticker", null: false
     t.datetime "ts", null: false
@@ -24,8 +26,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_10_074950) do
     t.float "close", null: false
     t.float "aclose", null: false
     t.float "volume"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.index ["timeframe", "ticker", "ts"], name: "index_bars_on_timeframe_and_ticker_and_ts", unique: true
   end
 end
