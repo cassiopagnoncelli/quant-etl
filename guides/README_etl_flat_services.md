@@ -8,11 +8,34 @@ This directory contains services for importing flat file data from various finan
 app/services/etl/import/flat/
 ├── cboe/                    # Chicago Board Options Exchange data
 │   └── vix_historical.rb    # VIX volatility index historical data
-└── polygon/                 # Polygon.io data
-    └── flat_file.rb        # S3-based flat file downloads
+├── polygon/                 # Polygon.io data
+│   └── flat_file.rb        # S3-based flat file downloads
+└── file_csv.rb             # Generic CSV file importer
 ```
 
 ## Available Services
+
+### Generic CSV File Importer
+**Module:** `Etl::Import::Flat::FileCsv`
+
+Imports CSV files with standard OHLCV (Open, High, Low, Close, Volume) data format.
+
+**Features:**
+- Supports standard Yahoo Finance CSV format
+- Configurable decimal precision
+- Automatic data cleanup before import
+- Validation of all bars before import
+
+**Usage:**
+```ruby
+service = Etl::Import::Flat::FileCsv.new(
+  ticker: 'AAPL',
+  file_path: 'path/to/data.csv',
+  timeframe: 'D1',
+  decimals: 2
+)
+service.call
+```
 
 ### CBOE VIX Historical Data
 **Module:** `Etl::Import::Flat::Cboe::VixHistorical`

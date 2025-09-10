@@ -3,7 +3,8 @@ require 'ostruct'
 
 module Etl
   module Import
-    class FileCsv
+    module Flat
+      class FileCsv
       attr_accessor :timeframe, :ticker, :file_path, :bars, :decimals
 
       def initialize(timeframe: "D1", ticker:, file_path:, decimals: 2)
@@ -66,6 +67,7 @@ module Etl
 
       def cleanup
         Bar.where(timeframe:, ticker:).delete_all
+      end
       end
     end
   end
