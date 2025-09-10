@@ -111,8 +111,8 @@ rspec spec/services/etl/import/flat/polygon/flat_file_spec.rb
 ## Documentation
 
 Detailed documentation for each service:
-- [CBOE VIX Documentation](../../../../../guides/README_cboe_vix.md)
-- [Polygon Flat Files Documentation](../../../../../guides/README_polygon_flat_file.md)
+- [CBOE VIX Documentation](README_cboe_vix.md)
+- [Polygon Flat Files Documentation](README_polygon_flat_file.md)
 
 ## Adding New Services
 
