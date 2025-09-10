@@ -9,6 +9,6 @@ class Bar < ApplicationRecord
   validates :volume, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
   def self.[](ticker)
-    where(ticker: ticker, tf: "D1").order(:ts)
+    where(ticker: ticker, timeframe: "D1").order(:ts)
   end
 end
