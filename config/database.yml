@@ -24,6 +24,15 @@ development:
   <<: *default
   database: etl_development
 
+development:
+  primary: &primary_development
+    <<: *default
+    database: etl_development
+  queue:
+    <<: *primary_development
+    database: etl_production_queue
+    migrations_paths: db/queue_migrate
+
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.
   # When left blank, PostgreSQL will use the default role. This is
@@ -84,15 +93,15 @@ production:
     database: etl_production
     username: etl
     password: <%= ENV["ETL_DATABASE_PASSWORD"] %>
-  cache:
-    <<: *primary_production
-    database: etl_production_cache
-    migrations_paths: db/cache_migrate
+  # cache:
+  #   <<: *primary_production
+  #   database: etl_production_cache
+  #   migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
     database: etl_production_queue
     migrations_paths: db/queue_migrate
-  cable:
-    <<: *primary_production
-    database: etl_production_cable
-    migrations_paths: db/cable_migrate
+  # cable:
+  #   <<: *primary_production
+  #   database: etl_production_cable
+  #   migrations_paths: db/cable_migrate
