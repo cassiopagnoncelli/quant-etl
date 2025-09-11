@@ -157,11 +157,11 @@ namespace :fred do
                   else 'D1'
                   end
       
-      total_records = Bar.where(ticker: ticker, timeframe: timeframe).count
+      total_records = Aggregate.where(ticker: ticker, timeframe: timeframe).count
       
       if total_records > 0
-        oldest = Bar.where(ticker: ticker, timeframe: timeframe).minimum(:ts)
-        newest = Bar.where(ticker: ticker, timeframe: timeframe).maximum(:ts)
+        oldest = Aggregate.where(ticker: ticker, timeframe: timeframe).minimum(:ts)
+        newest = Aggregate.where(ticker: ticker, timeframe: timeframe).maximum(:ts)
         
         puts ""
         puts "Database statistics for #{ticker}:"
@@ -305,7 +305,7 @@ namespace :fred do
   end
   
   namespace :load do
-    desc "Load FRED data from a CSV file into Bar model"
+    desc "Load FRED data from a CSV file into Aggregate model"
     task :file, [:file_path, :series, :update_existing] => :environment do |_t, args|
       unless args[:file_path]
         puts "❌ ERROR: File path is required"
@@ -558,11 +558,11 @@ namespace :fred do
                     else 'D1'
                     end
         
-        total_records = Bar.where(ticker: ticker, timeframe: timeframe).count
+        total_records = Aggregate.where(ticker: ticker, timeframe: timeframe).count
         
         if total_records > 0
-          oldest = Bar.where(ticker: ticker, timeframe: timeframe).minimum(:ts)
-          newest = Bar.where(ticker: ticker, timeframe: timeframe).maximum(:ts)
+          oldest = Aggregate.where(ticker: ticker, timeframe: timeframe).minimum(:ts)
+          newest = Aggregate.where(ticker: ticker, timeframe: timeframe).maximum(:ts)
           
           puts ""
           puts "Database statistics for #{ticker}:"

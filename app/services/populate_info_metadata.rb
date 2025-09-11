@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Service to populate Info model with metadata for all series and aggregates
+# Service to populate Info model with metadata for all univariates and aggregates
 class PopulateInfoMetadata
   def self.call
     new.call

@@ -17,7 +17,7 @@ module Etl
           
           # Available FRED series and their configurations
           FRED_SERIES = {
-            # Money Supply (Series model - single value)
+            # Money Supply (Univariate model - single value)
             m2: {
               series_id: 'M2SL',
               name: 'M2 Money Stock',
@@ -27,7 +27,7 @@ module Etl
               model_type: 'series'
             },
             
-            # GDP (Series model - single value)
+            # GDP (Univariate model - single value)
             gdp: {
               series_id: 'GDP',
               name: 'Gross Domestic Product',
@@ -45,7 +45,7 @@ module Etl
               model_type: 'series'
             },
             
-            # Employment (Series model - single value)
+            # Employment (Univariate model - single value)
             unemployment: {
               series_id: 'UNRATE',
               name: 'Unemployment Rate',
@@ -55,7 +55,7 @@ module Etl
               model_type: 'series'
             },
             
-            # Inflation (Series model - single value)
+            # Inflation (Univariate model - single value)
             cpi: {
               series_id: 'CPIAUCSL',
               name: 'Consumer Price Index',
@@ -65,7 +65,7 @@ module Etl
               model_type: 'series'
             },
             
-            # Interest Rates (Series model - single value)
+            # Interest Rates (Univariate model - single value)
             treasury_10y: {
               series_id: 'DGS10',
               name: '10-Year Treasury Yield',
@@ -91,7 +91,7 @@ module Etl
               model_type: 'series'
             },
             
-            # Dollar Index (Series model - single value univariate)
+            # Dollar Index (Univariate model - single value univariate)
             dollar_index: {
               series_id: 'DTWEXBGS',
               name: 'Trade Weighted Dollar Index',
@@ -101,7 +101,7 @@ module Etl
               model_type: 'series'
             },
             
-            # Commodities (Series model - univariate price series)
+            # Commodities (Univariate model - univariate price series)
             oil_wti: {
               series_id: 'DCOILWTICO',
               name: 'WTI Crude Oil',
@@ -127,7 +127,7 @@ module Etl
               model_type: 'series'
             },
             
-            # Stock Market (Series model - univariate index level)
+            # Stock Market (Univariate model - univariate index level)
             sp500: {
               series_id: 'SP500',
               name: 'S&P 500',
@@ -240,10 +240,10 @@ module Etl
               
               begin
                 if use_series_model
-                  # Use Series model for single-value economic indicators
+                  # Use Univariate model for single-value economic indicators
                   attributes = convert_to_series_attributes(record, series_config)
                   
-                  series_record = Series.find_or_initialize_by(
+                  series_record = Univariate.find_or_initialize_by(
                     ticker: attributes[:ticker],
                     ts: attributes[:ts]
                   )
@@ -262,23 +262,23 @@ module Etl
                     end
                   end
                 else
-                  # Use Bar model for OHLCV data
-                  bar_attributes = convert_to_bar_attributes(record, series_config)
+                  # Use Aggregate model for OHLCV data
+                  aggregate_attributes = convert_to_aggregate_attributes(record, series_config)
                   
-                  bar = Bar.find_or_initialize_by(
-                    ticker: bar_attributes[:ticker],
-                    timeframe: bar_attributes[:timeframe],
-                    ts: bar_attributes[:ts]
+                  aggregate = Aggregate.find_or_initialize_by(
+                    ticker: aggregate_attributes[:ticker],
+                    timeframe: aggregate_attributes[:timeframe],
+                    ts: aggregate_attributes[:ts]
                   )
                   
-                  if bar.new_record?
-                    bar.assign_attributes(bar_attributes)
-                    bar.save!
+                  if aggregate.new_record?
+                    aggregate.assign_attributes(aggregate_attributes)
+                    aggregate.save!
                     imported_count += 1
                   else
                     # Update existing record if values changed
-                    if bar_changed?(bar, bar_attributes)
-                      bar.update!(bar_attributes)
+                    if aggregate_changed?(aggregate, aggregate_attributes)
+                      aggregate.update!(aggregate_attributes)
                       imported_count += 1
                     else
                       skipped_count += 1
@@ -290,7 +290,7 @@ module Etl
               end
             end
             
-            model_name = use_series_model ? 'Series' : 'Bar'
+            model_name = use_series_model ? 'Univariate' : 'Aggregate'
             logger.info "Import complete for #{series_config[:series_id]} (#{model_name} model): #{imported_count} records imported, #{skipped_count} skipped"
             imported_count
           end
@@ -510,8 +510,8 @@ module Etl
             }
           end
           
-          def convert_to_bar_attributes(record, series_config)
-            # For Bar model - OHLCV data
+          def convert_to_aggregate_attributes(record, series_config)
+            # For Aggregate model - OHLCV data
             # For single-value series from FRED, we set OHLC all to the same value
             value = record[:value].to_f
             
@@ -544,9 +544,9 @@ module Etl
             }
           end
           
-          def bar_changed?(bar, new_attributes)
+          def aggregate_changed?(aggregate, new_attributes)
             %i[open high low close aclose].any? do |attr|
-              bar.send(attr).to_f != new_attributes[attr].to_f
+              aggregate.send(attr).to_f != new_attributes[attr].to_f
             end
           end
           

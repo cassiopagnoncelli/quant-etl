@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 namespace :vix_flat_file do
-  desc "Import VIX data from CBOE flat files into Bar model"
+  desc "Import VIX data from CBOE flat files into Aggregate model"
   task :import, [:symbol] => :environment do |_t, args|
     symbol = args[:symbol] || 'vix'
     

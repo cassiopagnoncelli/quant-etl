@@ -36,12 +36,12 @@ RSpec.describe Etl::Load::Flat::Cboe::VixHistorical do
     end
 
     context 'with valid CSV file' do
-      it 'loads data into Bar model' do
+      it 'loads data into Aggregate model' do
         expect {
           result = service.load_from_file(csv_file)
           expect(result[:imported]).to eq(5)
           expect(result[:errors]).to eq(0)
-        }.to change { Bar.count }.by(5)
+        }.to change { Aggregate.count }.by(5)
       end
 
       it 'detects symbol from filename' do
@@ -275,7 +275,7 @@ RSpec.describe Etl::Load::Flat::Cboe::VixHistorical do
       
       expect {
         result = service.dry_run(csv_file)
-      }.not_to change { Bar.count }
+      }.not_to change { Aggregate.count }
       
       expect(result[:dry_run]).to be true
       expect(result[:would_import]).to eq(5)
@@ -284,7 +284,7 @@ RSpec.describe Etl::Load::Flat::Cboe::VixHistorical do
 
     it 'detects existing records' do
       # Create some existing records
-      Bar.create!(
+      Aggregate.create!(
         ticker: 'VIX',
         timeframe: 'D1',
         ts: Date.parse('2024-01-01'),
@@ -302,7 +302,7 @@ RSpec.describe Etl::Load::Flat::Cboe::VixHistorical do
 
     it 'simulates updates when update_existing is true' do
       # Create existing record
-      Bar.create!(
+      Aggregate.create!(
         ticker: 'VIX',
         timeframe: 'D1',
         ts: Date.parse('2024-01-01'),
@@ -340,8 +340,8 @@ RSpec.describe Etl::Load::Flat::Cboe::VixHistorical do
       result = service.load_from_file(csv_file)
       expect(result[:imported]).to eq(1)
       
-      bar = Bar.last
-      expect(bar.ts.to_date).to eq(Date.parse('2024-01-15'))
+      aggregate = Aggregate.last
+      expect(aggregate.ts.to_date).to eq(Date.parse('2024-01-15'))
     end
 
     it 'handles YYYY-MM-DD format' do
@@ -353,8 +353,8 @@ RSpec.describe Etl::Load::Flat::Cboe::VixHistorical do
       result = service.load_from_file(csv_file)
       expect(result[:imported]).to eq(1)
       
-      bar = Bar.last
-      expect(bar.ts.to_date).to eq(Date.parse('2024-01-15'))
+      aggregate = Aggregate.last
+      expect(aggregate.ts.to_date).to eq(Date.parse('2024-01-15'))
     end
   end
 

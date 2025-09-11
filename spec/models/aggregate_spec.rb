@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Bar, type: :model do
+RSpec.describe Aggregate, type: :model do
   describe 'validations' do
     it { is_expected.to validate_presence_of(:timeframe) }
     it { is_expected.to validate_presence_of(:ticker) }

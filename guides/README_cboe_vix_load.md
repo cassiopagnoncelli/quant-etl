@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `Etl::Load::Flat::Cboe::VixHistorical` service is designed to load VIX historical data from CSV flat files into the Bar model. This service complements the Import service by providing a way to process previously downloaded VIX data files.
+The `Etl::Load::Flat::Cboe::VixHistorical` service is designed to load VIX historical data from CSV flat files into the Aggregate model. This service complements the Import service by providing a way to process previously downloaded VIX data files.
 
 ## Architecture
 
@@ -13,7 +13,7 @@ The ETL system follows a separation of concerns:
 ## Features
 
 ### Core Functionality
-- Load VIX data from CSV files into Bar model
+- Load VIX data from CSV files into Aggregate model
 - Automatic symbol detection from filenames
 - Batch processing for optimal performance
 - Duplicate detection and handling
@@ -360,7 +360,7 @@ class VixDataPipeline
     )
     
     # Calculate statistics
-    stats = Bar.where(
+    stats = Aggregate.where(
       ticker: 'VIX',
       timeframe: 'D1',
       ts: date_range
@@ -385,7 +385,7 @@ end
 rspec spec/services/etl/load/flat/cboe/vix_historical_spec.rb
 
 # Run specific test
-rspec spec/services/etl/load/flat/cboe/vix_historical_spec.rb -e "loads data into Bar model"
+rspec spec/services/etl/load/flat/cboe/vix_historical_spec.rb -e "loads data into Aggregate model"
 
 # Run with coverage
 COVERAGE=true rspec spec/services/etl/load/flat/cboe/vix_historical_spec.rb
@@ -461,4 +461,4 @@ service = Etl::Load::Flat::Cboe::VixHistorical.new(logger: logger)
 
 - [CBOE VIX Import Service](README_cboe_vix.md) - For downloading VIX data
 - [ETL Flat Services Overview](README_etl_flat_services.md) - General ETL architecture
-- [Bar Model Documentation](../app/models/bar.rb) - Database schema details
+- [Aggregate Model Documentation](../app/models/aggregate.rb) - Database schema details

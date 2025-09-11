@@ -10,7 +10,7 @@ service = Etl::Import::Flat::Cboe::VixFlatFile.new
 puts ''
 puts '📊 SERVICE CAPABILITIES:'
 puts '  ✓ Download VIX data from CBOE API'
-puts '  ✓ Load CSV files into Bar model'
+puts '  ✓ Load CSV files into Aggregate model'
 puts '  ✓ Validate CSV file format'
 puts '  ✓ Perform dry runs before import'
 puts '  ✓ Update existing records'
@@ -36,11 +36,11 @@ total_records = 0
 indices_with_data = 0
 
 vix_indices.each do |ticker, description|
-  count = Bar.where(ticker: ticker, timeframe: 'D1').count
+  count = Aggregate.where(ticker: ticker, timeframe: 'D1').count
   if count > 0
     indices_with_data += 1
     total_records += count
-    latest = Bar.where(ticker: ticker, timeframe: 'D1').order(ts: :desc).first
+    latest = Aggregate.where(ticker: ticker, timeframe: 'D1').order(ts: :desc).first
     puts "  #{ticker.ljust(8)} │ #{count.to_s.rjust(6)} records │ Latest: #{latest.ts.to_date} │ Close: #{latest.close.round(2)}"
   else
     puts "  #{ticker.ljust(8)} │      - no data -"

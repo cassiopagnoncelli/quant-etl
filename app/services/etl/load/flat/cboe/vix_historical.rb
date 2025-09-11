@@ -7,7 +7,7 @@ module Etl
   module Load
     module Flat
       module Cboe
-        # Service class to load CBOE VIX historical data from flat files into Bar model
+        # Service class to load CBOE VIX historical data from flat files into Aggregate model
         # This service processes CSV files that were previously downloaded by the Import service
         class VixHistorical
           attr_reader :logger
@@ -32,7 +32,7 @@ module Etl
             @logger = logger
           end
 
-          # Load VIX data from a CSV file into the Bar model
+          # Load VIX data from a CSV file into the Aggregate model
           # @param file_path [String, Pathname] Path to the CSV file
           # @param symbol [Symbol, String] VIX index symbol (e.g., :vix, 'VIX')
           # @param options [Hash] Additional options
@@ -218,7 +218,7 @@ module Etl
             }
 
             # Count existing records
-            result[:existing_records] = Bar.where(ticker: ticker, timeframe: 'D1').count
+            result[:existing_records] = Aggregate.where(ticker: ticker, timeframe: 'D1').count
 
             dates = []
             would_import = []
@@ -238,7 +238,7 @@ module Etl
               next if options[:end_date] && date > options[:end_date]
 
               # Check if record exists
-              existing = Bar.exists?(
+              existing = Aggregate.exists?(
                 ticker: ticker,
                 timeframe: 'D1',
                 ts: date
@@ -311,32 +311,32 @@ module Etl
           end
 
           def process_csv_file(file_path, ticker, options, result)
-            bars_to_insert = []
-            bars_to_update = []
+            aggregates_to_insert = []
+            aggregates_to_update = []
             
             CSV.foreach(file_path, headers: true).with_index do |row, index|
               result[:total_rows] += 1
               
               begin
-                bar_attributes = parse_csv_row(row, ticker, options)
-                next unless bar_attributes
+                aggregate_attributes = parse_csv_row(row, ticker, options)
+                next unless aggregate_attributes
                 
                 if options[:dry_run]
                   # Don't actually save in dry run mode
                   next
                 end
 
-                existing_bar = Bar.find_by(
-                  ticker: bar_attributes[:ticker],
-                  timeframe: bar_attributes[:timeframe],
-                  ts: bar_attributes[:ts]
+                existing_aggregate = Aggregate.find_by(
+                  ticker: aggregate_attributes[:ticker],
+                  timeframe: aggregate_attributes[:timeframe],
+                  ts: aggregate_attributes[:ts]
                 )
 
-                if existing_bar
+                if existing_aggregate
                   if options[:update_existing]
-                    if bar_changed?(existing_bar, bar_attributes)
-                      bars_to_update << { bar: existing_bar, attributes: bar_attributes }
-                      result[:updated] += 1 if update_bar(existing_bar, bar_attributes)
+                    if aggregate_changed?(existing_aggregate, aggregate_attributes)
+                      aggregates_to_update << { aggregate: existing_aggregate, attributes: aggregate_attributes }
+                      result[:updated] += 1 if update_aggregate(existing_aggregate, aggregate_attributes)
                     else
                       result[:skipped] += 1
                     end
@@ -344,13 +344,13 @@ module Etl
                     result[:skipped] += 1
                   end
                 else
-                  bars_to_insert << bar_attributes
+                  aggregates_to_insert << aggregate_attributes
                   
                   # Perform batch insert when batch size is reached
-                  if bars_to_insert.size >= options[:batch_size]
-                    imported = batch_insert_bars(bars_to_insert)
+                  if aggregates_to_insert.size >= options[:batch_size]
+                    imported = batch_insert_aggregates(aggregates_to_insert)
                     result[:imported] += imported
-                    bars_to_insert.clear
+                    aggregates_to_insert.clear
                   end
                 end
               rescue StandardError => e
@@ -367,9 +367,9 @@ module Etl
               end
             end
 
-            # Insert remaining bars
-            unless options[:dry_run] || bars_to_insert.empty?
-              imported = batch_insert_bars(bars_to_insert)
+            # Insert remaining aggregates
+            unless options[:dry_run] || aggregates_to_insert.empty?
+              imported = batch_insert_aggregates(aggregates_to_insert)
               result[:imported] += imported
             end
           end
@@ -460,34 +460,34 @@ module Etl
             false
           end
 
-          def bar_changed?(bar, new_attributes)
+          def aggregate_changed?(aggregate, new_attributes)
             %i[open high low close aclose].any? do |attr|
-              bar.send(attr).to_f != new_attributes[attr].to_f
+              aggregate.send(attr).to_f != new_attributes[attr].to_f
             end
           end
 
-          def update_bar(bar, attributes)
-            bar.update!(attributes)
+          def update_aggregate(aggregate, attributes)
+            aggregate.update!(attributes)
             true
           rescue ActiveRecord::RecordInvalid => e
-            logger.error "Failed to update bar: #{e.message}"
+            logger.error "Failed to update aggregate: #{e.message}"
             false
           end
 
-          def batch_insert_bars(bars)
-            return 0 if bars.empty?
+          def batch_insert_aggregates(aggregates)
+            return 0 if aggregates.empty?
 
             begin
-              Bar.insert_all(bars)
-              bars.count
+              Aggregate.insert_all(aggregates)
+              aggregates.count
             rescue ActiveRecord::RecordNotUnique => e
               # Handle duplicates by inserting one by one
               logger.warn "Duplicate records detected, falling back to individual inserts"
               
               inserted = 0
-              bars.each do |bar_attributes|
+              aggregates.each do |aggregate_attributes|
                 begin
-                  Bar.create!(bar_attributes)
+                  Aggregate.create!(aggregate_attributes)
                   inserted += 1
                 rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
                   # Skip duplicates or invalid records
@@ -496,7 +496,7 @@ module Etl
               
               inserted
             rescue StandardError => e
-              logger.error "Failed to batch insert bars: #{e.message}"
+              logger.error "Failed to batch insert aggregates: #{e.message}"
               0
             end
           end

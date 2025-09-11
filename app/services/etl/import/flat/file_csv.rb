@@ -5,20 +5,20 @@ module Etl
   module Import
     module Flat
       class FileCsv
-      attr_accessor :timeframe, :ticker, :file_path, :bars, :decimals
+      attr_accessor :timeframe, :ticker, :file_path, :aggregates, :decimals
 
       def initialize(timeframe: "D1", ticker:, file_path:, decimals: 2)
         @timeframe = timeframe
         @ticker = ticker
         @file_path = file_path
         @decimals = decimals
-        @bars = []
+        @aggregates = []
       end
 
       def call
         cleanup
-        generate_bars(load_csv)
-        import_data if valid_bars?
+        generate_aggregates(load_csv)
+        import_data if valid_aggregates?
       end
 
       def load_csv
@@ -33,10 +33,10 @@ module Etl
         raise "Failed to load CSV: #{e.message}"
       end
 
-      def generate_bars(rows)
-        @bars = []
+      def generate_aggregates(rows)
+        @aggregates = []
         rows.each do |row|
-          @bars << Bar.new(
+          @aggregates << Aggregate.new(
             timeframe:,
             ticker:,
             ts: row["Date"].to_date,
@@ -48,25 +48,25 @@ module Etl
             volume: row["Volume"].to_i
           )
         end
-        bars.count
+        aggregates.count
       end
 
-      def valid_bars?
-        bars.each do |bar|
-          unless bar.valid?
-            raise "Invalid bar: #{bar.errors.full_messages.join(', ')}"
+      def valid_aggregates?
+        aggregates.each do |aggregate|
+          unless aggregate.valid?
+            raise "Invalid aggregate: #{aggregate.errors.full_messages.join(', ')}"
           end
         end
         true
       end
 
       def import_data
-        bars.each(&:save!)
-        bars.count
+        aggregates.each(&:save!)
+        aggregates.count
       end
 
       def cleanup
-        Bar.where(timeframe:, ticker:).delete_all
+        Aggregate.where(timeframe:, ticker:).delete_all
       end
       end
     end

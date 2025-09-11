@@ -213,9 +213,9 @@ rails polygon:flat_files:process[AAPL,2024-03-07]
 
 - `:trades` - Individual trades
 - `:quotes` - Bid/ask quotes
-- `:minute_aggs` - 1-minute aggregated bars
-- `:day_aggs` - Daily aggregated bars
-- `:second_aggs` - 1-second aggregated bars
+- `:minute_aggs` - 1-minute aggregated aggregates
+- `:day_aggs` - Daily aggregated aggregates
+- `:second_aggs` - 1-second aggregated aggregates
 
 ## File Structure
 

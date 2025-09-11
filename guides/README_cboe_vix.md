@@ -141,7 +141,7 @@ The service returns data in the following format:
 ```
 
 ### Database Storage
-Data is stored in the `bars` table with the following mapping:
+Data is stored in the `aggregates` table with the following mapping:
 - `ticker`: VIX symbol (e.g., "VIX", "VVIX")
 - `timeframe`: Always "D1" (daily)
 - `ts`: Date timestamp
@@ -259,7 +259,7 @@ rails cboe:vix:test_connection
 ### Import Failures
 - Ensure database migrations are run
 - Check for unique constraint violations
-- Verify Bar model validations
+- Verify Aggregate model validations
 
 ## Future Enhancements
 

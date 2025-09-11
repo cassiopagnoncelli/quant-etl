@@ -9,7 +9,7 @@ This document clarifies the authoritative data sources for VIX (Volatility Index
 - **Location**: `app/services/etl/import/flat/cboe/vix_historical.rb`
 - **Source**: Direct from CBOE API (Chicago Board Options Exchange)
 - **Data Type**: Full OHLC (Open, High, Low, Close) data
-- **Model**: Bar model (aggregate data)
+- **Model**: Aggregate model (aggregate data)
 - **Why Primary**: CBOE is the creator and authoritative source of VIX indices
 
 ### Supported VIX Indices
@@ -42,7 +42,7 @@ rails cboe:vix:import[vix,2024-01-01,2024-12-31]
 - **Location**: `app/services/etl/import/flat/cboe/vix_flat_file.rb`
 - **Source**: CSV files (typically downloaded from CBOE)
 - **Use Case**: When you have CSV files to import
-- **Model**: Bar model
+- **Model**: Aggregate model
 
 ### Usage
 ```bash
@@ -62,12 +62,12 @@ FRED (Federal Reserve Economic Data) does provide VIX data (ticker: VIXCLS), but
 
 ## Data Model Classification
 
-### Bar Model (Aggregate/OHLC Data)
+### Aggregate Model (Aggregate/OHLC Data)
 - VIX and all VIX variants
 - Data represents aggregated options market activity
 - Contains OHLC values
 
-### Series Model (Univariate Time Series)
+### Univariate Model (Univariate Time Series)
 - Economic indicators from FRED (M2, CPI, unemployment, etc.)
 - Single value per timestamp
 - No OHLC structure
@@ -75,7 +75,7 @@ FRED (Federal Reserve Economic Data) does provide VIX data (ticker: VIXCLS), but
 ## Current Database Status
 
 As of the last import:
-- **26,025 VIX records** in Bar model from CBOE
+- **26,025 VIX records** in Aggregate model from CBOE
 - **0 VIX records** from FRED (correctly removed)
 - All VIX data has full OHLC values
 

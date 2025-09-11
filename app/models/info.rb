@@ -8,14 +8,14 @@ class Info < ApplicationRecord
   validates :source, presence: true
   validates :kind, presence: true, inclusion: { in: KINDS }
 
-  has_many :bars, foreign_key: :ticker, primary_key: :ticker
-  has_many :series, foreign_key: :ticker, primary_key: :ticker
+  has_many :aggregates, foreign_key: :ticker, primary_key: :ticker
+  has_many :univariates, foreign_key: :ticker, primary_key: :ticker
 
   def timeseries
     if univariate?
-      series
+      univariates
     else
-      bars
+      aggregates
     end
   end
 end

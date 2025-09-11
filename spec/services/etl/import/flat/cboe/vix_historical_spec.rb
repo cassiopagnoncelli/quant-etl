@@ -140,16 +140,16 @@ RSpec.describe Etl::Import::Flat::Cboe::VixHistorical do
     it 'imports new records to database' do
       expect {
         service.import_to_database(symbol: :vix)
-      }.to change(Bar, :count).by(2)
+      }.to change(Aggregate, :count).by(2)
       
       # Verify imported data
-      bar = Bar.find_by(ticker: 'VIX', ts: DateTime.parse('2024-01-02'))
-      expect(bar).not_to be_nil
-      expect(bar.open).to eq(13.50)
-      expect(bar.high).to eq(14.20)
-      expect(bar.low).to eq(13.30)
-      expect(bar.close).to eq(13.85)
-      expect(bar.timeframe).to eq('D1')
+      aggregate = Aggregate.find_by(ticker: 'VIX', ts: DateTime.parse('2024-01-02'))
+      expect(aggregate).not_to be_nil
+      expect(aggregate.open).to eq(13.50)
+      expect(aggregate.high).to eq(14.20)
+      expect(aggregate.low).to eq(13.30)
+      expect(aggregate.close).to eq(13.85)
+      expect(aggregate.timeframe).to eq('D1')
     end
     
     it 'skips existing records' do
@@ -159,7 +159,7 @@ RSpec.describe Etl::Import::Flat::Cboe::VixHistorical do
       # Second import should skip
       expect {
         service.import_to_database(symbol: :vix)
-      }.not_to change(Bar, :count)
+      }.not_to change(Aggregate, :count)
     end
     
     it 'updates changed records' do
@@ -173,8 +173,8 @@ RSpec.describe Etl::Import::Flat::Cboe::VixHistorical do
       
       service.import_to_database(symbol: :vix)
       
-      bar = Bar.find_by(ticker: 'VIX', ts: DateTime.parse('2024-01-02'))
-      expect(bar.close).to eq(14.00)
+      aggregate = Aggregate.find_by(ticker: 'VIX', ts: DateTime.parse('2024-01-02'))
+      expect(aggregate.close).to eq(14.00)
     end
     
     it 'filters by date range' do
@@ -184,10 +184,10 @@ RSpec.describe Etl::Import::Flat::Cboe::VixHistorical do
           start_date: '2024-01-03',
           end_date: '2024-01-03'
         )
-      }.to change(Bar, :count).by(1)
+      }.to change(Aggregate, :count).by(1)
       
-      bar = Bar.find_by(ticker: 'VIX', ts: DateTime.parse('2024-01-03'))
-      expect(bar).not_to be_nil
+      aggregate = Aggregate.find_by(ticker: 'VIX', ts: DateTime.parse('2024-01-03'))
+      expect(aggregate).not_to be_nil
     end
   end
   

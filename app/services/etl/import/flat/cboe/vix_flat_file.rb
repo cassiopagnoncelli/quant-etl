@@ -7,7 +7,7 @@ module Etl
     module Flat
       module Cboe
         # Service class to orchestrate VIX data import from flat files
-        # This service combines downloading VIX data from CBOE and loading it into the Bar model
+        # This service combines downloading VIX data from CBOE and loading it into the Aggregate model
         class VixFlatFile
           attr_reader :download_dir, :logger, :import_service, :load_service
 
@@ -83,8 +83,8 @@ module Etl
               result[:file_path] = file_path.to_s
               logger.info "Download complete: #{file_path}"
 
-              # Step 2: Load the data into Bar model
-              logger.info "Step 2: Loading data into Bar model..."
+              # Step 2: Load the data into Aggregate model
+              logger.info "Step 2: Loading data into Aggregate model..."
               load_result = load_data(file_path, symbol: symbol_key, **options)
               
               result[:import_status] = 'success'
@@ -273,16 +273,16 @@ module Etl
           def get_statistics(symbol: :vix)
             ticker = resolve_ticker(symbol)
             
-            bars = Bar.where(ticker: ticker, timeframe: 'D1').order(ts: :asc)
+            aggregates = Aggregate.where(ticker: ticker, timeframe: 'D1').order(ts: :asc)
             
-            return { ticker: ticker, message: 'No data found' } if bars.empty?
+            return { ticker: ticker, message: 'No data found' } if aggregates.empty?
 
-            closes = bars.pluck(:close)
-            dates = bars.pluck(:ts)
+            closes = aggregates.pluck(:close)
+            dates = aggregates.pluck(:ts)
 
             {
               ticker: ticker,
-              total_records: bars.count,
+              total_records: aggregates.count,
               date_range: {
                 from: dates.first.to_date,
                 to: dates.last.to_date,
@@ -295,8 +295,8 @@ module Etl
                 mean: (closes.sum / closes.size).round(2),
                 std_dev: calculate_std_dev(closes).round(2)
               },
-              recent_30d: calculate_recent_stats(bars.last(30)),
-              recent_90d: calculate_recent_stats(bars.last(90))
+              recent_30d: calculate_recent_stats(aggregates.last(30)),
+              recent_90d: calculate_recent_stats(aggregates.last(90))
             }
           end
 
@@ -308,7 +308,7 @@ module Etl
                 symbol: key,
                 ticker: ticker,
                 description: get_index_description(key),
-                data_available: Bar.where(ticker: ticker).exists?
+                data_available: Aggregate.where(ticker: ticker).exists?
               }
             end
           end
@@ -369,13 +369,13 @@ module Etl
             Math.sqrt(variance)
           end
 
-          def calculate_recent_stats(bars)
-            return {} if bars.empty?
+          def calculate_recent_stats(aggregates)
+            return {} if aggregates.empty?
             
-            closes = bars.map(&:close)
+            closes = aggregates.map(&:close)
             
             {
-              records: bars.size,
+              records: aggregates.size,
               min: closes.min.round(2),
               max: closes.max.round(2),
               mean: (closes.sum / closes.size).round(2),

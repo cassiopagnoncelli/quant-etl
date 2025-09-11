@@ -1,6 +1,6 @@
-class CreateSeries < ActiveRecord::Migration[8.0]
+class CreateUnivariate < ActiveRecord::Migration[8.0]
   def change
-    create_table :series, if_not_exists: true do |t|
+    create_table :univariates, if_not_exists: true do |t|
       t.timestamps
 
       t.string :timeframe, null: false
@@ -8,6 +8,6 @@ class CreateSeries < ActiveRecord::Migration[8.0]
       t.datetime :ts, null: false
       t.float :main, null: false
     end
-    add_index :series, %i[ticker ts], unique: true
+    add_index :univariates, %i[ticker ts], unique: true
   end
 end

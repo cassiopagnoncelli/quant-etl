@@ -182,9 +182,9 @@ rails fred:load:download_and_load[treasury_10y,2020-01-01,2024-12-31]
 
 ## Data Storage
 
-### Bar Model Mapping
+### Aggregate Model Mapping
 
-FRED data is stored in the Bar model with the following mapping:
+FRED data is stored in the Aggregate model with the following mapping:
 
 - **ticker**: FRED series ID (e.g., "M2SL", "DGS10")
 - **timeframe**: Based on frequency:
@@ -199,15 +199,15 @@ FRED data is stored in the Bar model with the following mapping:
 
 ```ruby
 # Get M2 money supply data
-m2_data = Bar.where(ticker: 'M2SL', timeframe: 'MN1').order(:ts)
+m2_data = Aggregate.where(ticker: 'M2SL', timeframe: 'MN1').order(:ts)
 
 # Get latest unemployment rate
-latest_unemployment = Bar.where(ticker: 'UNRATE', timeframe: 'MN1')
+latest_unemployment = Aggregate.where(ticker: 'UNRATE', timeframe: 'MN1')
                          .order(ts: :desc)
                          .first
 
 # Get 10-year treasury yield for 2024
-treasury_2024 = Bar.where(ticker: 'DGS10', timeframe: 'D1')
+treasury_2024 = Aggregate.where(ticker: 'DGS10', timeframe: 'D1')
                    .where(ts: Date.new(2024,1,1)..Date.new(2024,12,31))
 ```
 
@@ -271,7 +271,7 @@ class EconomicAnalysisService
     end_date = Date.today
     start_date = end_date - months.months
     
-    cpi_data = Bar.where(ticker: 'CPIAUCSL', timeframe: 'MN1')
+    cpi_data = Aggregate.where(ticker: 'CPIAUCSL', timeframe: 'MN1')
                   .where(ts: start_date..end_date)
                   .order(:ts)
     
@@ -443,8 +443,8 @@ rails fred:info[m2]
 ### Verify Import
 ```bash
 # Check database after import
-rails runner "puts Bar.where(ticker: 'M2SL').count"
-rails runner "puts Bar.where(ticker: 'M2SL').order(ts: :desc).first(5).map { |b| \"#{b.ts.to_date}: #{b.close}\" }"
+rails runner "puts Aggregate.where(ticker: 'M2SL').count"
+rails runner "puts Aggregate.where(ticker: 'M2SL').order(ts: :desc).first(5).map { |b| \"#{b.ts.to_date}: #{b.close}\" }"
 ```
 
 ## Related Documentation
@@ -452,4 +452,4 @@ rails runner "puts Bar.where(ticker: 'M2SL').order(ts: :desc).first(5).map { |b|
 - [FRED API Documentation](https://fred.stlouisfed.org/docs/api/fred/)
 - [FRED Series Search](https://fred.stlouisfed.org/series)
 - [CBOE VIX Services](README_cboe_vix.md) - For VIX-specific data
-- [Bar Model Documentation](../app/models/bar.rb) - Database schema
+- [Aggregate Model Documentation](../app/models/aggregate.rb) - Database schema

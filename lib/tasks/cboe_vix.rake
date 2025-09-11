@@ -139,11 +139,11 @@ namespace :cboe do
         
         # Show database statistics
         ticker = Etl::Import::Flat::Cboe::VixHistorical::VIX_INDICES[symbol]
-        total_records = Bar.where(ticker: ticker, timeframe: 'D1').count
+        total_records = Aggregate.where(ticker: ticker, timeframe: 'D1').count
         
         if total_records > 0
-          oldest = Bar.where(ticker: ticker, timeframe: 'D1').minimum(:ts)
-          newest = Bar.where(ticker: ticker, timeframe: 'D1').maximum(:ts)
+          oldest = Aggregate.where(ticker: ticker, timeframe: 'D1').minimum(:ts)
+          newest = Aggregate.where(ticker: ticker, timeframe: 'D1').maximum(:ts)
           
           puts ""
           puts "Database statistics for #{ticker}:"

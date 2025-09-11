@@ -2,7 +2,7 @@
 
 ## Overview
 
-The VIX Flat File Import Service (`Etl::Import::Flat::Cboe::VixFlatFile`) is a comprehensive service that orchestrates the download and import of CBOE VIX (Volatility Index) data from flat files into the Bar model. This service combines the functionality of downloading data from CBOE and loading it into the database.
+The VIX Flat File Import Service (`Etl::Import::Flat::Cboe::VixFlatFile`) is a comprehensive service that orchestrates the download and import of CBOE VIX (Volatility Index) data from flat files into the Aggregate model. This service combines the functionality of downloading data from CBOE and loading it into the database.
 
 ## Architecture
 
@@ -21,7 +21,7 @@ The service follows a modular architecture with clear separation of concerns:
 └──────────────────┘  └──────────────────┘
            │              │
            ▼              ▼
-    [CBOE API]       [Bar Model]
+    [CBOE API]       [Aggregate Model]
 ```
 
 ## Available VIX Indices
@@ -139,10 +139,10 @@ The import methods accept various options:
 
 ## Data Model
 
-VIX data is stored in the Bar model with the following structure:
+VIX data is stored in the Aggregate model with the following structure:
 
 ```ruby
-Bar
+Aggregate
 ├── ticker (String)      # e.g., "VIX", "VIX9D"
 ├── timeframe (String)   # "D1" for daily data
 ├── ts (DateTime)        # Timestamp
@@ -287,7 +287,7 @@ Info.create!(
 ### Common Issues
 
 1. **No data imported (0 records)**
-   - Check if data already exists: `Bar.where(ticker: 'VIX').count`
+   - Check if data already exists: `Aggregate.where(ticker: 'VIX').count`
    - Use `update_existing: true` to update existing records
    - Check CBOE API availability
 
@@ -304,7 +304,7 @@ Info.create!(
 ## Related Services
 
 - `Etl::Import::Flat::Cboe::VixHistorical` - Downloads VIX data from CBOE
-- `Etl::Load::Flat::Cboe::VixHistorical` - Loads CSV files into Bar model
+- `Etl::Load::Flat::Cboe::VixHistorical` - Loads CSV files into Aggregate model
 - `PopulateInfoMetadata` - Populates Info model with VIX metadata
 
 ## Future Enhancements

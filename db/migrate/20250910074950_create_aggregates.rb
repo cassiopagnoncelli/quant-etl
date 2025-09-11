@@ -1,6 +1,6 @@
-class CreateBars < ActiveRecord::Migration[8.0]
+class CreateAggregates < ActiveRecord::Migration[8.0]
   def change
-    create_table :bars, if_not_exists: true do |t|
+    create_table :aggregates, if_not_exists: true do |t|
       t.timestamps
 
       t.string :timeframe, null: false
@@ -13,6 +13,6 @@ class CreateBars < ActiveRecord::Migration[8.0]
       t.float :aclose, null: false
       t.float :volume
     end
-    add_index :bars, %i[timeframe ticker ts], unique: true
+    add_index :aggregates, %i[timeframe ticker ts], unique: true
   end
 end

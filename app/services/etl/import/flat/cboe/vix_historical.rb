@@ -105,24 +105,24 @@ module Etl
               next if start_date && date < start_date
               next if end_date && date > end_date
               
-              # Convert to Bar model format
-              bar_attributes = convert_to_bar_attributes(record, symbol)
+              # Convert to Aggregate model format
+              aggregate_attributes = convert_to_aggregate_attributes(record, symbol)
               
               begin
-                bar = Bar.find_or_initialize_by(
-                  ticker: bar_attributes[:ticker],
-                  timeframe: bar_attributes[:timeframe],
-                  ts: bar_attributes[:ts]
+                aggregate = Aggregate.find_or_initialize_by(
+                  ticker: aggregate_attributes[:ticker],
+                  timeframe: aggregate_attributes[:timeframe],
+                  ts: aggregate_attributes[:ts]
                 )
                 
-                if bar.new_record?
-                  bar.assign_attributes(bar_attributes)
-                  bar.save!
+                if aggregate.new_record?
+                  aggregate.assign_attributes(aggregate_attributes)
+                  aggregate.save!
                   imported_count += 1
                 else
                   # Update existing record if values changed
-                  if bar_changed?(bar, bar_attributes)
-                    bar.update!(bar_attributes)
+                  if aggregate_changed?(aggregate, aggregate_attributes)
+                    aggregate.update!(aggregate_attributes)
                     imported_count += 1
                   else
                     skipped_count += 1
@@ -279,7 +279,7 @@ module Etl
             end
           end
           
-          def convert_to_bar_attributes(record, symbol)
+          def convert_to_aggregate_attributes(record, symbol)
             symbol_key = symbol.is_a?(Symbol) ? symbol : symbol.downcase.to_sym
             ticker = VIX_INDICES[symbol_key] || symbol.to_s.upcase
             
@@ -296,9 +296,9 @@ module Etl
             }
           end
           
-          def bar_changed?(bar, new_attributes)
+          def aggregate_changed?(aggregate, new_attributes)
             %i[open high low close aclose].any? do |attr|
-              bar.send(attr) != new_attributes[attr]
+              aggregate.send(attr) != new_attributes[attr]
             end
           end
           

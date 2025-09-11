@@ -24,7 +24,7 @@ Imports CSV files with standard OHLCV (Open, High, Low, Close, Volume) data form
 - Supports standard Yahoo Finance CSV format
 - Configurable decimal precision
 - Automatic data cleanup before import
-- Validation of all bars before import
+- Validation of all aggregates before import
 
 **Usage:**
 ```ruby
@@ -101,7 +101,7 @@ All flat file import services follow these patterns:
 
 ## Database Storage
 
-All services import data into the `bars` table with the following structure:
+All services import data into the `aggregates` table with the following structure:
 - `ticker`: Symbol/ticker
 - `timeframe`: Time period (e.g., 'D1' for daily)
 - `ts`: Timestamp

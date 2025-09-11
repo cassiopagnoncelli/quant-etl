@@ -3,7 +3,7 @@
 namespace :cboe do
   namespace :vix do
     namespace :load do
-      desc "Load VIX data from a CSV file into Bar model"
+      desc "Load VIX data from a CSV file into Aggregate model"
       task :file, [:file_path, :symbol, :update_existing] => :environment do |_t, args|
         unless args[:file_path]
           puts "❌ ERROR: File path is required"
@@ -361,11 +361,11 @@ namespace :cboe do
           
           # Show database statistics
           ticker = Etl::Import::Flat::Cboe::VixHistorical::VIX_INDICES[symbol]
-          total_records = Bar.where(ticker: ticker, timeframe: 'D1').count
+          total_records = Aggregate.where(ticker: ticker, timeframe: 'D1').count
           
           if total_records > 0
-            oldest = Bar.where(ticker: ticker, timeframe: 'D1').minimum(:ts)
-            newest = Bar.where(ticker: ticker, timeframe: 'D1').maximum(:ts)
+            oldest = Aggregate.where(ticker: ticker, timeframe: 'D1').minimum(:ts)
+            newest = Aggregate.where(ticker: ticker, timeframe: 'D1').maximum(:ts)
             
             puts ""
             puts "Database statistics for #{ticker}:"
@@ -387,7 +387,7 @@ namespace :cboe do
         puts "CBOE VIX Load Service - Help"
         puts "=" * 50
         puts ""
-        puts "This service loads VIX historical data from CSV files into the Bar model."
+        puts "This service loads VIX historical data from CSV files into the Aggregate model."
         puts ""
         puts "Available tasks:"
         puts ""
