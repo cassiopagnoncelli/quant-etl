@@ -32,6 +32,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_11_045319) do
   create_table "series", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "timeframe", null: false
     t.string "ticker", null: false
     t.datetime "ts", null: false
     t.float "main", null: false
