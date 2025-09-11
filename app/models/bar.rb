@@ -8,6 +8,8 @@ class Bar < ApplicationRecord
   validates :close, presence: true
   validates :volume, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
+  belongs_to :info, primary_key: :ticker
+
   def self.[](ticker)
     where(ticker: ticker, timeframe: "D1").order(:ts)
   end

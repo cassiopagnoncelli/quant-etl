@@ -3,6 +3,8 @@ class Series < ApplicationRecord
   validates :ticker, presence: true
   validates :ts, presence: true
   validates :main, presence: true, allow_nil: false
+
+  belongs_to :info, primary_key: :ticker
   
   def self.[](ticker)
     where(ticker: ticker).order(:ts)
