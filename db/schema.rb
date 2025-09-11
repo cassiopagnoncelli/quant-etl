@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_10_074950) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_11_045319) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -27,5 +27,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_10_074950) do
     t.float "aclose", null: false
     t.float "volume"
     t.index ["timeframe", "ticker", "ts"], name: "index_bars_on_timeframe_and_ticker_and_ts", unique: true
+  end
+
+  create_table "series", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "ticker", null: false
+    t.datetime "ts", null: false
+    t.float "main", null: false
+    t.index ["ticker", "ts"], name: "index_series_on_ticker_and_ts", unique: true
   end
 end
