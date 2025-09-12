@@ -135,8 +135,58 @@ module Etl
               frequency: 'daily',
               units: 'index',
               model_type: 'series'
+            },
+
+            # Additional Dollar Indices
+            dollar_index_major: {
+              series_id: 'DTWEXMGS',
+              name: 'Trade Weighted Dollar Index: Major Currencies',
+              description: 'Trade Weighted U.S. Dollar Index: Major Currencies',
+              frequency: 'daily',
+              units: 'index',
+              model_type: 'series'
+            },
+
+            # Federal Funds Target Rate (different from Effective Federal Funds Rate DFF)
+            fed_funds_target: {
+              series_id: 'FEDFUNDS',
+              name: 'Federal Funds Target Rate',
+              description: 'Federal Funds Target Rate',
+              frequency: 'daily',
+              units: 'percent',
+              model_type: 'series'
+            },
+
+            # Consumer Price Index - Electricity
+            cpi_electricity: {
+              series_id: 'CUSR0000SEHF01',
+              name: 'Consumer Price Index: Electricity',
+              description: 'Consumer Price Index for Electricity',
+              frequency: 'monthly',
+              units: 'index_1982_1984',
+              model_type: 'series'
+            },
+
+            # Vehicle Sales
+            total_vehicle_sales: {
+              series_id: 'TOTALSA',
+              name: 'Total Vehicle Sales',
+              description: 'Total Vehicle Sales',
+              frequency: 'monthly',
+              units: 'millions_of_units',
+              model_type: 'series'
+            },
+
+            # Freight Index
+            cass_freight_index: {
+              series_id: 'FRGSHPUSM649NCIS',
+              name: 'Cass Freight Index',
+              description: 'Cass Freight Index',
+              frequency: 'monthly',
+              units: 'index',
+              model_type: 'series'
             }
-            
+
             # Note: VIX data should be imported using the CBOE VIX Historical service
             # which provides full OHLC data. FRED only provides closing values.
             # See: app/services/etl/import/flat/cboe/vix_historical.rb

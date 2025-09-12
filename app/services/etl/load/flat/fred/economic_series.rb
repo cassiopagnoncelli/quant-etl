@@ -44,7 +44,22 @@ module Etl
             sp500: 'SP500',
             
             # Volatility
-            vix: 'VIXCLS'
+            vix: 'VIXCLS',
+
+            # Additional Dollar Indices
+            dollar_index_major: 'DTWEXMGS',
+
+            # Federal Funds Target Rate
+            fed_funds_target: 'FEDFUNDS',
+
+            # Consumer Price Index - Electricity
+            cpi_electricity: 'CUSR0000SEHF01',
+
+            # Vehicle Sales
+            total_vehicle_sales: 'TOTALSA',
+
+            # Freight Index
+            cass_freight_index: 'FRGSHPUSM649NCIS'
           }.freeze
 
           # Frequency mapping for timeframes

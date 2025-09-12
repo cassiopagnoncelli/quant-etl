@@ -90,7 +90,7 @@ namespace :fred do
     series_list = if args[:series_list]
                     args[:series_list].split(',').map(&:strip).map(&:to_sym)
                   else
-                    [:m2, :gdp_growth, :unemployment, :cpi, :treasury_10y, :dollar_index, :oil_wti, :sp500]
+                    [:m2, :gdp_growth, :unemployment, :cpi, :treasury_10y, :dollar_index, :dollar_index_major, :fed_funds_target, :cpi_electricity, :total_vehicle_sales, :cass_freight_index, :oil_wti, :sp500]
                   end
     
     begin
@@ -180,7 +180,7 @@ namespace :fred do
   
   desc "Import all key economic indicators"
   task import_all: :environment do
-    series_list = [:m2, :gdp_growth, :unemployment, :cpi, :treasury_10y, :dollar_index, :oil_wti, :sp500]
+    series_list = [:m2, :gdp_growth, :unemployment, :cpi, :treasury_10y, :dollar_index, :dollar_index_major, :fed_funds_target, :cpi_electricity, :total_vehicle_sales, :cass_freight_index, :oil_wti, :sp500]
     
     puts "Importing all key economic indicators..."
     puts "Series: #{series_list.join(', ')}"

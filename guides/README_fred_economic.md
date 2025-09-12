@@ -56,6 +56,16 @@ To use these services, you need a free FRED API key:
 | `sp500` | SP500 | S&P 500 Index | Daily |
 | `vix` | VIXCLS | CBOE Volatility Index | Daily |
 
+### Additional Economic Indicators
+
+| Symbol | FRED ID | Description | Frequency |
+|--------|---------|-------------|-----------|
+| `dollar_index_major` | DTWEXMGS | Trade Weighted U.S. Dollar Index: Major Currencies | Daily |
+| `fed_funds_target` | FEDFUNDS | Federal Funds Target Rate | Daily |
+| `cpi_electricity` | CUSR0000SEHF01 | Consumer Price Index for Electricity | Monthly |
+| `total_vehicle_sales` | TOTALSA | Total Vehicle Sales | Monthly |
+| `cass_freight_index` | FRGSHPUSM649NCIS | Cass Freight Index | Monthly |
+
 ## Usage
 
 ### Ruby Service
