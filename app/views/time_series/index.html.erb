@@ -9,23 +9,23 @@
       <th>Timeframe</th>
       <th>Number of Data Points</th>
       <th>Type</th>
-      <th>Info Metadata</th>
+      <th>Description</th>
       <th>Since</th>
       <th>Most Recent TS</th>
     </tr>
   </thead>
   <tbody>
-    <% @time_series.each do |time_series| %>
+    <% @time_series.each do |ts_data| %>
       <tr>
-        <td><%= link_to time_series[:info].ticker, time_series_path(time_series[:info].ticker) %></td>
-        <td><%= time_series[:info].ticker %></td>
-        <td><%= time_series[:info].source %></td>
-        <td><%= time_series[:info].timeframe %></td>
-        <td><%= time_series[:count] %></td>
-        <td><%= time_series[:info].kind %></td>
-        <td><%= time_series[:info].description %></td>
-        <td><%= time_series[:earliest_ts] %></td>
-        <td><%= time_series[:recent_ts] %></td>
+        <td><%= link_to ts_data[:time_series].ticker, time_series_path(ts_data[:time_series].ticker) %></td>
+        <td><%= ts_data[:time_series].ticker %></td>
+        <td><%= ts_data[:time_series].source %></td>
+        <td><%= ts_data[:time_series].timeframe %></td>
+        <td><%= ts_data[:count] %></td>
+        <td><%= ts_data[:time_series].kind %></td>
+        <td><%= ts_data[:time_series].description %></td>
+        <td><%= ts_data[:earliest_ts] %></td>
+        <td><%= ts_data[:recent_ts] %></td>
       </tr>
     <% end %>
   </tbody>

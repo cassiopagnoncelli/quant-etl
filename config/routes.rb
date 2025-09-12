@@ -5,4 +5,6 @@ Rails.application.routes.draw do
   get 'pages', to: 'pages#home'
 
   resources :time_series, only: [:index, :show], param: :ticker
+
+  root 'time_series#index'
 end

@@ -1,4 +1,4 @@
-class CreateUnivariate < ActiveRecord::Migration[8.0]
+class CreateUnivariates < ActiveRecord::Migration[8.0]
   def change
     create_table :univariates, if_not_exists: true do |t|
       t.timestamps

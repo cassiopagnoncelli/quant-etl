@@ -29,7 +29,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_11_073628) do
     t.index ["timeframe", "ticker", "ts"], name: "index_aggregates_on_timeframe_and_ticker_and_ts", unique: true
   end
 
-  create_table "infos", force: :cascade do |t|
+  create_table "time_series", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "ticker", null: false
@@ -37,7 +37,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_11_073628) do
     t.string "source", null: false
     t.string "kind", default: "univariate", null: false
     t.string "description"
-    t.index ["ticker"], name: "index_infos_on_ticker"
+    t.index ["ticker"], name: "index_time_series_on_ticker"
   end
 
   create_table "univariates", force: :cascade do |t|

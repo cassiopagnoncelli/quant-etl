@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Service to populate Info model with metadata for all univariates and aggregates
+# Service to populate TimeSeries model with metadata for all univariates and aggregates
 class PopulateInfoMetadata
   def self.call
     new.call
@@ -10,8 +10,8 @@ class PopulateInfoMetadata
     populate_vix_info
     populate_fred_info
     
-    puts "Info metadata population complete!"
-    puts "Total Info records: #{Info.count}"
+    puts "TimeSeries metadata population complete!"
+    puts "Total TimeSeries records: #{TimeSeries.count}"
   end
 
   private
@@ -52,12 +52,12 @@ class PopulateInfoMetadata
     ]
     
     vix_data.each do |data|
-      info = Info.find_or_initialize_by(ticker: data[:ticker])
-      info.assign_attributes(data)
-      if info.save
+      time_series = TimeSeries.find_or_initialize_by(ticker: data[:ticker])
+      time_series.assign_attributes(data)
+      if time_series.save
         puts "  Created/Updated: #{data[:ticker]} - #{data[:description][0..50]}..."
       else
-        puts "  Failed to save #{data[:ticker]}: #{info.errors.full_messages.join(', ')}"
+        puts "  Failed to save #{data[:ticker]}: #{time_series.errors.full_messages.join(', ')}"
       end
     end
   end
@@ -135,12 +135,12 @@ class PopulateInfoMetadata
     ]
     
     fred_data.each do |data|
-      info = Info.find_or_initialize_by(ticker: data[:ticker])
-      info.assign_attributes(data)
-      if info.save
+      time_series = TimeSeries.find_or_initialize_by(ticker: data[:ticker])
+      time_series.assign_attributes(data)
+      if time_series.save
         puts "  Created/Updated: #{data[:ticker]} - #{data[:description][0..50]}..."
       else
-        puts "  Failed to save #{data[:ticker]}: #{info.errors.full_messages.join(', ')}"
+        puts "  Failed to save #{data[:ticker]}: #{time_series.errors.full_messages.join(', ')}"
       end
     end
   end

@@ -1,13 +1,13 @@
-<h1>Time Series Details: <%= @info.ticker %></h1>
+<h1>Time Series Details: <%= @time_series.ticker %></h1>
 
-<p><strong>Source:</strong> <%= @info.source %></p>
-<p><strong>Timeframe:</strong> <%= @info.timeframe %></p>
-<p><strong>Type:</strong> <%= @info.kind %></p>
-<p><strong>Description:</strong> <%= @info.description %></p>
+<p><strong>Source:</strong> <%= @time_series.source %></p>
+<p><strong>Timeframe:</strong> <%= @time_series.timeframe %></p>
+<p><strong>Type:</strong> <%= @time_series.kind %></p>
+<p><strong>Description:</strong> <%= @time_series.description %></p>
 
 <h2>Data Points</h2>
 
-<% if @info.kind == 'univariate' %>
+<% if @time_series.kind == 'univariate' %>
   <table border="1">
     <thead>
       <tr>
