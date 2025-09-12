@@ -30,7 +30,7 @@ development:
     database: etl_development
   queue:
     <<: *primary_development
-    database: etl_production_queue
+    database: etl_development_queue
     migrations_paths: db/queue_migrate
 
   # The specified database role being used to connect to PostgreSQL.

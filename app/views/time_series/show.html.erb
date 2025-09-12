@@ -1,0 +1,56 @@
+<h1>Time Series Details: <%= @info.ticker %></h1>
+
+<p><strong>Source:</strong> <%= @info.source %></p>
+<p><strong>Timeframe:</strong> <%= @info.timeframe %></p>
+<p><strong>Type:</strong> <%= @info.kind %></p>
+<p><strong>Description:</strong> <%= @info.description %></p>
+
+<h2>Data Points</h2>
+
+<% if @info.kind == 'univariate' %>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @data.each do |point| %>
+        <tr>
+          <td><%= point.ts %></td>
+          <td><%= point.main %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Open</th>
+        <th>High</th>
+        <th>Low</th>
+        <th>Close</th>
+        <th>Adjusted Close</th>
+        <th>Volume</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @data.each do |point| %>
+        <tr>
+          <td><%= point.ts %></td>
+          <td><%= point.open %></td>
+          <td><%= point.high %></td>
+          <td><%= point.low %></td>
+          <td><%= point.close %></td>
+          <td><%= point.aclose %></td>
+          <td><%= point.volume %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+
+<%= link_to 'Back to Time Series List', time_series_index_path %>

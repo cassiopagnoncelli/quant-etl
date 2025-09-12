@@ -1,0 +1,32 @@
+<h1>Available Time Series</h1>
+
+<table border="1">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Code</th>
+      <th>Source</th>
+      <th>Timeframe</th>
+      <th>Number of Data Points</th>
+      <th>Type</th>
+      <th>Info Metadata</th>
+      <th>Since</th>
+      <th>Most Recent TS</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @time_series.each do |time_series| %>
+      <tr>
+        <td><%= link_to time_series[:info].ticker, time_series_path(time_series[:info].ticker) %></td>
+        <td><%= time_series[:info].ticker %></td>
+        <td><%= time_series[:info].source %></td>
+        <td><%= time_series[:info].timeframe %></td>
+        <td><%= time_series[:count] %></td>
+        <td><%= time_series[:info].kind %></td>
+        <td><%= time_series[:info].description %></td>
+        <td><%= time_series[:earliest_ts] %></td>
+        <td><%= time_series[:recent_ts] %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

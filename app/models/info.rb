@@ -4,7 +4,7 @@ class Info < ApplicationRecord
   enum :kind, KINDS.index_with(&:itself), default: :univariate
 
   validates :ticker, presence: true
-  validates :timeframe, presence: true, inclusion: { in: %w[M1 M5 M15 M30 H1 H4 D1 W1 MN1 Q Y] }
+  validates :timeframe, presence: true, inclusion: { in: %w[M1 H1 D1 W1 MN1 Q Y] }
   validates :source, presence: true
   validates :kind, presence: true, inclusion: { in: KINDS }
 

@@ -131,7 +131,17 @@ module Etl
             sp500: {
               series_id: 'SP500',
               name: 'S&P 500',
-              description: 'S&P 500 Index',
+              description: 'S&P 500 Index (daily, 10-year history due to licensing)',
+              frequency: 'daily',
+              units: 'index',
+              model_type: 'series'
+            },
+
+            # NASDAQ Composite (full history back to 1971)
+            nasdaq: {
+              series_id: 'NASDAQCOM',
+              name: 'NASDAQ Composite Index',
+              description: 'NASDAQ Composite Index (daily, 1971-present)',
               frequency: 'daily',
               units: 'index',
               model_type: 'series'
@@ -533,7 +543,7 @@ module Etl
           end
           
           def convert_to_series_attributes(record, series_config)
-            # For Series model - single value economic indicators
+            # For TimeSeries model - single value economic indicators
             value = record[:value].to_f
             
             # Determine timeframe based on frequency

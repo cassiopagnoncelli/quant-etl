@@ -111,7 +111,27 @@ class PopulateInfoMetadata
       
       # Stock Market
       { ticker: 'SP500', timeframe: 'D1', source: 'FRED', kind: 'univariate',
-        description: 'S&P 500 Index - Standard & Poor\'s 500 Stock Index' }
+        description: 'S&P 500 Index - Standard & Poor\'s 500 Stock Index' },
+
+      # Additional Dollar Indices
+      { ticker: 'DTWEXMGS', timeframe: 'D1', source: 'FRED', kind: 'univariate',
+        description: 'Trade Weighted Dollar Index - Major Currencies, Index Jan 2006=100' },
+
+      # Federal Funds Target Rate
+      { ticker: 'FEDFUNDS', timeframe: 'D1', source: 'FRED', kind: 'univariate',
+        description: 'Federal Funds Target Rate - Upper limit of target range, percent per annum' },
+
+      # Consumer Price Index - Electricity
+      { ticker: 'CUSR0000SEHF01', timeframe: 'MN1', source: 'FRED', kind: 'univariate',
+        description: 'Consumer Price Index - Electricity, Index 1982-1984=100, seasonally adjusted' },
+
+      # Vehicle Sales
+      { ticker: 'TOTALSA', timeframe: 'MN1', source: 'FRED', kind: 'univariate',
+        description: 'Total Vehicle Sales - Light weight vehicles, millions of units, seasonally adjusted' },
+
+      # Freight Index
+      { ticker: 'FRGSHPUSM649NCIS', timeframe: 'MN1', source: 'FRED', kind: 'univariate',
+        description: 'Cass Freight Index - Shipments, Index 1990=100, not seasonally adjusted' }
     ]
     
     fred_data.each do |data|

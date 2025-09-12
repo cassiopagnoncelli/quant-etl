@@ -61,7 +61,9 @@ namespace :etl do
       
       # Import all available FRED series
       fred_series = [:m2, :gdp, :gdp_growth, :unemployment, :cpi, :treasury_10y, :treasury_2y, 
-                     :fed_funds, :dollar_index, :oil_wti, :oil_brent, :gold, :sp500]
+                     :fed_funds, :dollar_index, :dollar_index_major, :fed_funds_target, 
+                     :cpi_electricity, :total_vehicle_sales, :cass_freight_index, 
+                     :oil_wti, :oil_brent, :gold, :sp500]
       
       total_imported = 0
       total_skipped = 0
@@ -197,7 +199,9 @@ namespace :etl do
       start_date = end_date - 7
       
       fred_series = [:m2, :gdp, :gdp_growth, :unemployment, :cpi, :treasury_10y, :treasury_2y, 
-                     :fed_funds, :dollar_index, :oil_wti, :oil_brent, :gold, :sp500]
+                     :fed_funds, :dollar_index, :dollar_index_major, :fed_funds_target, 
+                     :cpi_electricity, :total_vehicle_sales, :cass_freight_index, 
+                     :oil_wti, :oil_brent, :gold, :sp500]
       
       total_new = 0
       fred_series.each do |series|

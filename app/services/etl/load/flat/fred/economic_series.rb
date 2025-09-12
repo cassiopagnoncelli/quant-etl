@@ -42,6 +42,7 @@ module Etl
             
             # Stock Market
             sp500: 'SP500',
+            nasdaq: 'NASDAQCOM',
             
             # Volatility
             vix: 'VIXCLS',
