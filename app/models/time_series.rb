@@ -13,8 +13,8 @@ class TimeSeries < ApplicationRecord
 
   scope :univariate, -> { where(kind: 'univariate') }
   scope :aggregate, -> { where(kind: 'aggregate') }
-  scope :by_ticker, ->(ticker) { where(ticker: ticker) }
-  scope :by_source, ->(source) { where(source: source) }
+  scope :by_ticker, ->(ticker) { where(ticker:) }
+  scope :by_source, ->(source) { where(source:) }
 
   def points
     case kind
