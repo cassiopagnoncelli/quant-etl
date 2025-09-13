@@ -15,6 +15,7 @@ class TimeSeries < ApplicationRecord
   scope :aggregate, -> { where(kind: 'aggregate') }
   scope :by_ticker, ->(ticker) { where(ticker:) }
   scope :by_source, ->(source) { where(source:) }
+  scope :by_source_id, ->(source_id) { where(source_id:) }
 
   def points
     case kind
@@ -23,5 +24,10 @@ class TimeSeries < ApplicationRecord
     when 'aggregate'
       aggregates
     end
+  end
+
+  # Helper method to find time series by source and source_id
+  def self.find_by_source_mapping(source, source_id)
+    find_by(source: source, source_id: source_id)
   end
 end
