@@ -8,7 +8,7 @@ class Univariate < ApplicationRecord
   validates :ts, presence: true
   validates :main, presence: true, allow_nil: false
 
-  belongs_to :info, primary_key: :ticker, foreign_key: :ticker, optional: true
+  belongs_to :time_series, primary_key: :ticker, foreign_key: :ticker, optional: true
 
   normalize :ticker, with: :strip
   
