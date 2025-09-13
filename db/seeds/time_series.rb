@@ -9,11 +9,13 @@ class TimeSeriesSeeder
     cleanup_duplicates
 
     # VIX Indices - Aggregate Time Series (CBOE Data)
+    # Source IDs match the ticker symbols used in CBOE's download process
     vix_series = [
       {
         ticker: "VIX",
         timeframe: "D1",
         source: "CBOE",
+        source_id: "VIX",
         kind: "aggregate",
         description: "CBOE Volatility Index - 30-day implied volatility of S&P 500 options"
       },
@@ -21,6 +23,7 @@ class TimeSeriesSeeder
         ticker: "VIX9D",
         timeframe: "D1",
         source: "CBOE",
+        source_id: "VIX9D",
         kind: "aggregate",
         description: "CBOE 9-Day Volatility Index - 9-day implied volatility"
       },
@@ -28,6 +31,7 @@ class TimeSeriesSeeder
         ticker: "VIX3M",
         timeframe: "D1",
         source: "CBOE",
+        source_id: "VIX3M",
         kind: "aggregate",
         description: "CBOE 3-Month Volatility Index - 3-month implied volatility"
       },
@@ -35,6 +39,7 @@ class TimeSeriesSeeder
         ticker: "VIX6M",
         timeframe: "D1",
         source: "CBOE",
+        source_id: "VIX6M",
         kind: "aggregate",
         description: "CBOE 6-Month Volatility Index - 6-month implied volatility"
       },
@@ -42,6 +47,7 @@ class TimeSeriesSeeder
         ticker: "VIX1Y",
         timeframe: "D1",
         source: "CBOE",
+        source_id: "VIX1Y",
         kind: "aggregate",
         description: "CBOE 1-Year Volatility Index - 1-year implied volatility"
       },
@@ -49,6 +55,7 @@ class TimeSeriesSeeder
         ticker: "VVIX",
         timeframe: "D1",
         source: "CBOE",
+        source_id: "VVIX",
         kind: "aggregate",
         description: "CBOE VIX of VIX Index - volatility of volatility"
       },
@@ -56,6 +63,7 @@ class TimeSeriesSeeder
         ticker: "GVZ",
         timeframe: "D1",
         source: "CBOE",
+        source_id: "GVZ",
         kind: "aggregate",
         description: "CBOE Gold ETF Volatility Index - implied volatility of gold ETF"
       },
@@ -63,6 +71,7 @@ class TimeSeriesSeeder
         ticker: "OVX",
         timeframe: "D1",
         source: "CBOE",
+        source_id: "OVX",
         kind: "aggregate",
         description: "CBOE Crude Oil ETF Volatility Index - implied volatility of oil ETF"
       },
@@ -70,6 +79,7 @@ class TimeSeriesSeeder
         ticker: "EVZ",
         timeframe: "D1",
         source: "CBOE",
+        source_id: "EVZ",
         kind: "aggregate",
         description: "CBOE EuroCurrency ETF Volatility Index - implied volatility of euro ETF"
       },
@@ -77,18 +87,21 @@ class TimeSeriesSeeder
         ticker: "RVX",
         timeframe: "D1",
         source: "CBOE",
+        source_id: "RVX",
         kind: "aggregate",
         description: "CBOE Russell 2000 Volatility Index - implied volatility of Russell 2000"
       }
     ]
 
     # FRED Economic Series - Univariate Time Series
+    # Source IDs match the series_id used in FRED API calls
     fred_series = [
       # Key Economic Indicators
       {
         ticker: "M2SL",
         timeframe: "MN1",
         source: "FRED",
+        source_id: "M2SL",
         kind: "univariate",
         description: "M2 Money Stock (seasonally adjusted) - broad measure of money supply"
       },
@@ -96,6 +109,7 @@ class TimeSeriesSeeder
         ticker: "GDP",
         timeframe: "Q",
         source: "FRED",
+        source_id: "GDP",
         kind: "univariate",
         description: "Gross Domestic Product - total economic output"
       },
@@ -103,6 +117,7 @@ class TimeSeriesSeeder
         ticker: "UNRATE",
         timeframe: "MN1",
         source: "FRED",
+        source_id: "UNRATE",
         kind: "univariate",
         description: "Civilian Unemployment Rate - percentage of labor force unemployed"
       },
@@ -110,6 +125,7 @@ class TimeSeriesSeeder
         ticker: "CPIAUCSL",
         timeframe: "MN1",
         source: "FRED",
+        source_id: "CPIAUCSL",
         kind: "univariate",
         description: "Consumer Price Index for All Urban Consumers - inflation measure"
       },
@@ -119,6 +135,7 @@ class TimeSeriesSeeder
         ticker: "DGS10",
         timeframe: "D1",
         source: "FRED",
+        source_id: "DGS10",
         kind: "univariate",
         description: "10-Year Treasury Constant Maturity Rate - long-term interest rate benchmark"
       },
@@ -126,6 +143,7 @@ class TimeSeriesSeeder
         ticker: "DGS2",
         timeframe: "D1",
         source: "FRED",
+        source_id: "DGS2",
         kind: "univariate",
         description: "2-Year Treasury Constant Maturity Rate - short-term interest rate benchmark"
       },
@@ -133,6 +151,7 @@ class TimeSeriesSeeder
         ticker: "DFF",
         timeframe: "D1",
         source: "FRED",
+        source_id: "DFF",
         kind: "univariate",
         description: "Effective Federal Funds Rate - overnight interbank lending rate"
       },
@@ -142,6 +161,7 @@ class TimeSeriesSeeder
         ticker: "DTWEXBGS",
         timeframe: "D1",
         source: "FRED",
+        source_id: "DTWEXBGS",
         kind: "univariate",
         description: "Trade Weighted U.S. Dollar Index: Broad - dollar strength measure"
       },
@@ -149,6 +169,7 @@ class TimeSeriesSeeder
         ticker: "DCOILWTICO",
         timeframe: "D1",
         source: "FRED",
+        source_id: "DCOILWTICO",
         kind: "univariate",
         description: "Crude Oil Prices: West Texas Intermediate (WTI) - oil price benchmark"
       },
@@ -156,6 +177,7 @@ class TimeSeriesSeeder
         ticker: "DCOILBRENTEU",
         timeframe: "D1",
         source: "FRED",
+        source_id: "DCOILBRENTEU",
         kind: "univariate",
         description: "Crude Oil Prices: Brent - Europe - international oil price benchmark"
       },
@@ -163,6 +185,7 @@ class TimeSeriesSeeder
         ticker: "GOLDAMGBD228NLBM",
         timeframe: "D1",
         source: "FRED",
+        source_id: "GOLDAMGBD228NLBM",
         kind: "univariate",
         description: "Gold Fixing Price 3:00 P.M. (London time) in London Bullion Market"
       },
@@ -170,6 +193,7 @@ class TimeSeriesSeeder
         ticker: "SP500",
         timeframe: "D1",
         source: "FRED",
+        source_id: "SP500",
         kind: "univariate",
         description: "S&P 500 Index - broad U.S. stock market benchmark"
       }
@@ -247,11 +271,18 @@ class TimeSeriesSeeder
       ) do |ts|
         ts.kind = series_attrs[:kind]
         ts.description = series_attrs[:description]
+        ts.source_id = series_attrs[:source_id]
+      end
+      
+      # Update source_id if record already exists but source_id is missing
+      if time_series.persisted? && series_attrs[:source_id] && time_series.source_id != series_attrs[:source_id]
+        time_series.update!(source_id: series_attrs[:source_id])
       end
       
       if time_series.persisted?
         count += 1
-        puts "  ✓ #{series_attrs[:ticker]} - #{series_attrs[:description]}"
+        source_id_info = series_attrs[:source_id] ? " (source_id: #{series_attrs[:source_id]})" : ""
+        puts "  ✓ #{series_attrs[:ticker]}#{source_id_info} - #{series_attrs[:description]}"
       else
         puts "  ✗ Failed to create #{series_attrs[:ticker]}: #{time_series.errors.full_messages.join(', ')}"
       end

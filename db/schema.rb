@@ -35,6 +35,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_11_073628) do
     t.string "ticker", null: false
     t.string "timeframe", null: false
     t.string "source", null: false
+    t.string "source_id"
     t.string "kind", default: "univariate", null: false
     t.string "description"
     t.index ["ticker"], name: "index_time_series_on_ticker"
