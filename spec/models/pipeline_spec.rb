@@ -1,26 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe Pipeline, type: :model do
-  let(:time_series) do
-    TimeSeries.create!(
-      ticker: 'AAPL_POLYGON',
-      timeframe: 'D1',
-      source: 'Polygon',
-      source_id: 'AAPL',
-      kind: 'aggregate'
-    )
-  end
-
-  let(:valid_attributes) do
-    {
-      time_series: time_series,
-      status: 'pending',
-      stage: 'start',
-      n_successful: 0,
-      n_failed: 0,
-      n_skipped: 0
-    }
-  end
+  let(:time_series) { create(:time_series, :polygon) }
+  let(:valid_attributes) { attributes_for(:pipeline).merge(time_series: time_series) }
 
   describe 'validations' do
     subject { described_class.new(valid_attributes) }
@@ -164,11 +146,11 @@ RSpec.describe Pipeline, type: :model do
   end
 
   describe 'scopes' do
-    let!(:pending_pipeline) { described_class.create!(valid_attributes.merge(status: 'pending')) }
-    let!(:working_pipeline) { described_class.create!(valid_attributes.merge(status: 'working')) }
-    let!(:complete_pipeline) { described_class.create!(valid_attributes.merge(status: 'complete')) }
-    let!(:download_pipeline) { described_class.create!(valid_attributes.merge(stage: 'download')) }
-    let!(:import_pipeline) { described_class.create!(valid_attributes.merge(stage: 'import')) }
+    let!(:pending_pipeline) { create(:pipeline, time_series: time_series, status: 'pending') }
+    let!(:working_pipeline) { create(:pipeline, :working, time_series: time_series) }
+    let!(:complete_pipeline) { create(:pipeline, :complete, time_series: time_series) }
+    let!(:download_pipeline) { create(:pipeline, time_series: time_series, stage: 'download') }
+    let!(:import_pipeline) { create(:pipeline, time_series: time_series, stage: 'import') }
 
     describe '.by_status' do
       it 'returns pipelines with the specified status' do
@@ -262,13 +244,13 @@ RSpec.describe Pipeline, type: :model do
 
   describe 'time series relationship' do
     it 'can access the associated time series' do
-      pipeline = described_class.create!(valid_attributes)
+      pipeline = create(:pipeline, time_series: time_series)
       expect(pipeline.time_series).to eq(time_series)
       expect(pipeline.time_series.ticker).to eq('AAPL_POLYGON')
     end
 
     it 'can be accessed from time series' do
-      pipeline = described_class.create!(valid_attributes)
+      pipeline = create(:pipeline, time_series: time_series)
       expect(time_series.pipelines).to include(pipeline)
     end
   end

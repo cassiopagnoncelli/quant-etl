@@ -1,16 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe TimeSeries, type: :model do
-  let(:valid_attributes) do
-    {
-      ticker: 'AAPL_POLYGON',
-      timeframe: 'D1',
-      source: 'Polygon',
-      source_id: 'AAPL',
-      kind: 'aggregate',
-      description: 'Apple Inc. stock data'
-    }
-  end
+  let(:valid_attributes) { attributes_for(:time_series, :polygon, description: 'Apple Inc. stock data') }
 
   describe 'validations' do
     subject { described_class.new(valid_attributes) }
@@ -75,10 +66,10 @@ RSpec.describe TimeSeries, type: :model do
   end
 
   describe 'scopes' do
-    let!(:univariate_series) { described_class.create!(valid_attributes.merge(kind: 'univariate', ticker: 'UNI1')) }
-    let!(:aggregate_series) { described_class.create!(valid_attributes.merge(kind: 'aggregate', ticker: 'AGG1')) }
-    let!(:polygon_series) { described_class.create!(valid_attributes.merge(source: 'Polygon', source_id: 'POL1', ticker: 'POL1')) }
-    let!(:fred_series) { described_class.create!(valid_attributes.merge(source: 'FRED', source_id: 'FRED1', ticker: 'FRED1')) }
+    let!(:univariate_series) { create(:time_series, kind: 'univariate', ticker: 'UNI1') }
+    let!(:aggregate_series) { create(:time_series, :aggregate, ticker: 'AGG1') }
+    let!(:polygon_series) { create(:time_series, :polygon, source_id: 'POL1', ticker: 'POL1') }
+    let!(:fred_series) { create(:time_series, :fred, source_id: 'FRED1', ticker: 'FRED1') }
 
     describe '.univariate' do
       it 'returns only univariate time series' do
@@ -115,7 +106,7 @@ RSpec.describe TimeSeries, type: :model do
     describe '.by_source_id' do
       it 'returns time series for the specified source_id' do
         source_id = 'TEST_SOURCE_ID'
-        series_with_source_id = described_class.create!(valid_attributes.merge(source_id: source_id, ticker: 'TEST'))
+        series_with_source_id = create(:time_series, source_id: source_id, ticker: 'TEST')
         
         result = described_class.by_source_id(source_id)
         expect(result).to include(series_with_source_id)
@@ -126,7 +117,7 @@ RSpec.describe TimeSeries, type: :model do
 
   describe 'class methods' do
     describe '.find_by_source_mapping' do
-      let!(:time_series) { described_class.create!(valid_attributes.merge(source: 'FRED', source_id: 'GDP', ticker: 'GDP_FRED')) }
+      let!(:time_series) { create(:time_series, :fred, source_id: 'GDP', ticker: 'GDP_FRED') }
 
       it 'finds time series by source and source_id' do
         result = described_class.find_by_source_mapping('FRED', 'GDP')
@@ -142,7 +133,7 @@ RSpec.describe TimeSeries, type: :model do
 
   describe 'instance methods' do
     describe '#points' do
-      let(:time_series) { described_class.create!(valid_attributes) }
+      let(:time_series) { create(:time_series, :polygon) }
 
       context 'when kind is univariate' do
         before { time_series.update!(kind: 'univariate') }

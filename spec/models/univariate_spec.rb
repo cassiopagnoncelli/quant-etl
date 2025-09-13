@@ -1,14 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe Univariate, type: :model do
-  let(:valid_attributes) do
-    {
-      timeframe: 'D1',
-      ticker: 'GDP',
-      ts: Time.current,
-      main: 25000.0
-    }
-  end
+  let(:valid_attributes) { attributes_for(:univariate) }
 
   describe 'validations' do
     subject { described_class.new(valid_attributes) }
@@ -59,10 +52,10 @@ RSpec.describe Univariate, type: :model do
 
   describe 'class methods' do
     describe '.[]' do
-      let!(:univariate1) { described_class.create!(valid_attributes.merge(ts: 2.days.ago)) }
-      let!(:univariate2) { described_class.create!(valid_attributes.merge(ts: 1.day.ago)) }
-      let!(:univariate3) { described_class.create!(valid_attributes.merge(ts: Time.current)) }
-      let!(:other_ticker) { described_class.create!(valid_attributes.merge(ticker: 'INFLATION', ts: 3.days.ago)) }
+      let!(:univariate1) { create(:univariate, :two_days_ago) }
+      let!(:univariate2) { create(:univariate, :yesterday) }
+      let!(:univariate3) { create(:univariate) }
+      let!(:other_ticker) { create(:univariate, :inflation, :three_days_ago) }
 
       it 'returns univariates for the given ticker ordered by timestamp' do
         result = described_class['GDP']
@@ -89,23 +82,23 @@ RSpec.describe Univariate, type: :model do
 
   describe 'database constraints' do
     it 'enforces unique constraint on ticker and ts' do
-      described_class.create!(valid_attributes)
-      duplicate = described_class.new(valid_attributes)
+      original = create(:univariate)
+      duplicate = build(:univariate, ticker: original.ticker, ts: original.ts)
       
       expect { duplicate.save! }.to raise_error(ActiveRecord::RecordNotUnique)
     end
 
     it 'allows same ticker with different timestamps' do
-      described_class.create!(valid_attributes.merge(ts: 1.day.ago))
-      different_ts = described_class.new(valid_attributes.merge(ts: Time.current))
+      create(:univariate, :yesterday)
+      different_ts = build(:univariate)
       
       expect(different_ts).to be_valid
       expect { different_ts.save! }.not_to raise_error
     end
 
     it 'allows same timestamp with different tickers' do
-      described_class.create!(valid_attributes.merge(ticker: 'GDP'))
-      different_ticker = described_class.new(valid_attributes.merge(ticker: 'INFLATION'))
+      create(:univariate)
+      different_ticker = build(:univariate, :inflation)
       
       expect(different_ticker).to be_valid
       expect { different_ticker.save! }.not_to raise_error
@@ -114,14 +107,14 @@ RSpec.describe Univariate, type: :model do
 
   describe 'data types' do
     it 'stores main as a float' do
-      univariate = described_class.create!(valid_attributes.merge(main: 123.456))
+      univariate = create(:univariate, main: 123.456)
       expect(univariate.reload.main).to be_a(Float)
       expect(univariate.main).to eq(123.456)
     end
 
     it 'stores ts as a datetime' do
       timestamp = Time.zone.parse('2023-01-15 10:30:00')
-      univariate = described_class.create!(valid_attributes.merge(ts: timestamp))
+      univariate = create(:univariate, ts: timestamp)
       expect(univariate.reload.ts).to be_a(Time)
       expect(univariate.ts.to_i).to eq(timestamp.to_i)
     end
@@ -145,7 +138,7 @@ RSpec.describe Univariate, type: :model do
     context 'with precision values' do
       it 'handles high precision decimal values' do
         precise_value = 123.123456789
-        univariate = described_class.create!(valid_attributes.merge(main: precise_value))
+        univariate = create(:univariate, main: precise_value)
         # Note: Float precision may cause slight differences
         expect(univariate.reload.main).to be_within(0.000001).of(precise_value)
       end

@@ -3,26 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe PipelineRunner do
-  let(:time_series) do
-    TimeSeries.create!(
-      ticker: 'AAPL',
-      source: 'Polygon',
-      source_id: 'AAPL',
-      timeframe: 'D1',
-      kind: 'aggregate'
-    )
-  end
-  
-  let(:pipeline) do
-    Pipeline.create!(
-      time_series: time_series,
-      status: 'pending',
-      stage: 'start',
-      n_successful: 0,
-      n_failed: 0,
-      n_skipped: 0
-    )
-  end
+  let(:time_series) { create(:time_series, :polygon, ticker: 'AAPL', source_id: 'AAPL') }
+  let(:pipeline) { create(:pipeline, time_series: time_series) }
   let(:runner) { described_class.new(pipeline) }
   let(:temp_dir) { Rails.root.join('tmp', 'test_flat_files') }
   let(:test_file_path) { temp_dir.join('polygon_AAPL', 'test_file.csv') }

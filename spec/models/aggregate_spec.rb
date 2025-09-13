@@ -1,19 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe Aggregate, type: :model do
-  let(:valid_attributes) do
-    {
-      timeframe: 'D1',
-      ticker: 'AAPL',
-      ts: Time.current,
-      open: 150.0,
-      high: 155.0,
-      low: 148.0,
-      close: 152.0,
-      aclose: 152.5,
-      volume: 1000000
-    }
-  end
+  let(:valid_attributes) { attributes_for(:aggregate) }
 
   describe 'validations' do
     subject { described_class.new(valid_attributes) }
@@ -54,10 +42,10 @@ RSpec.describe Aggregate, type: :model do
 
   describe 'class methods' do
     describe '.[]' do
-      let!(:aggregate1) { described_class.create!(valid_attributes.merge(ts: 1.day.ago)) }
-      let!(:aggregate2) { described_class.create!(valid_attributes.merge(ts: Time.current)) }
-      let!(:other_ticker) { described_class.create!(valid_attributes.merge(ticker: 'GOOGL', ts: 2.days.ago)) }
-      let!(:other_timeframe) { described_class.create!(valid_attributes.merge(timeframe: 'H1', ts: 3.days.ago)) }
+      let!(:aggregate1) { create(:aggregate, :yesterday) }
+      let!(:aggregate2) { create(:aggregate) }
+      let!(:other_ticker) { create(:aggregate, :with_different_ticker, :two_days_ago) }
+      let!(:other_timeframe) { create(:aggregate, :hourly, :three_days_ago) }
 
       it 'returns aggregates for the given ticker ordered by timestamp' do
         result = described_class['AAPL']
@@ -108,8 +96,8 @@ RSpec.describe Aggregate, type: :model do
 
   describe 'database constraints' do
     it 'enforces unique constraint on timeframe, ticker, and ts' do
-      described_class.create!(valid_attributes)
-      duplicate = described_class.new(valid_attributes)
+      original = create(:aggregate)
+      duplicate = build(:aggregate, timeframe: original.timeframe, ticker: original.ticker, ts: original.ts)
       
       expect { duplicate.save! }.to raise_error(ActiveRecord::RecordNotUnique)
     end

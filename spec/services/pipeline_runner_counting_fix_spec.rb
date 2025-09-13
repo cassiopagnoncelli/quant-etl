@@ -3,26 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe PipelineRunner, 'counting fix' do
-  let(:time_series) do
-    TimeSeries.create!(
-      ticker: 'TEST',
-      source: 'FRED',
-      source_id: 'TEST_ID',
-      timeframe: 'D1',
-      kind: 'univariate'
-    )
-  end
-  
-  let(:pipeline) do
-    Pipeline.create!(
-      time_series: time_series,
-      status: 'pending',
-      stage: 'start',
-      n_successful: 0,
-      n_failed: 0,
-      n_skipped: 0
-    )
-  end
+  let(:time_series) { create(:time_series) }
+  let(:pipeline) { create(:pipeline, time_series: time_series) }
 
   let(:runner) { described_class.new(pipeline) }
   let(:download_service) { instance_double(Download::FlatFred) }
