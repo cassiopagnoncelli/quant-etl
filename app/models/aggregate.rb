@@ -1,7 +1,9 @@
 class Aggregate < ApplicationRecord
   include DatetimeFormatter
 
-  validates :timeframe, presence: true, inclusion: { in: %w[M1 H1 D1 W1 MN1 Q Y] }
+  TIMEFRAMES = %w[M1 H1 D1 W1 MN1 Q Y].freeze
+
+  validates :timeframe, presence: true, inclusion: { in: TIMEFRAMES }
   validates :ticker, presence: true
   validates :ts, presence: true
   validates :open, presence: true

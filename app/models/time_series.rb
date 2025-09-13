@@ -5,8 +5,6 @@ class TimeSeries < ApplicationRecord
 
   enum :kind, KINDS.index_with(&:itself), default: :univariate
 
-  normalize :ticker, with: :strip
-
   validates :ticker, presence: true
   validates :timeframe, presence: true, inclusion: { in: TIMEFRAMES }
   validates :source, presence: true, inclusion: { in: SOURCES }
@@ -21,6 +19,8 @@ class TimeSeries < ApplicationRecord
   scope :by_ticker, ->(ticker) { where(ticker:) }
   scope :by_source, ->(source) { where(source:) }
   scope :by_source_id, ->(source_id) { where(source_id:) }
+
+  normalize :ticker, with: :strip
 
   def points
     case kind
