@@ -18,5 +18,13 @@ class TimeSeriesController < ApplicationController
       return
     end
     @data = @time_series.points.order(ts: :desc)
+    
+    # Get additional metadata like in the index page
+    points = @time_series.points
+    @count = points.count
+    @recent_ts = points.maximum(:ts)
+    @earliest_ts = points.minimum(:ts)
+    last_record = points.order(ts: :desc).first
+    @last_value = last_record&.main
   end
 end

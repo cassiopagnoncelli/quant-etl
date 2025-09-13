@@ -1,5 +1,5 @@
 class PipelinesController < ApplicationController
-  before_action :set_pipeline, only: [:show]
+  before_action :set_pipeline, only: [:show, :run]
 
   def index
     @pipelines = Pipeline.includes(:time_series).order(created_at: :desc)
@@ -21,6 +21,15 @@ class PipelinesController < ApplicationController
     else
       @time_series_options = TimeSeries.all.map { |ts| [ts.ticker, ts.id] }
       render :new, status: :unprocessable_entity
+    end
+  end
+
+  def run
+    if @pipeline.can_run?
+      @pipeline.run_async!
+      redirect_to @pipeline, notice: 'Pipeline has been started and is running in the background.'
+    else
+      redirect_to @pipeline, alert: 'Pipeline cannot be run. It must be in pending status and start stage.'
     end
   end
 

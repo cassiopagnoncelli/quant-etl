@@ -20,6 +20,11 @@
         </div>
       <% end %>
       <span class="type-kind-show"><%= @time_series.kind %></span>
+      <% if @last_value.present? %>
+        <div class="last-value">
+          <%= number_with_precision(@last_value, precision: 2, delimiter: ',') %>
+        </div>
+      <% end %>
     </h1>
     
     <div class="time-series-meta">
@@ -33,7 +38,15 @@
       </div>
       <div class="meta-group">
         <span class="meta-label">Data Points:</span>
-        <span class="meta-value"><%= number_with_delimiter(@data.count) %></span>
+        <span class="meta-value"><%= number_with_delimiter(@count) %></span>
+      </div>
+      <div class="meta-group">
+        <span class="meta-label">Since:</span>
+        <span class="meta-value"><%= @earliest_ts&.strftime('%Y-%m-%d') || 'N/A' %></span>
+      </div>
+      <div class="meta-group">
+        <span class="meta-label">Latest:</span>
+        <span class="meta-value"><%= @recent_ts&.strftime('%Y-%m-%d') || 'N/A' %></span>
       </div>
     </div>
   </div>

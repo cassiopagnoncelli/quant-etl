@@ -1,4 +1,12 @@
 <div class="container">
+  <%= link_to pipelines_path, class: 'back-link' do %>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5"></path>
+      <path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back to Pipelines
+  <% end %>
+  
   <div class="page-header">
     <div class="header-left">
       <h1>Pipeline #<%= @pipeline.id %></h1>
@@ -12,7 +20,11 @@
       </div>
     </div>
     <div class="header-actions">
-      <%= link_to "← Back to Pipelines", pipelines_path, class: "btn btn-secondary" %>
+      <% if @pipeline.can_run? %>
+        <%= link_to "Run", run_pipeline_path(@pipeline), method: :patch, class: "btn btn-primary", 
+            confirm: "Are you sure you want to run this pipeline?", 
+            data: { turbo_method: :patch } %>
+      <% end %>
     </div>
   </div>
 
@@ -164,6 +176,16 @@
     display: inline-block;
     border: none;
     cursor: pointer;
+  }
+
+  .btn-primary {
+    background-color: #3b82f6;
+    color: white;
+    margin-right: 0.5rem;
+  }
+
+  .btn-primary:hover {
+    background-color: #2563eb;
   }
 
   .btn-secondary {
