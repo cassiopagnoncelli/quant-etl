@@ -1,5 +1,5 @@
 class Pipeline < ApplicationRecord
-  STATUSES = %w[pending working complete].freeze
+  STATUSES = %w[pending working complete error].freeze
   STAGES = %w[start download import finish].freeze
 
   enum :status, STATUSES.index_with(&:itself), default: :pending
