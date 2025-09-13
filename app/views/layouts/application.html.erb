@@ -23,6 +23,79 @@
   </head>
 
   <body>
-    <%= yield %>
+    <nav class="main-nav">
+      <div class="nav-container">
+        <%= link_to "ETL System", root_path, class: "nav-brand" %>
+        <div class="nav-links">
+          <%= link_to "Time Series", time_series_index_path, class: "nav-link" %>
+          <%= link_to "Pipelines", pipelines_path, class: "nav-link" %>
+        </div>
+      </div>
+    </nav>
+    
+    <main class="main-content">
+      <%= yield %>
+    </main>
+
+    <style>
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #f9fafb;
+        color: #111827;
+      }
+
+      .main-nav {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 0 1rem;
+      }
+
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 4rem;
+      }
+
+      .nav-brand {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #111827;
+        text-decoration: none;
+      }
+
+      .nav-brand:hover {
+        color: #3b82f6;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+      }
+
+      .nav-link {
+        color: #6b7280;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+
+      .nav-link:hover {
+        color: #3b82f6;
+      }
+
+      .main-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+      }
+
+      .container {
+        /* Override any existing container styles */
+      }
+    </style>
   </body>
 </html>

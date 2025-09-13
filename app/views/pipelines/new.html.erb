@@ -1,0 +1,246 @@
+<div class="container">
+  <div class="page-header">
+    <h1>Create New Pipeline</h1>
+    <%= link_to "← Back to Pipelines", pipelines_path, class: "btn btn-secondary" %>
+  </div>
+
+  <div class="form-container">
+    <%= form_with model: @pipeline, local: true, class: "pipeline-form" do |form| %>
+      <% if @pipeline.errors.any? %>
+        <div class="error-messages">
+          <h3><%= pluralize(@pipeline.errors.count, "error") %> prohibited this pipeline from being saved:</h3>
+          <ul>
+            <% @pipeline.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="form-section">
+        <h2>Pipeline Configuration</h2>
+        
+        <div class="form-group">
+          <%= form.label :time_series_id, "Time Series", class: "form-label" %>
+          <%= form.select :time_series_id, options_for_select(@time_series_options), 
+                         { prompt: "Select a time series..." }, 
+                         { class: "form-select" } %>
+          <div class="form-help">Choose the time series this pipeline will process.</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <%= form.label :status, class: "form-label" %>
+            <%= form.select :status, options_for_select(Pipeline::STATUSES.map { |s| [s.capitalize, s] }, @pipeline.status), 
+                           {}, { class: "form-select" } %>
+            <div class="form-help">Current status of the pipeline.</div>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :stage, class: "form-label" %>
+            <%= form.select :stage, options_for_select(Pipeline::STAGES.map { |s| [s.capitalize, s] }, @pipeline.stage), 
+                           {}, { class: "form-select" } %>
+            <div class="form-help">Current stage of the pipeline process.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Operation Counters</h2>
+        <div class="form-help section-help">These counters track the number of operations performed by the pipeline.</div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <%= form.label :n_successful, "Successful Operations", class: "form-label" %>
+            <%= form.number_field :n_successful, min: 0, class: "form-input", placeholder: "0" %>
+            <div class="form-help">Number of successful operations.</div>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :n_failed, "Failed Operations", class: "form-label" %>
+            <%= form.number_field :n_failed, min: 0, class: "form-input", placeholder: "0" %>
+            <div class="form-help">Number of failed operations.</div>
+          </div>
+
+          <div class="form-group">
+            <%= form.label :n_skipped, "Skipped Operations", class: "form-label" %>
+            <%= form.number_field :n_skipped, min: 0, class: "form-input", placeholder: "0" %>
+            <div class="form-help">Number of skipped operations.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <%= form.submit "Create Pipeline", class: "btn btn-primary" %>
+        <%= link_to "Cancel", pipelines_path, class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .page-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+  }
+
+  .btn-primary {
+    background-color: #3b82f6;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #2563eb;
+  }
+
+  .btn-secondary {
+    background-color: #6b7280;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background-color: #4b5563;
+  }
+
+  .form-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .pipeline-form {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 2rem;
+  }
+
+  .error-messages {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .error-messages h3 {
+    margin: 0 0 0.5rem 0;
+    color: #dc2626;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .error-messages ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  .error-messages li {
+    color: #dc2626;
+    margin-bottom: 0.25rem;
+  }
+
+  .form-section {
+    margin-bottom: 2rem;
+  }
+
+  .form-section:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .form-section h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .section-help {
+    margin-bottom: 1rem !important;
+    color: #6b7280 !important;
+    font-style: italic;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-label {
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .form-input, .form-select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .form-help {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  @media (max-width: 640px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+    }
+    
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  }
+</style>

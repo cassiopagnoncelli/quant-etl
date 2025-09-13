@@ -1,0 +1,420 @@
+<div class="container">
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Pipeline #<%= @pipeline.id %></h1>
+      <div class="status-badges">
+        <span class="status-badge status-<%= @pipeline.status %>">
+          <%= @pipeline.status.capitalize %>
+        </span>
+        <span class="stage-badge stage-<%= @pipeline.stage %>">
+          <%= @pipeline.stage.capitalize %>
+        </span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <%= link_to "← Back to Pipelines", pipelines_path, class: "btn btn-secondary" %>
+    </div>
+  </div>
+
+  <div class="pipeline-details">
+    <div class="detail-section">
+      <h2>Time Series Information</h2>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">Ticker</span>
+          <span class="detail-value">
+            <%= link_to @pipeline.time_series.ticker, time_series_path(@pipeline.time_series.ticker), class: "ticker-link" %>
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Source</span>
+          <span class="detail-value"><%= @pipeline.time_series.source %></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Timeframe</span>
+          <span class="detail-value"><%= @pipeline.time_series.timeframe %></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Kind</span>
+          <span class="detail-value"><%= @pipeline.time_series.kind %></span>
+        </div>
+        <% if @pipeline.time_series.source_id.present? %>
+          <div class="detail-item">
+            <span class="detail-label">Source ID</span>
+            <span class="detail-value"><%= @pipeline.time_series.source_id %></span>
+          </div>
+        <% end %>
+        <% if @pipeline.time_series.description.present? %>
+          <div class="detail-item full-width">
+            <span class="detail-label">Description</span>
+            <span class="detail-value"><%= @pipeline.time_series.description %></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h2>Pipeline Statistics</h2>
+      <div class="stats-grid">
+        <div class="stat-card success">
+          <div class="stat-icon">✓</div>
+          <div class="stat-content">
+            <div class="stat-value"><%= number_with_delimiter(@pipeline.n_successful) %></div>
+            <div class="stat-label">Successful Operations</div>
+          </div>
+        </div>
+        <div class="stat-card failed">
+          <div class="stat-icon">✗</div>
+          <div class="stat-content">
+            <div class="stat-value"><%= number_with_delimiter(@pipeline.n_failed) %></div>
+            <div class="stat-label">Failed Operations</div>
+          </div>
+        </div>
+        <div class="stat-card skipped">
+          <div class="stat-icon">⊘</div>
+          <div class="stat-content">
+            <div class="stat-value"><%= number_with_delimiter(@pipeline.n_skipped) %></div>
+            <div class="stat-label">Skipped Operations</div>
+          </div>
+        </div>
+        <div class="stat-card total">
+          <div class="stat-icon">Σ</div>
+          <div class="stat-content">
+            <div class="stat-value"><%= number_with_delimiter(@pipeline.n_successful + @pipeline.n_failed + @pipeline.n_skipped) %></div>
+            <div class="stat-label">Total Operations</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h2>Pipeline Timeline</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div class="timeline-title">Pipeline Created</div>
+            <div class="timeline-time"><%= @pipeline.created_at.strftime('%B %d, %Y at %I:%M %p') %></div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div class="timeline-title">Last Updated</div>
+            <div class="timeline-time"><%= @pipeline.updated_at.strftime('%B %d, %Y at %I:%M %p') %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h2>Current Status</h2>
+      <div class="status-overview">
+        <div class="status-item">
+          <span class="status-label">Current Status:</span>
+          <span class="status-badge status-<%= @pipeline.status %>">
+            <%= @pipeline.status.capitalize %>
+          </span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Current Stage:</span>
+          <span class="stage-badge stage-<%= @pipeline.stage %>">
+            <%= @pipeline.stage.capitalize %>
+          </span>
+        </div>
+      </div>
+      
+      <div class="progress-indicator">
+        <div class="progress-bar">
+          <% stages = ['start', 'download', 'import', 'finish'] %>
+          <% current_stage_index = stages.index(@pipeline.stage) %>
+          <% stages.each_with_index do |stage, index| %>
+            <div class="progress-step <%= 'active' if index <= current_stage_index %> <%= 'current' if stage == @pipeline.stage %>">
+              <div class="step-marker"></div>
+              <div class="step-label"><%= stage.capitalize %></div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .header-left h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-secondary {
+    background-color: #6b7280;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background-color: #4b5563;
+  }
+
+  .status-badges {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .status-badge, .stage-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .status-pending { background: #fef3c7; color: #92400e; }
+  .status-working { background: #dbeafe; color: #1e40af; }
+  .status-complete { background: #d1fae5; color: #065f46; }
+
+  .stage-start { background: #f3f4f6; color: #374151; }
+  .stage-download { background: #fef3c7; color: #92400e; }
+  .stage-import { background: #dbeafe; color: #1e40af; }
+  .stage-finish { background: #d1fae5; color: #065f46; }
+
+  .pipeline-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .detail-section {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+  }
+
+  .detail-section h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .detail-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .detail-item.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .detail-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+  }
+
+  .detail-value {
+    font-weight: 500;
+    color: #111827;
+  }
+
+  .ticker-link {
+    color: #3b82f6;
+    text-decoration: none;
+  }
+
+  .ticker-link:hover {
+    text-decoration: underline;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+  }
+
+  .stat-icon {
+    font-size: 1.5rem;
+    font-weight: bold;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+
+  .stat-card.success { background: #f0fdf4; }
+  .stat-card.success .stat-icon { background: #dcfce7; color: #059669; }
+  .stat-card.success .stat-value { color: #059669; }
+
+  .stat-card.failed { background: #fef2f2; }
+  .stat-card.failed .stat-icon { background: #fecaca; color: #dc2626; }
+  .stat-card.failed .stat-value { color: #dc2626; }
+
+  .stat-card.skipped { background: #fffbeb; }
+  .stat-card.skipped .stat-icon { background: #fed7aa; color: #d97706; }
+  .stat-card.skipped .stat-value { color: #d97706; }
+
+  .stat-card.total { background: #f8fafc; }
+  .stat-card.total .stat-icon { background: #e2e8f0; color: #475569; }
+  .stat-card.total .stat-value { color: #475569; }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .timeline-marker {
+    width: 0.75rem;
+    height: 0.75rem;
+    background: #3b82f6;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .timeline-title {
+    font-weight: 500;
+    color: #111827;
+  }
+
+  .timeline-time {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .status-overview {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .status-label {
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .progress-indicator {
+    margin-top: 1rem;
+  }
+
+  .progress-bar {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  .progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    height: 2px;
+    background: #e5e7eb;
+    z-index: 1;
+  }
+
+  .progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .step-marker {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: #e5e7eb;
+    border: 3px solid white;
+    margin-bottom: 0.5rem;
+  }
+
+  .progress-step.active .step-marker {
+    background: #3b82f6;
+  }
+
+  .progress-step.current .step-marker {
+    background: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+  }
+
+  .step-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .progress-step.active .step-label {
+    color: #3b82f6;
+  }
+
+  .progress-step.current .step-label {
+    color: #059669;
+  }
+</style>

@@ -10,6 +10,7 @@ class TimeSeries < ApplicationRecord
 
   has_many :aggregates, foreign_key: :ticker, primary_key: :ticker
   has_many :univariates, foreign_key: :ticker, primary_key: :ticker
+  has_many :pipelines
 
   scope :univariate, -> { where(kind: 'univariate') }
   scope :aggregate, -> { where(kind: 'aggregate') }

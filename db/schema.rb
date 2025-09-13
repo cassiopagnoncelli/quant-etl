@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_11_073628) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_13_044838) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -27,6 +27,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_11_073628) do
     t.float "aclose", null: false
     t.float "volume"
     t.index ["timeframe", "ticker", "ts"], name: "index_aggregates_on_timeframe_and_ticker_and_ts", unique: true
+  end
+
+  create_table "pipelines", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "time_series_id", null: false
+    t.string "status", null: false
+    t.string "stage", null: false
+    t.integer "n_successful", default: 0, null: false
+    t.integer "n_failed", default: 0, null: false
+    t.integer "n_skipped", default: 0, null: false
+    t.index ["time_series_id"], name: "index_pipelines_on_time_series_id"
   end
 
   create_table "time_series", force: :cascade do |t|
@@ -50,4 +62,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_11_073628) do
     t.float "main", null: false
     t.index ["ticker", "ts"], name: "index_univariates_on_ticker_and_ts", unique: true
   end
+
+  add_foreign_key "pipelines", "time_series"
 end
