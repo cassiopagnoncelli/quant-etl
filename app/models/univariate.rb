@@ -10,7 +10,7 @@ class Univariate < ApplicationRecord
 
   belongs_to :time_series, primary_key: :ticker, foreign_key: :ticker, optional: true
 
-  normalize :ticker, with: :strip
+  normalizes :ticker, with: ->(s) { s.to_s.strip.presence }
   
   def self.[](ticker)
     where(ticker:).order(:ts)

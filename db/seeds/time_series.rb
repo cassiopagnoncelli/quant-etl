@@ -4,9 +4,6 @@
 class TimeSeriesSeeder
   def self.seed!
     puts "🌱 Seeding TimeSeries records..."
-    
-    # Clean up any existing duplicates first
-    cleanup_duplicates
 
     # VIX Indices - Aggregate Time Series (CBOE Data)
     # Source IDs match the ticker symbols used in CBOE's download process
@@ -211,74 +208,13 @@ class TimeSeriesSeeder
 
   private
 
-  def self.cleanup_duplicates
-    puts "🧹 Cleaning up duplicate sources..."
-    
-    duplicates_removed = 0
-    
-    # Clean up cboe -> CBOE duplicates
-    TimeSeries.where(source: 'cboe').each do |record|
-      uppercase_equivalent = TimeSeries.find_by(
-        ticker: record.ticker,
-        timeframe: record.timeframe,
-        source: 'CBOE'
-      )
-      
-      if uppercase_equivalent
-        puts "  🗑️  Removing duplicate: #{record.ticker} (cboe) - keeping CBOE version"
-        record.destroy
-        duplicates_removed += 1
-      else
-        puts "  🔄 Updating: #{record.ticker} cboe -> CBOE"
-        record.update!(source: 'CBOE')
-      end
-    end
-
-    # Clean up fred -> FRED duplicates
-    TimeSeries.where(source: 'fred').each do |record|
-      uppercase_equivalent = TimeSeries.find_by(
-        ticker: record.ticker,
-        timeframe: record.timeframe,
-        source: 'FRED'
-      )
-      
-      if uppercase_equivalent
-        puts "  🗑️  Removing duplicate: #{record.ticker} (fred) - keeping FRED version"
-        record.destroy
-        duplicates_removed += 1
-      else
-        puts "  🔄 Updating: #{record.ticker} fred -> FRED"
-        record.update!(source: 'FRED')
-      end
-    end
-    
-    if duplicates_removed > 0
-      puts "  ✅ Cleanup completed. Removed #{duplicates_removed} duplicates."
-    else
-      puts "  ✅ No duplicates found."
-    end
-  end
-
   def self.create_series(series_data, header_message)
     puts header_message
     count = 0
     
     series_data.each do |series_attrs|
-      time_series = TimeSeries.find_or_create_by(
-        ticker: series_attrs[:ticker],
-        timeframe: series_attrs[:timeframe],
-        source: series_attrs[:source]
-      ) do |ts|
-        ts.kind = series_attrs[:kind]
-        ts.description = series_attrs[:description]
-        ts.source_id = series_attrs[:source_id]
-      end
-      
-      # Update source_id if record already exists but source_id is missing
-      if time_series.persisted? && series_attrs[:source_id] && time_series.source_id != series_attrs[:source_id]
-        time_series.update!(source_id: series_attrs[:source_id])
-      end
-      
+      time_series = TimeSeries.find_or_create_by(**series_attrs)
+
       if time_series.persisted?
         count += 1
         source_id_info = series_attrs[:source_id] ? " (source_id: #{series_attrs[:source_id]})" : ""

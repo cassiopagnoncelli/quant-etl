@@ -6,8 +6,8 @@ class CreateTimeSeries < ActiveRecord::Migration[8.0]
       t.string :ticker, null: false, index: true
       t.string :timeframe, null: false
       t.string :source, null: false
-      t.string :source_id
-      t.string :kind, null: false, default: 'univariate'
+      t.string :source_id, null: false
+      t.string :kind, null: false
       t.string :description
     end
   end

@@ -22,8 +22,6 @@ class Pipeline < ApplicationRecord
   scope :complete, -> { where(status: 'complete') }
   scope :error, -> { where(status: 'error') }
 
-  normalize :ticker, with: :strip
-
   # Convenience methods for pipeline execution
   def run!
     PipelineRunner.run(self)

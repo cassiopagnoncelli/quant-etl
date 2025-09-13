@@ -1,11 +1,11 @@
 class TimeSeries < ApplicationRecord
   KINDS = %w[univariate aggregate].freeze
-  SOURCES = %w[fred cboe polygon].freeze
+  SOURCES = %w[FRED CBOE Polygon].freeze
   TIMEFRAMES = %w[M1 H1 D1 W1 MN1 Q Y].freeze
 
   enum :kind, KINDS.index_with(&:itself), default: :univariate
 
-  validates :ticker, presence: true
+  validates :ticker, presence: true, uniqueness: true
   validates :timeframe, presence: true, inclusion: { in: TIMEFRAMES }
   validates :source, presence: true, inclusion: { in: SOURCES }
   validates :kind, presence: true, inclusion: { in: KINDS }
@@ -20,7 +20,7 @@ class TimeSeries < ApplicationRecord
   scope :by_source, ->(source) { where(source:) }
   scope :by_source_id, ->(source_id) { where(source_id:) }
 
-  normalize :ticker, with: :strip
+  normalizes :ticker, with: ->(s) { s.to_s.strip.presence }
 
   def points
     case kind
@@ -33,6 +33,6 @@ class TimeSeries < ApplicationRecord
 
   # Helper method to find time series by source and source_id
   def self.find_by_source_mapping(source, source_id)
-    find_by(source: source, source_id: source_id)
+    find_by(source:, source_id:)
   end
 end

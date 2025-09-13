@@ -14,8 +14,10 @@ class Aggregate < ApplicationRecord
 
   belongs_to :time_series, primary_key: :ticker, foreign_key: :ticker, optional: true
 
+  normalizes :ticker, with: ->(s) { s.to_s.strip.presence }
+
   def self.[](ticker)
-    where(ticker: ticker, timeframe: "D1").order(:ts)
+    where(ticker:).order(:ts)
   end
 
   def main
