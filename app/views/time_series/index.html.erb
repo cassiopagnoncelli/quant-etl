@@ -1,32 +1,64 @@
-<h1>Available Time Series</h1>
+<div class="container">
+  <h1>Available Time Series</h1>
 
-<table border="1">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Code</th>
-      <th>Source</th>
-      <th>Timeframe</th>
-      <th>Number of Data Points</th>
-      <th>Type</th>
-      <th>Description</th>
-      <th>Since</th>
-      <th>Most Recent TS</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @time_series.each do |ts_data| %>
-      <tr>
-        <td><%= link_to ts_data[:time_series].ticker, time_series_path(ts_data[:time_series].ticker) %></td>
-        <td><%= ts_data[:time_series].ticker %></td>
-        <td><%= ts_data[:time_series].source %></td>
-        <td><%= ts_data[:time_series].timeframe %></td>
-        <td><%= ts_data[:count] %></td>
-        <td><%= ts_data[:time_series].kind %></td>
-        <td><%= ts_data[:time_series].description %></td>
-        <td><%= ts_data[:earliest_ts] %></td>
-        <td><%= ts_data[:recent_ts] %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+  <% if @time_series.empty? %>
+    <div class="empty-state">
+      <h3>No time series available</h3>
+      <p>There are currently no time series in the system.</p>
+    </div>
+  <% else %>
+    <div class="time-series-list">
+      <% @time_series.each do |ts_data| %>
+        <%= link_to time_series_path(ts_data[:time_series].ticker), class: "time-series-row" do %>
+          <div class="row-header">
+            <div class="ticker-info">
+              <h3 class="ticker-name">
+                <%= ts_data[:time_series].ticker %>
+                <% if ts_data[:time_series].description.present? %>
+                  <div class="info-icon" title="<%= ts_data[:time_series].description %>">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M9,9h0a3,3,0,0,1,6,0c0,2-3,3-3,3"></path>
+                      <path d="M12,17h0"></path>
+                    </svg>
+                  </div>
+                <% end %>
+              </h3>
+              <span class="type-kind"><%= ts_data[:time_series].kind %></span>
+            </div>
+            <% if ts_data[:last].present? %>
+              <div class="last-value">
+                <%= number_with_precision(ts_data[:last], precision: 2, delimiter: ',') %>
+              </div>
+            <% end %>
+          </div>
+          
+          <div class="row-content">
+            <div class="row-meta">
+              <div class="meta-group">
+                <span class="meta-label">Source:</span>
+                <span class="meta-value"><%= ts_data[:time_series].source %></span>
+              </div>
+              <div class="meta-group">
+                <span class="meta-label">Timeframe:</span>
+                <span class="meta-value"><%= ts_data[:time_series].timeframe %></span>
+              </div>
+              <div class="meta-group">
+                <span class="meta-label">Data Points:</span>
+                <span class="meta-value"><%= number_with_delimiter(ts_data[:count]) %></span>
+              </div>
+              <div class="meta-group">
+                <span class="meta-label">Since:</span>
+                <span class="meta-value"><%= ts_data[:earliest_ts]&.strftime('%Y-%m-%d') || 'N/A' %></span>
+              </div>
+              <div class="meta-group">
+                <span class="meta-label">Latest:</span>
+                <span class="meta-value"><%= ts_data[:recent_ts]&.strftime('%Y-%m-%d') || 'N/A' %></span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

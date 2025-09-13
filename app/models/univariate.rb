@@ -7,6 +7,6 @@ class Univariate < ApplicationRecord
   belongs_to :info, primary_key: :ticker, foreign_key: :ticker, optional: true
   
   def self.[](ticker)
-    where(ticker: ticker).order(:ts)
+    where(ticker:).order(:ts)
   end
 end

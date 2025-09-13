@@ -1,22 +1,13 @@
 class TimeSeriesController < ApplicationController
   def index
     @time_series = TimeSeries.all.map do |time_series|
-      count = if time_series.kind == 'univariate'
-                Univariate.where(ticker: time_series.ticker).count
-              else
-                Aggregate.where(ticker: time_series.ticker).count
-              end
-      recent_ts = if time_series.kind == 'univariate'
-                    Univariate.where(ticker: time_series.ticker).maximum(:ts)
-                  else
-                    Aggregate.where(ticker: time_series.ticker).maximum(:ts)
-                  end
-      earliest_ts = if time_series.kind == 'univariate'
-                      Univariate.where(ticker: time_series.ticker).minimum(:ts)
-                    else
-                      Aggregate.where(ticker: time_series.ticker).minimum(:ts)
-                    end
-      { time_series: time_series, count: count, recent_ts: recent_ts, earliest_ts: earliest_ts }
+      points = time_series.points
+      count = points.count
+      recent_ts = points.maximum(:ts)
+      earliest_ts = points.minimum(:ts)
+      last_record = points.order(ts: :desc).first
+      last_value = last_record&.main
+      { time_series: time_series, count: count, recent_ts: recent_ts, earliest_ts: earliest_ts, last: last_value }
     end
   end
 
@@ -26,10 +17,6 @@ class TimeSeriesController < ApplicationController
       render plain: 'Time series not found', status: :not_found
       return
     end
-    if @time_series.kind == 'univariate'
-      @data = Univariate.where(ticker: @time_series.ticker).order(ts: :desc)
-    else
-      @data = Aggregate.where(ticker: @time_series.ticker).order(ts: :desc)
-    end
+    @data = @time_series.points.order(ts: :desc)
   end
 end

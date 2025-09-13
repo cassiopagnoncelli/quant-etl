@@ -13,4 +13,8 @@ class Aggregate < ApplicationRecord
   def self.[](ticker)
     where(ticker: ticker, timeframe: "D1").order(:ts)
   end
+
+  def main
+    aclose || close
+  end
 end

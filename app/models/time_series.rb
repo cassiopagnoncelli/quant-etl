@@ -17,9 +17,10 @@ class TimeSeries < ApplicationRecord
   scope :by_source, ->(source) { where(source: source) }
 
   def points
-    if univariate?
+    case kind
+    when 'univariate'
       univariates
-    else
+    when 'aggregate'
       aggregates
     end
   end

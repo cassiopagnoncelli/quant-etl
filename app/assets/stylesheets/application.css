@@ -3,8 +3,342 @@
  *
  * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
  * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
- * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
- * depending on specificity.
+ * cascading order, meaning styles declared later in the document or with higher specificity will override earlier ones.
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Typography */
+h1 {
+  color: #2c3e50;
+  font-size: 1.8rem;
+  font-weight: 300;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+h2 {
+  color: #34495e;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin: 0 0 1rem 0;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 0.5rem;
+}
+
+/* Time Series List */
+.time-series-list {
+  margin-top: 2rem;
+}
+
+.time-series-row {
+  display: block;
+  background: white;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.25rem;
+  border: 1px solid #e9ecef;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.time-series-row:hover {
+  background-color: #f8f9fa;
+  border-color: #3498db;
+  text-decoration: none;
+  color: inherit;
+}
+
+.row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.ticker-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ticker-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.type-kind {
+  color: #7f8c8d;
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-transform: lowercase;
+}
+
+.info-icon {
+  color: #7f8c8d;
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+.info-icon:hover {
+  color: #3498db;
+}
+
+.info-icon:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2c3e50;
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  max-width: 400px;
+  min-width: 200px;
+  white-space: normal;
+  word-wrap: break-word;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.info-icon:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  border: 4px solid transparent;
+  border-top-color: #2c3e50;
+  z-index: 1000;
+}
+
+.last-value {
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.row-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.meta-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.meta-label {
+  font-size: 0.7rem;
+  color: #7f8c8d;
+  font-weight: 600;
+}
+
+.meta-value {
+  font-size: 0.75rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.row-description {
+  color: #5a6c7d;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  font-style: italic;
+  border-left: 2px solid #e9ecef;
+  padding-left: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+/* Show page styles */
+.time-series-header {
+  background: white;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e9ecef;
+}
+
+.time-series-title {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.type-kind-show {
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  font-weight: 400;
+  text-transform: lowercase;
+}
+
+.time-series-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+/* Data table styles */
+.data-section {
+  background: white;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  border: 1px solid #e9ecef;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.data-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+  position: sticky;
+  top: 0;
+  font-size: 0.8rem;
+}
+
+.data-table tr:hover {
+  background: #f8f9fa;
+}
+
+.data-table td {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.8rem;
+}
+
+/* Navigation */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #7f8c8d;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.back-link:hover {
+  color: #3498db;
+  background: rgba(52, 152, 219, 0.05);
+  border-color: rgba(52, 152, 219, 0.1);
+  text-decoration: none;
+}
+
+.back-link svg {
+  flex-shrink: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .row-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .ticker-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .row-meta {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .time-series-meta {
+    grid-template-columns: 1fr;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  .last-value {
+    font-size: 1rem;
+  }
+}
+
+/* Loading states and animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.time-series-card {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #7f8c8d;
+}
+
+.empty-state h3 {
+  color: #95a5a6;
+  margin-bottom: 1rem;
+}

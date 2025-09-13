@@ -1,56 +1,104 @@
-<h1>Time Series Details: <%= @time_series.ticker %></h1>
-
-<p><strong>Source:</strong> <%= @time_series.source %></p>
-<p><strong>Timeframe:</strong> <%= @time_series.timeframe %></p>
-<p><strong>Type:</strong> <%= @time_series.kind %></p>
-<p><strong>Description:</strong> <%= @time_series.description %></p>
-
-<h2>Data Points</h2>
-
-<% if @time_series.kind == 'univariate' %>
-  <table border="1">
-    <thead>
-      <tr>
-        <th>Timestamp</th>
-        <th>Value</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @data.each do |point| %>
-        <tr>
-          <td><%= point.ts %></td>
-          <td><%= point.main %></td>
-        </tr>
+<div class="container">
+  <%= link_to time_series_index_path, class: 'back-link' do %>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5"></path>
+      <path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back to Time Series
+  <% end %>
+  
+  <div class="time-series-header">
+    <h1 class="time-series-title">
+      <%= @time_series.ticker %>
+      <% if @time_series.description.present? %>
+        <div class="info-icon" title="<%= @time_series.description %>">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9,9h0a3,3,0,0,1,6,0c0,2-3,3-3,3"></path>
+            <path d="M12,17h0"></path>
+          </svg>
+        </div>
       <% end %>
-    </tbody>
-  </table>
-<% else %>
-  <table border="1">
-    <thead>
-      <tr>
-        <th>Timestamp</th>
-        <th>Open</th>
-        <th>High</th>
-        <th>Low</th>
-        <th>Close</th>
-        <th>Adjusted Close</th>
-        <th>Volume</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @data.each do |point| %>
-        <tr>
-          <td><%= point.ts %></td>
-          <td><%= point.open %></td>
-          <td><%= point.high %></td>
-          <td><%= point.low %></td>
-          <td><%= point.close %></td>
-          <td><%= point.aclose %></td>
-          <td><%= point.volume %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-<% end %>
+      <span class="type-kind-show"><%= @time_series.kind %></span>
+    </h1>
+    
+    <div class="time-series-meta">
+      <div class="meta-group">
+        <span class="meta-label">Source:</span>
+        <span class="meta-value"><%= @time_series.source %></span>
+      </div>
+      <div class="meta-group">
+        <span class="meta-label">Timeframe:</span>
+        <span class="meta-value"><%= @time_series.timeframe %></span>
+      </div>
+      <div class="meta-group">
+        <span class="meta-label">Data Points:</span>
+        <span class="meta-value"><%= number_with_delimiter(@data.count) %></span>
+      </div>
+    </div>
+  </div>
 
-<%= link_to 'Back to Time Series List', time_series_index_path %>
+  <div class="data-section">
+    <h2>Recent Data Points</h2>
+    
+    <% if @data.empty? %>
+      <div class="empty-state">
+        <h3>No data available</h3>
+        <p>This time series doesn't have any data points yet.</p>
+      </div>
+    <% else %>
+      <% if @time_series.kind == 'univariate' %>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @data.limit(100).each do |point| %>
+              <tr>
+                <td><%= point.ts.strftime('%Y-%m-%d %H:%M:%S') %></td>
+                <td><%= number_with_precision(point.main, precision: 4, delimiter: ',') %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Open</th>
+              <th>High</th>
+              <th>Low</th>
+              <th>Close</th>
+              <th>Adj Close</th>
+              <th>Volume</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @data.limit(100).each do |point| %>
+              <tr>
+                <td><%= point.ts.strftime('%Y-%m-%d %H:%M:%S') %></td>
+                <td><%= number_with_precision(point.open, precision: 2, delimiter: ',') if point.open %></td>
+                <td><%= number_with_precision(point.high, precision: 2, delimiter: ',') if point.high %></td>
+                <td><%= number_with_precision(point.low, precision: 2, delimiter: ',') if point.low %></td>
+                <td><%= number_with_precision(point.close, precision: 2, delimiter: ',') if point.close %></td>
+                <td><%= number_with_precision(point.aclose, precision: 2, delimiter: ',') if point.aclose %></td>
+                <td><%= number_with_delimiter(point.volume) if point.volume %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+      
+      <% if @data.count > 100 %>
+        <p style="margin-top: 1rem; color: #7f8c8d; font-style: italic;">
+          Showing the most recent 100 data points out of <%= number_with_delimiter(@data.count) %> total.
+        </p>
+      <% end %>
+    <% end %>
+  </div>
+
+</div>
