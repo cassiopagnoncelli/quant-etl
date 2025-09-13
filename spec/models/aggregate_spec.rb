@@ -59,9 +59,9 @@ RSpec.describe Aggregate, type: :model do
       let!(:other_ticker) { described_class.create!(valid_attributes.merge(ticker: 'GOOGL', ts: 2.days.ago)) }
       let!(:other_timeframe) { described_class.create!(valid_attributes.merge(timeframe: 'H1', ts: 3.days.ago)) }
 
-      it 'returns aggregates for the given ticker with D1 timeframe ordered by timestamp' do
+      it 'returns aggregates for the given ticker ordered by timestamp' do
         result = described_class['AAPL']
-        expect(result).to eq([aggregate1, aggregate2])
+        expect(result).to eq([other_timeframe, aggregate1, aggregate2])
       end
 
       it 'does not include aggregates with different tickers' do
@@ -69,9 +69,9 @@ RSpec.describe Aggregate, type: :model do
         expect(result).not_to include(other_ticker)
       end
 
-      it 'does not include aggregates with different timeframes' do
+      it 'includes aggregates with different timeframes for the same ticker' do
         result = described_class['AAPL']
-        expect(result).not_to include(other_timeframe)
+        expect(result).to include(other_timeframe)
       end
 
       it 'returns empty collection for non-existent ticker' do

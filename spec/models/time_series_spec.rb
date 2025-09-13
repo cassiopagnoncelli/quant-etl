@@ -3,10 +3,10 @@ require 'rails_helper'
 RSpec.describe TimeSeries, type: :model do
   let(:valid_attributes) do
     {
-      ticker: 'AAPL',
+      ticker: 'AAPL_POLYGON',
       timeframe: 'D1',
-      source: 'polygon',
-      source_id: 'AAPL_POLYGON',
+      source: 'Polygon',
+      source_id: 'AAPL',
       kind: 'aggregate',
       description: 'Apple Inc. stock data'
     }
@@ -77,8 +77,8 @@ RSpec.describe TimeSeries, type: :model do
   describe 'scopes' do
     let!(:univariate_series) { described_class.create!(valid_attributes.merge(kind: 'univariate', ticker: 'UNI1')) }
     let!(:aggregate_series) { described_class.create!(valid_attributes.merge(kind: 'aggregate', ticker: 'AGG1')) }
-    let!(:polygon_series) { described_class.create!(valid_attributes.merge(source: 'polygon', ticker: 'POL1')) }
-    let!(:fred_series) { described_class.create!(valid_attributes.merge(source: 'fred', ticker: 'FRED1')) }
+    let!(:polygon_series) { described_class.create!(valid_attributes.merge(source: 'Polygon', source_id: 'POL1', ticker: 'POL1')) }
+    let!(:fred_series) { described_class.create!(valid_attributes.merge(source: 'FRED', source_id: 'FRED1', ticker: 'FRED1')) }
 
     describe '.univariate' do
       it 'returns only univariate time series' do
@@ -106,7 +106,7 @@ RSpec.describe TimeSeries, type: :model do
 
     describe '.by_source' do
       it 'returns time series for the specified source' do
-        result = described_class.by_source('polygon')
+        result = described_class.by_source('Polygon')
         expect(result).to include(polygon_series)
         expect(result).not_to include(fred_series)
       end
@@ -126,10 +126,10 @@ RSpec.describe TimeSeries, type: :model do
 
   describe 'class methods' do
     describe '.find_by_source_mapping' do
-      let!(:time_series) { described_class.create!(valid_attributes.merge(source: 'fred', source_id: 'GDP')) }
+      let!(:time_series) { described_class.create!(valid_attributes.merge(source: 'FRED', source_id: 'GDP', ticker: 'GDP_FRED')) }
 
       it 'finds time series by source and source_id' do
-        result = described_class.find_by_source_mapping('fred', 'GDP')
+        result = described_class.find_by_source_mapping('FRED', 'GDP')
         expect(result).to eq(time_series)
       end
 

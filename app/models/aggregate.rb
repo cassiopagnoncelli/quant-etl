@@ -3,8 +3,8 @@ class Aggregate < ApplicationRecord
 
   TIMEFRAMES = %w[M1 H1 D1 W1 MN1 Q Y].freeze
 
-  validates :timeframe, presence: true, inclusion: { in: TIMEFRAMES }
   validates :ticker, presence: true
+  validates :timeframe, presence: true, inclusion: { in: TIMEFRAMES }
   validates :ts, presence: true
   validates :open, presence: true
   validates :high, presence: true

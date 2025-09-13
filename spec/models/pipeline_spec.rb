@@ -3,9 +3,10 @@ require 'rails_helper'
 RSpec.describe Pipeline, type: :model do
   let(:time_series) do
     TimeSeries.create!(
-      ticker: 'AAPL',
+      ticker: 'AAPL_POLYGON',
       timeframe: 'D1',
-      source: 'polygon',
+      source: 'Polygon',
+      source_id: 'AAPL',
       kind: 'aggregate'
     )
   end
@@ -105,7 +106,8 @@ RSpec.describe Pipeline, type: :model do
       expect(described_class.statuses).to eq({
         'pending' => 'pending',
         'working' => 'working',
-        'complete' => 'complete'
+        'complete' => 'complete',
+        'error' => 'error'
       })
     end
 
@@ -153,7 +155,7 @@ RSpec.describe Pipeline, type: :model do
 
   describe 'constants' do
     it 'defines STATUSES constant' do
-      expect(described_class::STATUSES).to eq(%w[pending working complete])
+      expect(described_class::STATUSES).to eq(%w[pending working complete error])
     end
 
     it 'defines STAGES constant' do
@@ -262,7 +264,7 @@ RSpec.describe Pipeline, type: :model do
     it 'can access the associated time series' do
       pipeline = described_class.create!(valid_attributes)
       expect(pipeline.time_series).to eq(time_series)
-      expect(pipeline.time_series.ticker).to eq('AAPL')
+      expect(pipeline.time_series.ticker).to eq('AAPL_POLYGON')
     end
 
     it 'can be accessed from time series' do

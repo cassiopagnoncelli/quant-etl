@@ -6,7 +6,8 @@ RSpec.describe PipelineRunner do
   let(:time_series) do
     TimeSeries.create!(
       ticker: 'AAPL',
-      source: 'polygon',
+      source: 'Polygon',
+      source_id: 'AAPL',
       timeframe: 'D1',
       kind: 'aggregate'
     )

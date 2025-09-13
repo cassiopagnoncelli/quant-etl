@@ -68,9 +68,9 @@ class PipelineRunner
     # For now, we'll call a generic download method that each service should implement
     result = download_service.download_for_time_series(time_series)
     
-    # Update pipeline counters based on result
+    # Check if download was successful, but don't increment counters yet
+    # Counters will be updated based on actual import results
     if result[:success]
-      pipeline.increment!(:n_successful)
       logger.info "Download stage completed successfully for pipeline #{pipeline.id}"
     else
       pipeline.increment!(:n_failed)
