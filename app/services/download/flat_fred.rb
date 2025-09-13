@@ -59,6 +59,30 @@ module Download
       file_path.to_s
     end
     
+    # Standardized method for pipeline integration
+    def download_for_time_series(time_series)
+      begin
+        # Download recent data - can be customized based on time_series attributes
+        end_date = Date.current
+        start_date = end_date - 30.days # Default to last 30 days
+        
+        file_path = download(start_date: start_date, end_date: end_date)
+        
+        {
+          success: true,
+          file_path: file_path,
+          start_date: start_date,
+          end_date: end_date
+        }
+      rescue StandardError => e
+        logger.error "Download failed for time_series #{time_series.id}: #{e.message}"
+        {
+          success: false,
+          error: e.message
+        }
+      end
+    end
+    
     private
     
     def ensure_download_directory

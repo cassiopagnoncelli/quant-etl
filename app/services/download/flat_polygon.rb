@@ -52,6 +52,33 @@ module Download
       local_path.to_s
     end
     
+    # Standardized method for pipeline integration
+    def download_for_time_series(time_series)
+      begin
+        # Default to downloading today's data for stocks/trades
+        # This can be customized based on time_series attributes
+        date = Date.current
+        asset_class = determine_asset_class(time_series)
+        data_type = determine_data_type(time_series)
+        
+        file_path = download(date: date, asset_class: asset_class, data_type: data_type)
+        
+        {
+          success: true,
+          file_path: file_path,
+          date: date,
+          asset_class: asset_class,
+          data_type: data_type
+        }
+      rescue StandardError => e
+        logger.error "Download failed for time_series #{time_series.id}: #{e.message}"
+        {
+          success: false,
+          error: e.message
+        }
+      end
+    end
+    
     private
     
     def ensure_download_directory
@@ -121,6 +148,26 @@ module Download
       end
       
       logger.info "Successfully downloaded: #{local_path}"
+    end
+    
+    def determine_asset_class(time_series)
+      # Default to stocks, but this could be enhanced based on time_series attributes
+      # or ticker patterns (e.g., forex pairs, crypto symbols, etc.)
+      :stocks
+    end
+    
+    def determine_data_type(time_series)
+      # Map timeframe to appropriate data type
+      case time_series.timeframe
+      when 'M1'
+        :minute_aggs
+      when 'D1'
+        :day_aggs
+      when 'H1'
+        :minute_aggs # Use minute aggs for hourly, can be aggregated later
+      else
+        :day_aggs # Default to daily aggregates
+      end
     end
   end
 end

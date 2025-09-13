@@ -56,6 +56,24 @@ module Download
       file_path.to_s
     end
     
+    # Standardized method for pipeline integration
+    def download_for_time_series(time_series)
+      begin
+        file_path = download(force: false)
+        
+        {
+          success: true,
+          file_path: file_path
+        }
+      rescue StandardError => e
+        logger.error "Download failed for time_series #{time_series.id}: #{e.message}"
+        {
+          success: false,
+          error: e.message
+        }
+      end
+    end
+    
     private
     
     def ensure_download_directory

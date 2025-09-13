@@ -1,4 +1,6 @@
 class Univariate < ApplicationRecord
+  include DatetimeFormatter
+
   validates :timeframe, presence: true, inclusion: { in: %w[M1 H1 D1 W1 MN1 Q Y] }
   validates :ticker, presence: true
   validates :ts, presence: true

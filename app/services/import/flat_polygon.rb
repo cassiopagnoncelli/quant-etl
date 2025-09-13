@@ -56,6 +56,33 @@ module Import
       result
     end
     
+    # Standardized method for pipeline integration
+    def import_for_time_series(time_series, download_result)
+      begin
+        file_path = download_result[:file_path]
+        timeframe = time_series.timeframe
+        
+        result = import(
+          file_path,
+          timeframe: timeframe,
+          filter_ticker: true,
+          batch_size: 1000
+        )
+        
+        logger.info "Import completed for time_series #{time_series.id}: #{result[:imported]} imported, #{result[:errors]} errors"
+        result
+      rescue StandardError => e
+        logger.error "Import failed for time_series #{time_series.id}: #{e.message}"
+        {
+          imported: 0,
+          updated: 0,
+          skipped: 0,
+          errors: 1,
+          error_details: [e.message]
+        }
+      end
+    end
+    
     private
     
     def parse_date(date)

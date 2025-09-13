@@ -58,7 +58,7 @@
           <tbody>
             <% @data.limit(100).each do |point| %>
               <tr>
-                <td><%= point.ts.strftime('%Y-%m-%d %H:%M:%S') %></td>
+                <td><%= point.datetime %></td>
                 <td><%= number_with_precision(point.main, precision: 4, delimiter: ',') %></td>
               </tr>
             <% end %>
@@ -80,7 +80,7 @@
           <tbody>
             <% @data.limit(100).each do |point| %>
               <tr>
-                <td><%= point.ts.strftime('%Y-%m-%d %H:%M:%S') %></td>
+                <td><%= point.datetime %></td>
                 <td><%= number_with_precision(point.open, precision: 2, delimiter: ',') if point.open %></td>
                 <td><%= number_with_precision(point.high, precision: 2, delimiter: ',') if point.high %></td>
                 <td><%= number_with_precision(point.low, precision: 2, delimiter: ',') if point.low %></td>
