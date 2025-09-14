@@ -371,7 +371,7 @@ class PolygonFlat < PipelineChainBase
   def cleanup_old_files
     return unless @download_dir.exist?
     
-    logger.info "Cleaning up old files in #{@download_dir}"
+    log_info "Cleaning up old files in #{@download_dir}"
     
     # Remove files older than 7 days (recursively through subdirectories)
     cutoff_time = 7.days.ago
@@ -384,9 +384,9 @@ class PolygonFlat < PipelineChainBase
         begin
           File.delete(file_path)
           files_removed += 1
-          logger.info "Removed old file: #{file_path}"
+          log_info "Removed old file: #{file_path}"
         rescue StandardError => e
-          logger.error "Failed to remove file #{file_path}: #{e.message}"
+          log_error "Failed to remove file #{file_path}: #{e.message}"
         end
       end
     end
@@ -402,7 +402,7 @@ class PolygonFlat < PipelineChainBase
       end
     end
     
-    logger.info "Cleanup completed: #{files_removed} files removed"
+    log_info "Cleanup completed: #{files_removed} files removed"
   end
   
   def cleanup_downloaded_file
@@ -410,7 +410,7 @@ class PolygonFlat < PipelineChainBase
     
     begin
       File.delete(@downloaded_file_path)
-      logger.info "Cleaned up downloaded file: #{@downloaded_file_path}"
+      log_info "Cleaned up downloaded file: #{@downloaded_file_path}"
       
       # Try to remove empty parent directories
       parent_dir = File.dirname(@downloaded_file_path)
@@ -423,7 +423,7 @@ class PolygonFlat < PipelineChainBase
         end
       end
     rescue StandardError => e
-      logger.error "Failed to cleanup downloaded file #{@downloaded_file_path}: #{e.message}"
+      log_error "Failed to cleanup downloaded file #{@downloaded_file_path}: #{e.message}"
     end
   end
 end

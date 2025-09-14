@@ -81,6 +81,8 @@ export default class extends Controller {
     // Check if this is a pipeline list update (pipelines index page)
     if (data.pipelines && Array.isArray(data.pipelines)) {
       this.updatePipelinesList(data.pipelines)
+      // Check if any pipeline has completed and stop polling if needed
+      this.checkForCompletedPipelines(data.pipelines)
     } else {
       // Single pipeline/run update
       this.updateStatusBadges(data)
@@ -89,6 +91,8 @@ export default class extends Controller {
       this.updateLogs(data)
       this.updateProgress(data)
       this.updateTimestamps(data)
+      // Check if this single pipeline has completed
+      this.checkForCompletedPipeline(data)
     }
   }
 
@@ -325,5 +329,37 @@ export default class extends Controller {
     const div = document.createElement('div')
     div.textContent = text
     return div.innerHTML
+  }
+
+  checkForCompletedPipeline(data) {
+    // Check if the pipeline status is COMPLETED or FAILED, or if stage is FINISH
+    if (data.status === 'COMPLETED' || data.status === 'FAILED' || data.stage === 'FINISH') {
+      console.log(`Pipeline completed with status: ${data.status}, stage: ${data.stage}. Stopping live updates.`)
+      this.stopPollingAndDisableToggle()
+    }
+  }
+
+  checkForCompletedPipelines(pipelines) {
+    // For pipeline list view, we don't automatically stop polling since there might be multiple pipelines
+    // But we could add logic here if needed for specific scenarios
+    // For now, we'll leave this empty but keep the method for future enhancements
+  }
+
+  stopPollingAndDisableToggle() {
+    // Stop the polling
+    this.stopPolling()
+    
+    // Disable and uncheck the toggle if it exists
+    if (this.hasToggleTarget) {
+      this.toggleTarget.checked = false
+      this.toggleTarget.disabled = true
+      
+      // Add visual indication that polling has stopped due to completion
+      const toggleLabel = this.toggleTarget.closest('.toggle-label')
+      if (toggleLabel) {
+        toggleLabel.style.opacity = '0.6'
+        toggleLabel.title = 'Live updates stopped - pipeline completed'
+      }
+    }
   }
 }
