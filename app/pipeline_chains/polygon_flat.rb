@@ -376,7 +376,6 @@ class PolygonFlat < PipelineChainBase
   end
   
   def log_import_results(result)
-    log_info "=" * 50
     log_info "Import completed for #{result[:ticker]}"
     log_info "File: #{result[:file]}"
     log_info "Total rows: #{result[:total_rows]}"
@@ -391,8 +390,6 @@ class PolygonFlat < PipelineChainBase
         log_info "  - #{error}"
       end
     end
-    
-    log_info "=" * 50
   end
   
   def cleanup_old_files

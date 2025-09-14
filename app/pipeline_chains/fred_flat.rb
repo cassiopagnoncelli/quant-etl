@@ -367,7 +367,6 @@ class FredFlat < PipelineChainBase
   end
   
   def log_import_results(result)
-    log_info "=" * 50
     log_info "Import completed for #{result[:ticker]} (#{result[:model]})"
     log_info "File: #{result[:file]}"
     log_info "Total rows: #{result[:total_rows]}"
@@ -382,8 +381,6 @@ class FredFlat < PipelineChainBase
         log_info "  - #{error}"
       end
     end
-    
-    log_info "=" * 50
   end
   
   def cleanup_old_files
