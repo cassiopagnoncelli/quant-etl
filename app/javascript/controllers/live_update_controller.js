@@ -85,6 +85,7 @@ export default class extends Controller {
       // Single pipeline/run update
       this.updateStatusBadges(data)
       this.updateStatistics(data)
+      this.updateRunsCounts(data)
       this.updateLogs(data)
       this.updateProgress(data)
       this.updateTimestamps(data)
@@ -204,6 +205,28 @@ export default class extends Controller {
                      (data.statistics.n_skipped || 0)
         const rate = total > 0 ? ((data.statistics.n_successful || 0) / total * 100).toFixed(2) : 0
         bar.style.width = `${rate}%`
+      })
+    }
+  }
+
+  updateRunsCounts(data) {
+    if (data.runs_count) {
+      // Update total runs count
+      const totalRunsElements = this.element.querySelectorAll('[data-stat="total-runs"]')
+      totalRunsElements.forEach(el => {
+        el.textContent = this.formatNumber(data.runs_count.total || 0)
+      })
+
+      // Update completed runs count
+      const completedRunsElements = this.element.querySelectorAll('[data-stat="completed-runs"]')
+      completedRunsElements.forEach(el => {
+        el.textContent = this.formatNumber(data.runs_count.completed || 0)
+      })
+
+      // Update failed runs count
+      const failedRunsElements = this.element.querySelectorAll('[data-stat="failed-runs"]')
+      failedRunsElements.forEach(el => {
+        el.textContent = this.formatNumber(data.runs_count.failed || 0)
       })
     }
   }
