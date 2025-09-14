@@ -1,0 +1,90 @@
+.logs-container {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.log-entry {
+  display: flex;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.log-entry:last-child {
+  border-bottom: none;
+}
+
+.log-entry.info {
+  background: #f8fafc;
+  border-left: 3px solid #3b82f6;
+}
+
+.log-entry.warn {
+  background: #fffbeb;
+  border-left: 3px solid #f59e0b;
+}
+
+.log-entry.error {
+  background: #fef2f2;
+  border-left: 3px solid #dc2626;
+}
+
+.log-timestamp {
+  color: #6b7280;
+  font-weight: 500;
+  margin-right: 1rem;
+  flex-shrink: 0;
+  width: 80px;
+}
+
+.log-level {
+  color: #6b7280;
+  font-weight: 600;
+  margin-right: 1rem;
+  flex-shrink: 0;
+  width: 50px;
+  font-size: 0.75rem;
+}
+
+.log-message {
+  color: #374151;
+  flex: 1;
+  word-break: break-word;
+}
+
+.log-entry.info .log-level {
+  color: #3b82f6;
+}
+
+.log-entry.info .log-message {
+  color: #374151;
+}
+
+.log-entry.warn .log-level {
+  color: #f59e0b;
+}
+
+.log-entry.warn .log-message {
+  color: #92400e;
+}
+
+.log-entry.error .log-level {
+  color: #dc2626;
+}
+
+.log-entry.error .log-message {
+  color: #dc2626;
+}
+
+/* Additional stage styles for the new stages */
+.stage-fetch { background: #fef3c7; color: #92400e; }
+.stage-transform { background: #e0e7ff; color: #3730a3; }
+.stage-post_processing { background: #f3e8ff; color: #6b21a8; }
+.status-scheduled_stop { background: #fef3c7; color: #92400e; }
+.status-completed { background: #d1fae5; color: #065f46; }
+.status-failed { background: #fef2f2; color: #dc2626; }

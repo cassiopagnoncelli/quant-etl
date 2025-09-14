@@ -13,16 +13,32 @@ class PipelineChainBase
     @run = run
     @logger = Rails.logger
   end
-  
+
+  # Log message to both Rails logger and PipelineRunLog
+  def log_info(message)
+    @logger.info message
+    create_log_entry(message, 'info') if @run.persisted?
+  end
+
+  def log_warn(message)
+    @logger.warn message
+    create_log_entry(message, 'warn') if @run.persisted?
+  end
+
+  def log_error(message)
+    @logger.error message
+    create_log_entry(message, 'error') if @run.persisted?
+  end
+
   # Main execution method - runs the pipeline from current stage to completion
   def execute
-    @logger.info "Starting pipeline execution for #{self.class.name} (run_id: #{@run.id})"
+    log_info "Starting pipeline execution for #{self.class.name} (run_id: #{@run.id})"
     
     loop do
       current_stage = @run.stage
       current_status = @run.status
       
-      @logger.info "Current stage: #{current_stage}, status: #{current_status}"
+      log_info "Current stage: #{current_stage}, status: #{current_status}"
       
       # Check if we should stop execution
       break if should_stop_execution?(current_stage, current_status)
@@ -43,17 +59,17 @@ class PipelineChainBase
           else
             # Pipeline completed
             update_run_status('COMPLETED')
-            @logger.info "Pipeline completed successfully"
+            log_info "Pipeline completed successfully"
             break
           end
         rescue StandardError => e
-          @logger.error "Pipeline failed at stage #{current_stage}: #{e.message}"
-          @logger.error e.backtrace.join("\n")
+          log_error "Pipeline failed at stage #{current_stage}: #{e.message}"
+          log_error e.backtrace.join("\n")
           update_run_status('FAILED')
           break
         end
       else
-        @logger.warn "Unexpected status #{current_status} for stage #{current_stage}, stopping execution"
+        log_error "Unexpected status #{current_status} for stage #{current_stage}, stopping execution"
         break
       end
     end
@@ -62,6 +78,12 @@ class PipelineChainBase
   end
   
   private
+
+  def create_log_entry(message, level = 'info')
+    @run.pipeline_run_logs.create!(message: message, level: level)
+  rescue StandardError => e
+    @logger.error "Failed to create log entry: #{e.message}"
+  end
   
   def should_stop_execution?(stage, status)
     return true if status == 'COMPLETED'
@@ -73,7 +95,7 @@ class PipelineChainBase
   end
   
   def execute_stage(stage)
-    @logger.info "Executing stage: #{stage}"
+    log_info "Executing stage: #{stage}"
     
     case stage
     when 'START'
@@ -92,7 +114,7 @@ class PipelineChainBase
       raise "Unknown stage: #{stage}"
     end
     
-    @logger.info "Stage #{stage} completed successfully"
+    log_info "Stage #{stage} completed successfully"
   end
   
   def get_next_stage(current_stage)
@@ -128,7 +150,7 @@ class PipelineChainBase
   
   def execute_start_stage
     # Default implementation - just log
-    @logger.info "Starting pipeline execution"
+    log_info "Starting pipeline execution"
   end
   
   def execute_fetch_stage
@@ -137,7 +159,7 @@ class PipelineChainBase
   
   def execute_transform_stage
     # Default implementation - no transformation needed
-    @logger.info "No transformation required, skipping"
+    log_info "No transformation required, skipping"
   end
   
   def execute_import_stage
@@ -146,12 +168,12 @@ class PipelineChainBase
   
   def execute_post_processing_stage
     # Default implementation - no post processing needed
-    @logger.info "No post processing required, skipping"
+    log_info "No post processing required, skipping"
   end
   
   def execute_finish_stage
     # Default implementation - just log
-    @logger.info "Pipeline execution finished"
+    log_info "Pipeline execution finished"
   end
   
   protected
@@ -160,7 +182,7 @@ class PipelineChainBase
   
   # Helper method to get time_series from pipeline run
   def time_series
-    @run.pipeline_chain.time_series if @run.pipeline_chain.respond_to?(:time_series)
+    @run.pipeline.time_series if @run.pipeline.respond_to?(:time_series)
   end
   
   # Helper method to get ticker from time_series

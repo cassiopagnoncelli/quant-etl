@@ -1,11 +1,12 @@
 class PipelineRun < ApplicationRecord
-  STATUSES = %w[pending working complete error].freeze
-  STAGES = %w[start download import finish].freeze
+  STATUSES = %w[PENDING WORKING SCHEDULED_STOP COMPLETED FAILED].freeze
+  STAGES = %w[START FETCH TRANSFORM IMPORT POST_PROCESSING FINISH].freeze
 
-  enum :status, STATUSES.index_with(&:itself), default: :pending
-  enum :stage, STAGES.index_with(&:itself), default: :start
+  enum :status, STATUSES.index_with(&:itself), default: :PENDING
+  enum :stage, STAGES.index_with(&:itself), default: :START
 
   belongs_to :pipeline
+  has_many :pipeline_run_logs
 
   before_create :set_initial_values
 
@@ -17,20 +18,20 @@ class PipelineRun < ApplicationRecord
 
   scope :by_status, ->(status) { where(status: status) }
   scope :by_stage, ->(stage) { where(stage: stage) }
-  scope :pending, -> { where(status: 'pending') }
-  scope :working, -> { where(status: 'working') }
-  scope :complete, -> { where(status: 'complete') }
-  scope :error, -> { where(status: 'error') }
+  scope :pending, -> { where(status: 'PENDING') }
+  scope :working, -> { where(status: 'WORKING') }
+  scope :complete, -> { where(status: 'COMPLETED') }
+  scope :error, -> { where(status: 'FAILED') }
 
   # Convenience methods for pipeline execution
   def can_run?
-    pending? && start?
+    PENDING? && START?
   end
 
   def reset!
     update!(
-      status: :pending,
-      stage: :start,
+      status: :PENDING,
+      stage: :START,
       n_successful: 0,
       n_failed: 0,
       n_skipped: 0
@@ -47,14 +48,19 @@ class PipelineRun < ApplicationRecord
   end
 
   def run_async!
-    PipelineChainJob.perform_later(pipeline.id, id)
+    PipelineJob.perform_later(id)
+  end
+
+  def execute!
+    chain_instance = pipeline.chain_class.new(self)
+    chain_instance.execute
   end
 
   private
 
   def set_initial_values
-    self.status ||= :pending
-    self.stage ||= :start
+    self.status ||= :PENDING
+    self.stage ||= :START
     self.n_successful ||= 0
     self.n_failed ||= 0
     self.n_skipped ||= 0
