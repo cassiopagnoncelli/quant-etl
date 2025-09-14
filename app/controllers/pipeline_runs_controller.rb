@@ -5,10 +5,10 @@ class PipelineRunsController < ApplicationController
   def index
     if params[:pipeline_id]
       # Nested route - show runs for specific pipeline
-      @pipeline_runs = @pipeline.pipeline_runs.includes(:pipeline).order(created_at: :desc)
+      @pipeline_runs = @pipeline.pipeline_runs.includes(pipeline: :time_series).order(created_at: :desc)
     else
       # Standalone route - show all pipeline runs
-      @pipeline_runs = PipelineRun.includes(:pipeline).order(created_at: :desc)
+      @pipeline_runs = PipelineRun.includes(pipeline: :time_series).order(created_at: :desc)
       @pipeline = nil # Explicitly set to nil for standalone route
     end
   end
