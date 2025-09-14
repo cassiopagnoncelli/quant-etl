@@ -5,13 +5,15 @@
     <h1>Available Time Series</h1>
     <div class="header-buttons">
       <% outdated_count = TimeSeries.outdated.count %>
-      <%= button_to sync_time_series_index_path, method: :post, class: "btn btn-primary sync-btn", 
+      <%= button_to sync_time_series_index_path, method: :post, class: "sync-clickable", 
                     data: { confirm: "This will run the first pipeline for each non-up-to-date time series. Continue?" } do %>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
-          <path d="M23 4v6h-6"></path>
-          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-        </svg>
-        <%= outdated_count %>
+        <span class="sync-icon-container">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 4v6h-6"></path>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          <span class="sync-count"><%= outdated_count %></span>
+        </span>
       <% end %>
     </div>
   </div>

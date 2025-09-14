@@ -91,7 +91,58 @@ h1 {
   cursor: not-allowed;
 }
 
+.btn-neutral {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #495057;
+}
+
+.btn-neutral:hover {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+  color: #495057;
+  text-decoration: none;
+}
+
+.btn-neutral:disabled {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
 .sync-btn {
+  font-weight: 600;
+}
+
+.sync-clickable {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sync-icon-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #6c757d;
+  background-color: transparent;
+  transition: all 0.2s ease;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.sync-clickable:hover .sync-icon-container {
+  color: #495057;
+  background-color: rgba(108, 117, 125, 0.1);
+}
+
+.sync-count {
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
