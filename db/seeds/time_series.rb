@@ -214,7 +214,7 @@ class TimeSeriesSeeder
         source_id: "SP500",
         kind: "univariate",
         description: "S&P 500 Index - broad U.S. stock market benchmark",
-        since: Date.new(1957, 1, 3)
+        since: Date.new(1971, 1, 3)
       }
     ]
 
@@ -241,12 +241,38 @@ class TimeSeriesSeeder
         count += 1
         source_id_info = series_attrs[:source_id] ? " (source_id: #{series_attrs[:source_id]})" : ""
         puts "  ✓ #{series_attrs[:ticker]}#{source_id_info} - #{series_attrs[:description]}"
+        
+        # Create pipeline for this time series
+        create_pipeline_for_time_series(time_series)
       else
         puts "  ✗ Failed to create #{series_attrs[:ticker]}: #{time_series.errors.full_messages.join(', ')}"
       end
     end
     
     count
+  end
+
+  def self.create_pipeline_for_time_series(time_series)
+    # Determine the appropriate chain based on the source
+    chain_class = case time_series.source
+                  when 'CBOE'
+                    'CboeFlat'
+                  when 'FRED'
+                    'FredFlat'
+                  when 'Polygon'
+                    'PolygonFlat'
+                  else
+                    raise "Unknown source: #{time_series.source}"
+                  end
+
+    # Create pipeline if it doesn't exist
+    pipeline = time_series.pipelines.find_or_create_by(chain: chain_class)
+    
+    if pipeline.persisted?
+      puts "    → Pipeline created with chain: #{chain_class}"
+    else
+      puts "    ✗ Failed to create pipeline: #{pipeline.errors.full_messages.join(', ')}"
+    end
   end
 
   def self.display_summary(vix_count, fred_count)
@@ -256,6 +282,7 @@ class TimeSeriesSeeder
     puts "📊 VIX Indices (aggregate): #{vix_count} series created"
     puts "📈 FRED Economic (univariate): #{fred_count} series created"
     puts "📋 Total TimeSeries records: #{TimeSeries.count}"
+    puts "🔗 Total Pipeline records: #{Pipeline.count}"
     puts "="*80
 
     # Display breakdown by kind and source
@@ -280,7 +307,12 @@ class TimeSeriesSeeder
       puts "  #{timeframe_desc} (#{timeframe}): #{count} series"
     end
 
-    puts "\n🌱 TimeSeries seeding completed successfully!"
+    puts "\n⛓️  Breakdown by Pipeline Chain:"
+    Pipeline.group(:chain).count.each do |chain, count|
+      puts "  #{chain}: #{count} pipelines"
+    end
+
+    puts "\n🌱 TimeSeries and Pipeline seeding completed successfully!"
   end
 end
 

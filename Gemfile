@@ -15,6 +15,7 @@ gem "factory_bot_rails", ">= 6.4", groups: %i[development test]
 gem "faraday"
 gem "importmap-rails"
 gem "jbuilder"
+gem "kaminari"
 gem "pg", "~> 1.1"
 gem "propshaft"
 gem "puma", ">= 5.0"

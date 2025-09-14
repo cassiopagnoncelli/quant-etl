@@ -48,6 +48,29 @@
         <span class="meta-label">Latest:</span>
         <span class="meta-value"><%= @recent_ts&.strftime('%Y-%m-%d') || 'N/A' %></span>
       </div>
+      <% if @pipelines.any? %>
+        <div class="meta-group">
+          <span class="meta-label">Pipelines:</span>
+          <div class="meta-value pipelines-inline">
+            <% @pipelines.each do |pipeline| %>
+              <%= link_to pipeline_path(pipeline), class: "pipeline-link" do %>
+                <span class="pipeline-name"><%= pipeline.chain %></span>
+                <% if pipeline.latest_run %>
+                  <% if pipeline.status == 'COMPLETE' && pipeline.n_failed == 0 %>
+                    <span class="pipeline-status success" title="Last run successful">✓</span>
+                  <% elsif pipeline.n_failed > 0 %>
+                    <span class="pipeline-status failed" title="Last run had failures">✗</span>
+                  <% else %>
+                    <span class="pipeline-status pending" title="<%= pipeline.status.capitalize %>">⏳</span>
+                  <% end %>
+                <% else %>
+                  <span class="pipeline-status pending" title="No runs yet">⏳</span>
+                <% end %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
     </div>
   </div>
 
@@ -69,7 +92,7 @@
             </tr>
           </thead>
           <tbody>
-            <% @data.limit(100).each do |point| %>
+            <% @data.each do |point| %>
               <tr>
                 <td><%= point.datetime %></td>
                 <td><%= number_with_precision(point.main, precision: 4, delimiter: ',') %></td>
@@ -91,7 +114,7 @@
             </tr>
           </thead>
           <tbody>
-            <% @data.limit(100).each do |point| %>
+            <% @data.each do |point| %>
               <tr>
                 <td><%= point.datetime %></td>
                 <td><%= number_with_precision(point.open, precision: 2, delimiter: ',') if point.open %></td>
@@ -106,12 +129,140 @@
         </table>
       <% end %>
       
-      <% if @data.count > 100 %>
-        <p style="margin-top: 1rem; color: #7f8c8d; font-style: italic;">
-          Showing the most recent 100 data points out of <%= number_with_delimiter(@data.count) %> total.
-        </p>
+      <!-- Pagination Controls -->
+      <% if @total_pages > 1 %>
+        <div class="pagination-container" style="margin-top: 2rem; display: flex; justify-content: center; align-items: center; gap: 1rem;">
+          <div class="pagination-info" style="color: #7f8c8d; font-size: 0.9rem;">
+            Showing <%= (@page - 1) * @per_page + 1 %>-<%= [@page * @per_page, @count].min %> of <%= number_with_delimiter(@count) %> records
+          </div>
+          
+          <div class="pagination-controls" style="display: flex; gap: 0.5rem; align-items: center;">
+            <!-- First Page -->
+            <% if @page > 1 %>
+              <%= link_to time_series_path(@time_series.ticker, page: 1), 
+                  class: 'pagination-btn', 
+                  style: 'padding: 0.5rem 0.75rem; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;',
+                  title: 'First Page' do %>
+                &laquo;&laquo; First
+              <% end %>
+            <% else %>
+              <span class="pagination-btn disabled" 
+                    style="padding: 0.5rem 0.75rem; background: #bdc3c7; color: #7f8c8d; border-radius: 4px; font-size: 0.9rem;">
+                &laquo;&laquo; First
+              </span>
+            <% end %>
+            
+            <!-- Previous Page -->
+            <% if @page > 1 %>
+              <%= link_to time_series_path(@time_series.ticker, page: @page - 1), 
+                  class: 'pagination-btn', 
+                  style: 'padding: 0.5rem 0.75rem; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;' do %>
+                &laquo; Previous
+              <% end %>
+            <% else %>
+              <span class="pagination-btn disabled" 
+                    style="padding: 0.5rem 0.75rem; background: #bdc3c7; color: #7f8c8d; border-radius: 4px; font-size: 0.9rem;">
+                &laquo; Previous
+              </span>
+            <% end %>
+            
+            <!-- Page Numbers -->
+            <% start_page = [@page - 2, 1].max %>
+            <% end_page = [start_page + 4, @total_pages].min %>
+            <% start_page = [end_page - 4, 1].max if end_page - start_page < 4 %>
+            
+            <% (start_page..end_page).each do |page_num| %>
+              <% if page_num == @page %>
+                <span class="pagination-btn current" 
+                      style="padding: 0.5rem 0.75rem; background: #2c3e50; color: white; border-radius: 4px; font-size: 0.9rem; font-weight: bold;">
+                  <%= page_num %>
+                </span>
+              <% else %>
+                <%= link_to page_num, time_series_path(@time_series.ticker, page: page_num), 
+                    class: 'pagination-btn', 
+                    style: 'padding: 0.5rem 0.75rem; background: #ecf0f1; color: #2c3e50; text-decoration: none; border-radius: 4px; font-size: 0.9rem;' %>
+              <% end %>
+            <% end %>
+            
+            <!-- Next Page -->
+            <% if @page < @total_pages %>
+              <%= link_to time_series_path(@time_series.ticker, page: @page + 1), 
+                  class: 'pagination-btn', 
+                  style: 'padding: 0.5rem 0.75rem; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;' do %>
+                Next &raquo;
+              <% end %>
+            <% else %>
+              <span class="pagination-btn disabled" 
+                    style="padding: 0.5rem 0.75rem; background: #bdc3c7; color: #7f8c8d; border-radius: 4px; font-size: 0.9rem;">
+                Next &raquo;
+              </span>
+            <% end %>
+            
+            <!-- Last Page -->
+            <% if @page < @total_pages %>
+              <%= link_to time_series_path(@time_series.ticker, page: @total_pages), 
+                  class: 'pagination-btn', 
+                  style: 'padding: 0.5rem 0.75rem; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;',
+                  title: 'Last Page' do %>
+                Last &raquo;&raquo;
+              <% end %>
+            <% else %>
+              <span class="pagination-btn disabled" 
+                    style="padding: 0.5rem 0.75rem; background: #bdc3c7; color: #7f8c8d; border-radius: 4px; font-size: 0.9rem;">
+                Last &raquo;&raquo;
+              </span>
+            <% end %>
+          </div>
+        </div>
       <% end %>
     <% end %>
   </div>
 
 </div>
+
+<style>
+  .pipelines-inline {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .pipeline-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    text-decoration: none;
+    color: inherit;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s;
+  }
+
+  .pipeline-link:hover {
+    background-color: #f8f9fa;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .pipeline-name {
+    font-weight: 500;
+    color: #495057;
+  }
+
+  .pipeline-status {
+    font-size: 0.9rem;
+    margin-left: 0.25rem;
+  }
+
+  .pipeline-status.success {
+    color: #28a745;
+  }
+
+  .pipeline-status.failed {
+    color: #dc3545;
+  }
+
+  .pipeline-status.pending {
+    color: #ffc107;
+  }
+</style>

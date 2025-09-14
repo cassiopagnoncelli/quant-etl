@@ -1,7 +1,14 @@
 <div class="container">
+  <%= link_to pipelines_path, class: 'back-link' do %>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5"></path>
+      <path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back to Pipelines
+  <% end %>
+  
   <div class="page-header">
     <h1>Create New Pipeline</h1>
-    <%= link_to "← Back to Pipelines", pipelines_path, class: "btn btn-secondary" %>
   </div>
 
   <div class="form-container">

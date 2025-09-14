@@ -17,11 +17,28 @@ class TimeSeriesController < ApplicationController
       render plain: 'Time series not found', status: :not_found
       return
     end
-    @data = @time_series.points.order(ts: :desc)
     
-    # Get additional metadata like in the index page
+    # Fetch related pipelines
+    @pipelines = @time_series.pipelines.includes(:pipeline_runs)
+    
+    # Pagination setup
+    @per_page = 50
+    @page = params[:page]&.to_i || 1
+    @page = 1 if @page < 1
+    
+    # Get all points for metadata
     points = @time_series.points
     @count = points.count
+    @total_pages = (@count.to_f / @per_page).ceil
+    @page = @total_pages if @page > @total_pages && @total_pages > 0
+    
+    # Calculate offset
+    offset = (@page - 1) * @per_page
+    
+    # Paginate data using limit and offset
+    @data = points.order(ts: :desc).limit(@per_page).offset(offset)
+    
+    # Get additional metadata like in the index page
     @recent_ts = points.maximum(:ts)
     @earliest_ts = points.minimum(:ts)
     last_record = points.order(ts: :desc).first
