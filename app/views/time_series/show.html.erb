@@ -10,15 +10,6 @@
   <div class="time-series-header">
     <h1 class="time-series-title">
       <%= @time_series.ticker %>
-      <% if @time_series.description.present? %>
-        <div class="info-icon" title="<%= @time_series.description %>">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M9,9h0a3,3,0,0,1,6,0c0,2-3,3-3,3"></path>
-            <path d="M12,17h0"></path>
-          </svg>
-        </div>
-      <% end %>
       <span class="type-kind-show"><%= @time_series.kind %></span>
       <% if @last_value.present? %>
         <div class="last-value">
@@ -26,6 +17,10 @@
         </div>
       <% end %>
     </h1>
+    
+    <% if @time_series.description.present? %>
+      <div class="description-text" style="font-size: 0.9em; margin-bottom: 1rem; color: #666;"><%= @time_series.description %></div>
+    <% end %>
     
     <div class="time-series-meta">
       <div class="meta-group">
