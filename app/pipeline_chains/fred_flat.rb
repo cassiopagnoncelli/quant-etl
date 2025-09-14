@@ -34,9 +34,7 @@ class FredFlat < PipelineChainBase
     end
 
     # Build API URL - fetch all available historical data by default
-    # Check if a custom start date is specified in pipeline configuration
     end_date = Date.current
-    start_date = pipeline_run&.configuration&.dig('start_date')
     
     params = {
       series_id: ticker,
@@ -45,13 +43,8 @@ class FredFlat < PipelineChainBase
       observation_end: end_date.strftime('%Y-%m-%d')
     }
     
-    # Add observation_start only if specified, otherwise fetch all historical data
-    if start_date.present?
-      params[:observation_start] = Date.parse(start_date).strftime('%Y-%m-%d')
-      logger.info "Fetching FRED data for #{ticker} from #{start_date} to #{end_date}"
-    else
-      logger.info "Fetching all available historical data for #{ticker} (from series inception)"
-    end
+    # Fetch all historical data (no start date specified)
+    logger.info "Fetching all available historical data for #{ticker} (from series inception)"
     
     uri = URI("#{BASE_URL}/series/observations")
     uri.query = URI.encode_www_form(params)
@@ -60,7 +53,18 @@ class FredFlat < PipelineChainBase
     
     response = Net::HTTP.get_response(uri)
     unless response.is_a?(Net::HTTPSuccess)
-      raise "Failed to download FRED data: HTTP #{response.code} - #{response.message}"
+      # Parse error response for better error messages
+      error_details = ""
+      begin
+        error_data = JSON.parse(response.body)
+        if error_data['error_message']
+          error_details = " - #{error_data['error_message']}"
+        end
+      rescue JSON::ParserError
+        # Ignore JSON parsing errors, use default message
+      end
+      
+      raise "Failed to download FRED data for series '#{ticker}': HTTP #{response.code} - #{response.message}#{error_details}"
     end
     
     # Parse JSON and convert to CSV
