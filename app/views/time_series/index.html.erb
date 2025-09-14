@@ -5,8 +5,7 @@
     <h1>Available Time Series</h1>
     <div class="header-buttons">
       <% outdated_count = TimeSeries.outdated.count %>
-      <%= button_to sync_time_series_index_path, method: :post, class: "sync-clickable", 
-                    data: { confirm: "This will run the first pipeline for each non-up-to-date time series. Continue?" } do %>
+      <%= button_to sync_time_series_index_path, method: :post, class: "sync-clickable" do %>
         <span class="sync-icon-container">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M23 4v6h-6"></path>

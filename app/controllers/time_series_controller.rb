@@ -87,31 +87,39 @@ class TimeSeriesController < ApplicationController
 
   def sync
     # Find all time series that are not up to date
-    not_up_to_date_series = TimeSeries.all.reject(&:up_to_date?)
+    outdated_series = TimeSeries.outdated
     
-    synced_count = 0
-    failed_count = 0
+    synced_pipelines_count = 0
+    failed_pipelines_count = 0
+    synced_time_series_count = 0
     
-    not_up_to_date_series.each do |time_series|
-      # Get the first active pipeline for this time series
-      first_pipeline = time_series.pipelines.where(active: true).order(:created_at).first
+    outdated_series.each do |time_series|
+      # Get all active pipelines for this time series that can run
+      runnable_pipelines = time_series.pipelines.where(active: true).select(&:can_run?)
       
-      if first_pipeline && first_pipeline.can_run?
-        begin
-          first_pipeline.run_async!
-          synced_count += 1
-        rescue => e
-          Rails.logger.error "Failed to sync pipeline for #{time_series.ticker}: #{e.message}"
-          failed_count += 1
+      if runnable_pipelines.any?
+        time_series_had_success = false
+        
+        runnable_pipelines.each do |pipeline|
+          begin
+            pipeline.run_async!
+            synced_pipelines_count += 1
+            time_series_had_success = true
+          rescue => e
+            Rails.logger.error "Failed to sync pipeline #{pipeline.id} for #{time_series.ticker}: #{e.message}"
+            failed_pipelines_count += 1
+          end
         end
+        
+        synced_time_series_count += 1 if time_series_had_success
       end
     end
     
-    if synced_count > 0
-      message = "Started sync for #{synced_count} time series"
-      message += " (#{failed_count} failed)" if failed_count > 0
+    if synced_pipelines_count > 0
+      message = "Started #{synced_pipelines_count} pipeline runs for #{synced_time_series_count} time series"
+      message += " (#{failed_pipelines_count} pipeline runs failed)" if failed_pipelines_count > 0
       redirect_to time_series_index_path, notice: message
-    elsif not_up_to_date_series.empty?
+    elsif outdated_series.empty?
       redirect_to time_series_index_path, notice: "All time series are already up to date"
     else
       redirect_to time_series_index_path, alert: "No active pipelines found for non-up-to-date time series"
