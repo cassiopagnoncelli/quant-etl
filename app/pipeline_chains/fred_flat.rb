@@ -33,17 +33,25 @@ class FredFlat < PipelineChainBase
       return
     end
 
-    # Build API URL - default to last 30 days
+    # Build API URL - fetch all available historical data by default
+    # Check if a custom start date is specified in pipeline configuration
     end_date = Date.current
-    start_date = end_date - 30.days
+    start_date = pipeline_run&.configuration&.dig('start_date')
     
     params = {
       series_id: ticker,
       api_key: @api_key,
       file_type: 'json',
-      observation_start: start_date.strftime('%Y-%m-%d'),
       observation_end: end_date.strftime('%Y-%m-%d')
     }
+    
+    # Add observation_start only if specified, otherwise fetch all historical data
+    if start_date.present?
+      params[:observation_start] = Date.parse(start_date).strftime('%Y-%m-%d')
+      logger.info "Fetching FRED data for #{ticker} from #{start_date} to #{end_date}"
+    else
+      logger.info "Fetching all available historical data for #{ticker} (from series inception)"
+    end
     
     uri = URI("#{BASE_URL}/series/observations")
     uri.query = URI.encode_www_form(params)
@@ -96,12 +104,14 @@ class FredFlat < PipelineChainBase
     log_import_results(result)
   end
   
+  def execute_start_stage
+    super
+    cleanup_old_files
+  end
+  
   def execute_post_processing_stage
-    # Clean up downloaded file if needed
-    if @downloaded_file_path && File.exist?(@downloaded_file_path)
-      logger.info "Cleaning up downloaded file: #{@downloaded_file_path}"
-      # File.delete(@downloaded_file_path) # Uncomment if you want to delete the file
-    end
+    # Clean up downloaded file after successful import
+    cleanup_downloaded_file
   end
   
   def ensure_download_directory
@@ -377,5 +387,42 @@ class FredFlat < PipelineChainBase
     end
     
     logger.info "=" * 50
+  end
+  
+  def cleanup_old_files
+    return unless @download_dir.exist?
+    
+    logger.info "Cleaning up old files in #{@download_dir}"
+    
+    # Remove files older than 7 days
+    cutoff_time = 7.days.ago
+    files_removed = 0
+    
+    Dir.glob(@download_dir.join('*')).each do |file_path|
+      next unless File.file?(file_path)
+      
+      if File.mtime(file_path) < cutoff_time
+        begin
+          File.delete(file_path)
+          files_removed += 1
+          logger.info "Removed old file: #{file_path}"
+        rescue StandardError => e
+          logger.error "Failed to remove file #{file_path}: #{e.message}"
+        end
+      end
+    end
+    
+    logger.info "Cleanup completed: #{files_removed} files removed"
+  end
+  
+  def cleanup_downloaded_file
+    return unless @downloaded_file_path && File.exist?(@downloaded_file_path)
+    
+    begin
+      File.delete(@downloaded_file_path)
+      logger.info "Cleaned up downloaded file: #{@downloaded_file_path}"
+    rescue StandardError => e
+      logger.error "Failed to cleanup downloaded file #{@downloaded_file_path}: #{e.message}"
+    end
   end
 end

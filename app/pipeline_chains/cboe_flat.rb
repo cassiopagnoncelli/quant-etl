@@ -138,12 +138,14 @@ class CboeFlat < PipelineChainBase
     log_import_results(result)
   end
   
+  def execute_start_stage
+    super
+    cleanup_old_files
+  end
+  
   def execute_post_processing_stage
-    # Clean up downloaded file if needed
-    if @downloaded_file_path && File.exist?(@downloaded_file_path)
-      logger.info "Cleaning up downloaded file: #{@downloaded_file_path}"
-      # File.delete(@downloaded_file_path) # Uncomment if you want to delete the file
-    end
+    # Clean up downloaded file after successful import
+    cleanup_downloaded_file
   end
   
   def ensure_download_directory
@@ -240,5 +242,42 @@ class CboeFlat < PipelineChainBase
     end
     
     logger.info "=" * 50
+  end
+  
+  def cleanup_old_files
+    return unless @download_dir.exist?
+    
+    logger.info "Cleaning up old files in #{@download_dir}"
+    
+    # Remove files older than 7 days
+    cutoff_time = 7.days.ago
+    files_removed = 0
+    
+    Dir.glob(@download_dir.join('*')).each do |file_path|
+      next unless File.file?(file_path)
+      
+      if File.mtime(file_path) < cutoff_time
+        begin
+          File.delete(file_path)
+          files_removed += 1
+          logger.info "Removed old file: #{file_path}"
+        rescue StandardError => e
+          logger.error "Failed to remove file #{file_path}: #{e.message}"
+        end
+      end
+    end
+    
+    logger.info "Cleanup completed: #{files_removed} files removed"
+  end
+  
+  def cleanup_downloaded_file
+    return unless @downloaded_file_path && File.exist?(@downloaded_file_path)
+    
+    begin
+      File.delete(@downloaded_file_path)
+      logger.info "Cleaned up downloaded file: #{@downloaded_file_path}"
+    rescue StandardError => e
+      logger.error "Failed to cleanup downloaded file #{@downloaded_file_path}: #{e.message}"
+    end
   end
 end
