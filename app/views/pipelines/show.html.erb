@@ -1,3 +1,5 @@
+<% content_for :title, "#{@pipeline.time_series.ticker} Pipeline" %>
+
 <div class="container" data-controller="live-update" data-live-update-url-value="<%= pipeline_path(@pipeline, format: :json) %>" data-live-update-enabled-value="<%= @pipeline.active? %>">
   <div class="top-navigation">
     <%= link_to pipelines_path, class: 'back-link' do %>

@@ -1,3 +1,5 @@
+<% content_for :title, "#{@pipeline.time_series.ticker} Pipeline Run ##{@pipeline_run.id}" %>
+
 <div class="container" data-controller="live-update" data-live-update-url-value="<%= pipeline_pipeline_run_path(@pipeline, @pipeline_run, format: :json) %>" data-live-update-enabled-value="true">
   <% 
     # Determine the correct back link based on the referer

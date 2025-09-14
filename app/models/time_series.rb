@@ -36,6 +36,12 @@ class TimeSeries < ApplicationRecord
     find_by(source:, source_id:)
   end
 
+  # Returns all time series that are outdated (not up to date)
+  # A time series is outdated if new data is expected but not yet available
+  def self.outdated
+    all.reject(&:up_to_date?)
+  end
+
   # Determines if this time series is up to date
   # A time series is up to date if no new data is expected to be fetched
   def up_to_date?

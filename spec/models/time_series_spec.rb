@@ -129,6 +129,39 @@ RSpec.describe TimeSeries, type: :model do
         expect(result).to be_nil
       end
     end
+
+    describe '.outdated' do
+      let(:current_time) { DateTime.parse('2025-08-15 14:30:00 UTC') }
+
+      before do
+        allow(DateTime).to receive(:current).and_return(current_time)
+      end
+
+      it 'returns an empty array when no time series exist' do
+        expect(described_class.outdated).to eq([])
+      end
+
+      it 'returns time series that are not up to date' do
+        # Create an up-to-date time series
+        up_to_date_ts = create(:time_series, timeframe: 'D1', ticker: 'UP_TO_DATE')
+        create(:univariate, ticker: up_to_date_ts.ticker, ts: current_time.beginning_of_day)
+
+        # Create an outdated time series
+        outdated_ts = create(:time_series, timeframe: 'D1', ticker: 'OUTDATED')
+        create(:univariate, ticker: outdated_ts.ticker, ts: current_time.beginning_of_day - 2.days)
+
+        result = described_class.outdated
+        expect(result).to include(outdated_ts)
+        expect(result).not_to include(up_to_date_ts)
+      end
+
+      it 'includes time series with no data points as outdated' do
+        no_data_ts = create(:time_series, timeframe: 'D1', ticker: 'NO_DATA')
+        
+        result = described_class.outdated
+        expect(result).to include(no_data_ts)
+      end
+    end
   end
 
   describe 'instance methods' do

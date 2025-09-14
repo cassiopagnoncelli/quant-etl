@@ -1,3 +1,9 @@
+<% if @pipeline %>
+  <% content_for :title, "#{@pipeline.time_series.ticker} Pipeline Runs" %>
+<% else %>
+  <% content_for :title, "Pipeline Runs" %>
+<% end %>
+
 <div class="container">
   <% if @pipeline %>
     <%= link_to pipeline_path(@pipeline), class: 'back-link' do %>
