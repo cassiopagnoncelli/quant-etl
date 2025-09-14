@@ -9,6 +9,12 @@ Rails.application.routes.draw do
     member do
       patch :run
     end
+    resources :pipeline_runs, only: [:index, :show, :create] do
+      member do
+        patch :rerun
+        patch :schedule_stop
+      end
+    end
   end
 
   root 'time_series#index'

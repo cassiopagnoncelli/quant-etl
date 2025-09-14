@@ -1,0 +1,49 @@
+class PipelineRunsController < ApplicationController
+  before_action :set_pipeline
+  before_action :set_pipeline_run, only: [:show, :rerun, :schedule_stop]
+
+  def index
+    @pipeline_runs = @pipeline.pipeline_runs.includes(:pipeline).order(created_at: :desc)
+  end
+
+  def show
+  end
+
+  def create
+    if @pipeline.can_run?
+      @pipeline.run_async!
+      redirect_to pipeline_path(@pipeline), notice: 'New pipeline run has been started and is running in the background.'
+    else
+      redirect_to pipeline_path(@pipeline), alert: 'Pipeline cannot be run. It must be in pending status and start stage.'
+    end
+  end
+
+  def rerun
+    if @pipeline_run.can_run?
+      @pipeline_run.reset!
+      @pipeline_run.run_async!
+      redirect_to pipeline_pipeline_run_path(@pipeline, @pipeline_run), notice: 'Pipeline run has been restarted and is running in the background.'
+    else
+      redirect_to pipeline_pipeline_run_path(@pipeline, @pipeline_run), alert: 'Pipeline run cannot be rerun. It must be in pending status and start stage.'
+    end
+  end
+
+  def schedule_stop
+    if @pipeline_run.WORKING?
+      @pipeline_run.update!(status: :SCHEDULED_STOP)
+      redirect_to pipeline_pipeline_run_path(@pipeline, @pipeline_run), notice: 'Pipeline run has been scheduled to stop.'
+    else
+      redirect_to pipeline_pipeline_run_path(@pipeline, @pipeline_run), alert: 'Pipeline run cannot be stopped. It must be in working status.'
+    end
+  end
+
+  private
+
+  def set_pipeline
+    @pipeline = Pipeline.find(params[:pipeline_id])
+  end
+
+  def set_pipeline_run
+    @pipeline_run = @pipeline.pipeline_runs.find(params[:id])
+  end
+end

@@ -1,0 +1,597 @@
+<div class="container">
+  <%= link_to pipeline_pipeline_runs_path(@pipeline), class: 'back-link' do %>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5"></path>
+      <path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back to Pipeline Runs
+  <% end %>
+  
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Pipeline Run #<%= @pipeline_run.id %></h1>
+      <p class="subtitle">
+        <%= @pipeline.time_series.ticker %> <span class="timestamp-badge"><%= @pipeline.display_name.split(' ').last %></span>
+        <% if @pipeline_run == @pipeline.latest_run %>
+          <span class="latest-badge">Latest Run</span>
+        <% end %>
+      </p>
+      <div class="status-badges">
+        <span class="status-badge status-<%= @pipeline_run.status.downcase %>">
+          <%= @pipeline_run.status.capitalize %>
+        </span>
+        <span class="stage-badge stage-<%= @pipeline_run.stage.downcase %>">
+          <%= @pipeline_run.stage.capitalize %>
+        </span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <%= link_to "View Pipeline", pipeline_path(@pipeline), class: "btn btn-secondary" %>
+      <% if @pipeline_run.can_run? %>
+        <%= link_to "Rerun", rerun_pipeline_pipeline_run_path(@pipeline, @pipeline_run), method: :patch, class: "btn btn-primary", 
+            confirm: "Are you sure you want to rerun this pipeline?", 
+            data: { turbo_method: :patch } %>
+      <% end %>
+      <% if @pipeline_run.WORKING? %>
+        <%= link_to "Schedule Stop", schedule_stop_pipeline_pipeline_run_path(@pipeline, @pipeline_run), method: :patch, class: "btn btn-warning", 
+            confirm: "Are you sure you want to schedule this pipeline run to stop?", 
+            data: { turbo_method: :patch } %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="run-details">
+    <div class="detail-section">
+      <h2>Run Statistics</h2>
+      <div class="stats-grid">
+        <div class="stat-card success">
+          <div class="stat-icon">✓</div>
+          <div class="stat-content">
+            <div class="stat-value"><%= number_with_delimiter(@pipeline_run.n_successful) %></div>
+            <div class="stat-label">Successful Operations</div>
+          </div>
+        </div>
+        <div class="stat-card failed">
+          <div class="stat-icon">✗</div>
+          <div class="stat-content">
+            <div class="stat-value"><%= number_with_delimiter(@pipeline_run.n_failed) %></div>
+            <div class="stat-label">Failed Operations</div>
+          </div>
+        </div>
+        <div class="stat-card skipped">
+          <div class="stat-icon">⊘</div>
+          <div class="stat-content">
+            <div class="stat-value"><%= number_with_delimiter(@pipeline_run.n_skipped) %></div>
+            <div class="stat-label">Skipped Operations</div>
+          </div>
+        </div>
+        <div class="stat-card total">
+          <div class="stat-icon">Σ</div>
+          <div class="stat-content">
+            <div class="stat-value"><%= number_with_delimiter(@pipeline_run.total_processed) %></div>
+            <div class="stat-label">Total Operations</div>
+          </div>
+        </div>
+      </div>
+      
+      <% if @pipeline_run.total_processed > 0 %>
+        <div class="success-rate">
+          <div class="rate-label">Success Rate</div>
+          <div class="rate-bar">
+            <div class="rate-fill" style="width: <%= @pipeline_run.success_rate %>%"></div>
+          </div>
+          <div class="rate-value"><%= @pipeline_run.success_rate %>%</div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="detail-section">
+      <h2>Run Information</h2>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">Run ID</span>
+          <span class="detail-value">#<%= @pipeline_run.id %></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Pipeline</span>
+          <span class="detail-value">
+            <%= link_to @pipeline.display_name, pipeline_path(@pipeline), class: "pipeline-link" %>
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Started At</span>
+          <span class="detail-value"><%= @pipeline_run.created_at.strftime('%B %d, %Y at %I:%M:%S %p') %></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Last Updated</span>
+          <span class="detail-value"><%= @pipeline_run.updated_at.strftime('%B %d, %Y at %I:%M:%S %p') %></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Duration</span>
+          <span class="detail-value">
+            <%= distance_of_time_in_words(@pipeline_run.created_at, @pipeline_run.updated_at) %>
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Current Status</span>
+          <span class="detail-value">
+            <span class="status-badge status-<%= @pipeline_run.status.downcase %>">
+              <%= @pipeline_run.status.capitalize %>
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h2>Pipeline Progress</h2>
+      <div class="progress-indicator">
+        <div class="progress-bar">
+          <% stages = ['START', 'FETCH', 'TRANSFORM', 'IMPORT', 'POST_PROCESSING', 'FINISH'] %>
+          <% current_stage_index = stages.index(@pipeline_run.stage) || 0 %>
+          <% stages.each_with_index do |stage, index| %>
+            <div class="progress-step <%= 'active' if current_stage_index && index <= current_stage_index %> <%= 'current' if stage == @pipeline_run.stage %>">
+              <div class="step-marker"></div>
+              <div class="step-label"><%= stage.humanize %></div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <% if @pipeline_run.logs.any? %>
+      <div class="detail-section">
+        <h2>Run Logs</h2>
+        <div class="logs-container">
+          <% @pipeline_run.logs.order(:created_at).each do |log| %>
+            <div class="log-entry <%= log.level %>">
+              <div class="log-timestamp">
+                <%= log.created_at.strftime('%H:%M:%S.%L') %>
+              </div>
+              <div class="log-level">
+                <%= log.level.upcase %>
+              </div>
+              <div class="log-message">
+                <%= log.message %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <div class="detail-section">
+        <h2>Run Logs</h2>
+        <div class="empty-logs">
+          <p>No logs available for this run yet.</p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b7280;
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+  }
+
+  .back-link:hover {
+    color: #3b82f6;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .header-left h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .subtitle {
+    margin: 0 0 1rem 0;
+    color: #6b7280;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .latest-badge {
+    background: #059669;
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background-color: #3b82f6;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #2563eb;
+  }
+
+  .btn-secondary {
+    background-color: #6b7280;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background-color: #4b5563;
+  }
+
+  .btn-warning {
+    background-color: #d97706;
+    color: white;
+  }
+
+  .btn-warning:hover {
+    background-color: #b45309;
+  }
+
+  .pipeline-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .timestamp-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    margin-left: 0.5rem;
+  }
+
+  .info-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+  }
+
+  .status-badges {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .status-badge, .stage-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .status-pending { background: #fef3c7; color: #92400e; }
+  .status-working { background: #dbeafe; color: #1e40af; }
+  .status-completed { background: #d1fae5; color: #065f46; }
+  .status-failed { background: #fecaca; color: #dc2626; }
+  .status-scheduled_stop { background: #fed7aa; color: #d97706; }
+
+  .stage-start { background: #f3f4f6; color: #374151; }
+  .stage-fetch { background: #fef3c7; color: #92400e; }
+  .stage-transform { background: #dbeafe; color: #1e40af; }
+  .stage-import { background: #dbeafe; color: #1e40af; }
+  .stage-post_processing { background: #e0e7ff; color: #3730a3; }
+  .stage-finish { background: #d1fae5; color: #065f46; }
+
+  .run-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .detail-section {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+  }
+
+  .detail-section h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+  }
+
+  .stat-icon {
+    font-size: 1.5rem;
+    font-weight: bold;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+
+  .stat-card.success { background: #f0fdf4; }
+  .stat-card.success .stat-icon { background: #dcfce7; color: #059669; }
+  .stat-card.success .stat-value { color: #059669; }
+
+  .stat-card.failed { background: #fef2f2; }
+  .stat-card.failed .stat-icon { background: #fecaca; color: #dc2626; }
+  .stat-card.failed .stat-value { color: #dc2626; }
+
+  .stat-card.skipped { background: #fffbeb; }
+  .stat-card.skipped .stat-icon { background: #fed7aa; color: #d97706; }
+  .stat-card.skipped .stat-value { color: #d97706; }
+
+  .stat-card.total { background: #f8fafc; }
+  .stat-card.total .stat-icon { background: #e2e8f0; color: #475569; }
+  .stat-card.total .stat-value { color: #475569; }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .success-rate {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+  }
+
+  .rate-label {
+    font-weight: 500;
+    color: #374151;
+    min-width: 100px;
+  }
+
+  .rate-bar {
+    flex: 1;
+    height: 0.5rem;
+    background: #e5e7eb;
+    border-radius: 0.25rem;
+    overflow: hidden;
+  }
+
+  .rate-fill {
+    height: 100%;
+    background: #059669;
+    transition: width 0.3s ease;
+  }
+
+  .rate-value {
+    font-weight: 600;
+    color: #059669;
+    min-width: 50px;
+    text-align: right;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .detail-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .detail-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+  }
+
+  .detail-value {
+    font-weight: 500;
+    color: #111827;
+  }
+
+  .pipeline-link {
+    color: #3b82f6;
+    text-decoration: none;
+  }
+
+  .pipeline-link:hover {
+    text-decoration: underline;
+  }
+
+  .progress-indicator {
+    margin-top: 1rem;
+  }
+
+  .progress-bar {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  .progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    height: 2px;
+    background: #e5e7eb;
+    z-index: 1;
+  }
+
+  .progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .step-marker {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: #e5e7eb;
+    border: 3px solid white;
+    margin-bottom: 0.5rem;
+  }
+
+  .progress-step.active .step-marker {
+    background: #3b82f6;
+  }
+
+  .progress-step.current .step-marker {
+    background: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+  }
+
+  .step-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .progress-step.active .step-label {
+    color: #3b82f6;
+  }
+
+  .progress-step.current .step-label {
+    color: #059669;
+  }
+
+  .logs-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.375rem;
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  }
+
+  .log-entry {
+    display: flex;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+
+  .log-entry:last-child {
+    border-bottom: none;
+  }
+
+  .log-entry.error {
+    background: #fef2f2;
+    border-left: 3px solid #dc2626;
+  }
+
+  .log-entry.debug {
+    background: #f0f9ff;
+    border-left: 3px solid #0ea5e9;
+  }
+
+  .log-timestamp {
+    color: #6b7280;
+    font-weight: 500;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    width: 100px;
+  }
+
+  .log-level {
+    color: #6b7280;
+    font-weight: 500;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    width: 70px;
+  }
+
+  .log-message {
+    color: #374151;
+    flex: 1;
+    word-break: break-word;
+  }
+
+  .log-entry.error .log-message {
+    color: #dc2626;
+  }
+
+  .log-entry.debug .log-message {
+    color: #0ea5e9;
+  }
+
+  .empty-logs {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+  }
+</style>

@@ -16,9 +16,7 @@
           <div class="row-header">
             <div class="pipeline-info">
               <h3 class="pipeline-title">
-                Pipeline #<%= pipeline.id %>
-                <span class="ticker-badge"><%= pipeline.time_series.ticker %></span>
-                <span class="chain-badge"><%= pipeline.chain %></span>
+                <%= pipeline.time_series.ticker %> <span class="timestamp-badge"><%= pipeline.display_name.split(' ').last %></span>
               </h3>
               <div class="status-badges">
                 <span class="status-badge status-<%= pipeline.status %>">
@@ -30,25 +28,18 @@
               </div>
             </div>
             <div class="pipeline-stats">
-              <% if pipeline.latest_run %>
-                <div class="stat-item success">
-                  <span class="stat-value"><%= number_with_delimiter(pipeline.latest_run.n_successful) %></span>
-                  <span class="stat-label">Success</span>
-                </div>
-                <div class="stat-item failed">
-                  <span class="stat-value"><%= number_with_delimiter(pipeline.latest_run.n_failed) %></span>
-                  <span class="stat-label">Failed</span>
-                </div>
-                <div class="stat-item skipped">
-                  <span class="stat-value"><%= number_with_delimiter(pipeline.latest_run.n_skipped) %></span>
-                  <span class="stat-label">Skipped</span>
-                </div>
-              <% else %>
-                <div class="stat-item">
-                  <span class="stat-value">-</span>
-                  <span class="stat-label">No runs yet</span>
-                </div>
-              <% end %>
+              <div class="stat-item">
+                <span class="stat-value"><%= pipeline.runs.count %></span>
+                <span class="stat-label">Total Runs</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value"><%= pipeline.runs.where(status: 'COMPLETED').count %></span>
+                <span class="stat-label">Completed</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value"><%= pipeline.runs.where(status: 'FAILED').count %></span>
+                <span class="stat-label">Failed</span>
+              </div>
             </div>
           </div>
           
@@ -158,6 +149,34 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+  }
+
+  .timestamp-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    margin-left: 0.5rem;
+  }
+
+  .pipeline-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .info-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
   }
 
   .ticker-badge {

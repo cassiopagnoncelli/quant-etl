@@ -35,12 +35,8 @@ class PipelinesController < ApplicationController
   end
 
   def run
-    if @pipeline.can_run?
-      @pipeline.run_async!
-      redirect_to @pipeline, notice: 'Pipeline has been started and is running in the background.'
-    else
-      redirect_to @pipeline, alert: 'Pipeline cannot be run. It must be in pending status and start stage.'
-    end
+    @pipeline.run_async!
+    redirect_to @pipeline, notice: 'Pipeline has been started and is running in the background.'
   end
 
   def destroy

@@ -56,10 +56,12 @@
               <%= link_to pipeline_path(pipeline), class: "pipeline-link" do %>
                 <span class="pipeline-name"><%= pipeline.chain %></span>
                 <% if pipeline.latest_run %>
-                  <% if pipeline.status == 'COMPLETE' && pipeline.n_failed == 0 %>
+                  <% if pipeline.status == 'COMPLETED' && pipeline.n_failed == 0 && pipeline.n_skipped == 0 %>
                     <span class="pipeline-status success" title="Last run successful">✓</span>
                   <% elsif pipeline.n_failed > 0 %>
                     <span class="pipeline-status failed" title="Last run had failures">✗</span>
+                  <% elsif pipeline.n_skipped > 0 %>
+                    <span class="pipeline-status skipped" title="Last run had skipped operations">⊘</span>
                   <% else %>
                     <span class="pipeline-status pending" title="<%= pipeline.status.capitalize %>">⏳</span>
                   <% end %>
@@ -264,5 +266,9 @@
 
   .pipeline-status.pending {
     color: #ffc107;
+  }
+
+  .pipeline-status.skipped {
+    color: #d97706;
   }
 </style>

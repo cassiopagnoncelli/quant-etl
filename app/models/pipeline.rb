@@ -47,4 +47,15 @@ class Pipeline < ApplicationRecord
   def n_skipped
     latest_run&.n_skipped || 0
   end
+
+  # Generate display name with just ticker
+  def display_name
+    time_series.ticker
+  end
+
+  # Get latest timestamp for display
+  def latest_timestamp
+    latest_ts = time_series.points.maximum(:ts)
+    latest_ts ? latest_ts.strftime('%Y-%m-%d') : 'N/A'
+  end
 end

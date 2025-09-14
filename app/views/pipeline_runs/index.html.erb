@@ -1,0 +1,343 @@
+<div class="container">
+  <%= link_to pipeline_path(@pipeline), class: 'back-link' do %>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5"></path>
+      <path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back to <%= @pipeline.display_name %>
+  <% end %>
+  
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Pipeline Runs</h1>
+      <p class="subtitle"><%= @pipeline.time_series.ticker %> <span class="timestamp-badge"><%= @pipeline.display_name.split(' ').last %></span></p>
+    </div>
+    <div class="header-actions">
+      <% if @pipeline.can_run? %>
+        <%= link_to "Execute New Run", pipeline_pipeline_runs_path(@pipeline), method: :post, class: "btn btn-primary", 
+            confirm: "Are you sure you want to start a new pipeline run?", 
+            data: { turbo_method: :post } %>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @pipeline_runs.empty? %>
+    <div class="empty-state">
+      <h3>No pipeline runs available</h3>
+      <p>This pipeline has not been executed yet.</p>
+      <% if @pipeline.can_run? %>
+        <%= link_to "Execute First Run", pipeline_pipeline_runs_path(@pipeline), method: :post, class: "btn btn-primary", 
+            confirm: "Are you sure you want to start the first pipeline run?", 
+            data: { turbo_method: :post } %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="runs-list">
+      <% @pipeline_runs.each do |run| %>
+        <%= link_to pipeline_pipeline_run_path(@pipeline, run), class: "run-row" do %>
+          <div class="row-header">
+            <div class="run-info">
+              <h3 class="run-title">
+                Run #<%= run.id %>
+                <% if run == @pipeline.latest_run %>
+                  <span class="latest-badge">Latest</span>
+                <% end %>
+              </h3>
+              <div class="status-badges">
+                <span class="status-badge status-<%= run.status.downcase %>">
+                  <%= run.status.capitalize %>
+                </span>
+                <span class="stage-badge stage-<%= run.stage.downcase %>">
+                  <%= run.stage.capitalize %>
+                </span>
+              </div>
+            </div>
+            <div class="run-stats">
+              <div class="stat-item success">
+                <span class="stat-value"><%= number_with_delimiter(run.n_successful) %></span>
+                <span class="stat-label">Success</span>
+              </div>
+              <div class="stat-item failed">
+                <span class="stat-value"><%= number_with_delimiter(run.n_failed) %></span>
+                <span class="stat-label">Failed</span>
+              </div>
+              <div class="stat-item skipped">
+                <span class="stat-value"><%= number_with_delimiter(run.n_skipped) %></span>
+                <span class="stat-label">Skipped</span>
+              </div>
+              <div class="stat-item total">
+                <span class="stat-value"><%= number_with_delimiter(run.total_processed) %></span>
+                <span class="stat-label">Total</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row-content">
+            <div class="row-meta">
+              <div class="meta-group">
+                <span class="meta-label">Started:</span>
+                <span class="meta-value"><%= run.created_at.strftime('%Y-%m-%d %H:%M:%S') %></span>
+              </div>
+              <div class="meta-group">
+                <span class="meta-label">Updated:</span>
+                <span class="meta-value"><%= run.updated_at.strftime('%Y-%m-%d %H:%M:%S') %></span>
+              </div>
+              <div class="meta-group">
+                <span class="meta-label">Success Rate:</span>
+                <span class="meta-value"><%= run.success_rate %>%</span>
+              </div>
+              <div class="meta-group">
+                <span class="meta-label">Duration:</span>
+                <span class="meta-value">
+                  <%= distance_of_time_in_words(run.created_at, run.updated_at) %>
+                </span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b7280;
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+  }
+
+  .back-link:hover {
+    color: #3b82f6;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .header-left h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .subtitle {
+    margin: 0 0 0.5rem 0;
+    color: #6b7280;
+    font-size: 1rem;
+  }
+
+  .timestamp-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    margin-left: 0.5rem;
+  }
+
+  .pipeline-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .info-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background-color: #3b82f6;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #2563eb;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+    border: 2px dashed #d1d5db;
+  }
+
+  .empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #374151;
+  }
+
+  .empty-state p {
+    margin: 0 0 1.5rem 0;
+    color: #6b7280;
+  }
+
+  .runs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .run-row {
+    display: block;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+  }
+
+  .run-row:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .run-info h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .latest-badge {
+    background: #059669;
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .status-badges {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .status-badge, .stage-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .status-pending { background: #fef3c7; color: #92400e; }
+  .status-working { background: #dbeafe; color: #1e40af; }
+  .status-completed { background: #d1fae5; color: #065f46; }
+  .status-failed { background: #fecaca; color: #dc2626; }
+  .status-scheduled_stop { background: #fed7aa; color: #d97706; }
+
+  .stage-start { background: #f3f4f6; color: #374151; }
+  .stage-fetch { background: #fef3c7; color: #92400e; }
+  .stage-transform { background: #dbeafe; color: #1e40af; }
+  .stage-import { background: #dbeafe; color: #1e40af; }
+  .stage-post_processing { background: #e0e7ff; color: #3730a3; }
+  .stage-finish { background: #d1fae5; color: #065f46; }
+
+  .run-stats {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .stat-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .stat-item.success .stat-value { color: #059669; }
+  .stat-item.failed .stat-value { color: #dc2626; }
+  .stat-item.skipped .stat-value { color: #d97706; }
+  .stat-item.total .stat-value { color: #475569; }
+
+  .row-content {
+    border-top: 1px solid #f3f4f6;
+    padding-top: 1rem;
+  }
+
+  .row-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .meta-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .meta-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+  }
+
+  .meta-value {
+    font-weight: 500;
+    color: #111827;
+  }
+</style>
