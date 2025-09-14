@@ -23,18 +23,7 @@
         <%= link_to time_series_path(ts_data[:time_series].ticker), class: "time-series-row #{row_class}" do %>
           <div class="row-header">
             <div class="ticker-info">
-              <h3 class="ticker-name">
-                <%= ts_data[:time_series].ticker %>
-                <% if ts_data[:time_series].description.present? %>
-                  <div class="info-icon" title="<%= ts_data[:time_series].description %>">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <path d="M9,9h0a3,3,0,0,1,6,0c0,2-3,3-3,3"></path>
-                      <path d="M12,17h0"></path>
-                    </svg>
-                  </div>
-                <% end %>
-              </h3>
+              <h3 class="ticker-name"><%= ts_data[:time_series].ticker %></h3>
               <span class="type-kind"><%= ts_data[:time_series].kind %></span>
             </div>
             <% if ts_data[:last].present? %>
@@ -43,6 +32,10 @@
               </div>
             <% end %>
           </div>
+
+          <% if ts_data[:time_series].description.present? %>
+              <div class="description-text" style="font-size: 0.8em; margin-bottom: 8px;"><%= ts_data[:time_series].description %></div>
+            <% end %>
           
           <div class="row-content">
             <div class="row-meta">
