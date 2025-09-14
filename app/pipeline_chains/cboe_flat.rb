@@ -46,6 +46,15 @@ class CboeFlat < PipelineChainBase
     cboe_symbol = VIX_INDICES[ticker] || ticker
     url = "#{BASE_URL}/#{cboe_symbol}_History.csv"
     
+    # Note: CBOE typically provides full historical datasets, not incremental
+    # But we can still log our incremental fetch intention for consistency
+    if should_use_incremental_fetch?
+      latest_date = get_start_date_from_latest_data.to_date
+      log_info "Would prefer incremental fetch from #{latest_date}, but CBOE provides full historical data"
+    else
+      log_info "No existing data found, fetching full historical dataset"
+    end
+    
     log_info "Downloading CBOE data from: #{url}"
     
     uri = URI(url)

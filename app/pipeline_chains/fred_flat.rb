@@ -34,7 +34,7 @@ class FredFlat < PipelineChainBase
       return
     end
 
-    # Build API URL - fetch all available historical data by default
+    # Build API URL - use incremental fetch if existing data is available
     end_date = Date.current
     
     params = {
@@ -44,8 +44,14 @@ class FredFlat < PipelineChainBase
       observation_end: end_date.strftime('%Y-%m-%d')
     }
     
-    # Fetch all historical data (no start date specified)
-    log_info "Fetching all available historical data for #{ticker} (from series inception)"
+    # Use incremental fetch if we have existing data
+    if should_use_incremental_fetch?
+      start_date = get_start_date_from_latest_data.to_date
+      params[:observation_start] = start_date.strftime('%Y-%m-%d')
+      log_info "Fetching incremental FRED data for #{ticker} from #{start_date} (latest existing data + 1 day)"
+    else
+      log_info "Fetching all available historical data for #{ticker} (from series inception - no existing data found)"
+    end
     
     uri = URI("#{BASE_URL}/series/observations")
     uri.query = URI.encode_www_form(params)

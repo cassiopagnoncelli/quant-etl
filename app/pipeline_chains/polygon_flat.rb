@@ -43,8 +43,16 @@ class PolygonFlat < PipelineChainBase
   def execute_fetch_stage
     return if @downloaded_file_path && File.exist?(@downloaded_file_path)
     
-    # Default to downloading today's data for stocks/day_aggs
-    date = Date.current
+    # Determine the date to fetch - use incremental approach if existing data is available
+    date = if should_use_incremental_fetch?
+             start_date = get_start_date_from_latest_data.to_date
+             log_info "Using incremental fetch starting from #{start_date} (latest existing data + 1 day)"
+             start_date
+           else
+             log_info "No existing data found, fetching current date: #{Date.current}"
+             Date.current
+           end
+    
     asset_class = determine_asset_class
     data_type = determine_data_type
     

@@ -1,5 +1,13 @@
 <div class="container" data-controller="live-update" data-live-update-url-value="<%= pipeline_pipeline_run_path(@pipeline, @pipeline_run, format: :json) %>" data-live-update-enabled-value="true">
-  <%= link_to pipeline_pipeline_runs_path(@pipeline), class: 'back-link' do %>
+  <% 
+    # Determine the correct back link based on the referer
+    back_path = if request.referer&.include?('/pipeline_runs') && !request.referer&.include?('/pipelines/')
+                  pipeline_runs_path
+                else
+                  pipeline_pipeline_runs_path(@pipeline)
+                end
+  %>
+  <%= link_to back_path, class: 'back-link' do %>
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M19 12H5"></path>
       <path d="M12 19l-7-7 7-7"></path>

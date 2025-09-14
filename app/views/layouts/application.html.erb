@@ -29,6 +29,7 @@
         <div class="nav-links">
           <%= link_to "Time Series", time_series_index_path, class: "nav-link #{'active' if current_page?(time_series_index_path)}" %>
           <%= link_to "Pipelines", pipelines_path, class: "nav-link #{'active' if current_page?(pipelines_path) || current_page?(new_pipeline_path)}" %>
+          <%= link_to "Pipeline Runs", pipeline_runs_path, class: "nav-link #{'active' if current_page?(pipeline_runs_path)}" %>
         </div>
       </div>
     </nav>

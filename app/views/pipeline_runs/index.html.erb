@@ -1,19 +1,25 @@
 <div class="container">
-  <%= link_to pipeline_path(@pipeline), class: 'back-link' do %>
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M19 12H5"></path>
-      <path d="M12 19l-7-7 7-7"></path>
-    </svg>
-    Back to <%= @pipeline.display_name %>
+  <% if @pipeline %>
+    <%= link_to pipeline_path(@pipeline), class: 'back-link' do %>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5"></path>
+        <path d="M12 19l-7-7 7-7"></path>
+      </svg>
+      Back to <%= @pipeline.display_name %>
+    <% end %>
   <% end %>
   
   <div class="page-header">
     <div class="header-left">
       <h1>Pipeline Runs</h1>
-      <p class="subtitle"><%= @pipeline.time_series.ticker %> <span class="latest-timestamp"><%= @pipeline.latest_timestamp %></span></p>
+      <% if @pipeline %>
+        <p class="subtitle"><%= @pipeline.time_series.ticker %> <span class="latest-timestamp"><%= @pipeline.latest_timestamp %></span></p>
+      <% else %>
+        <p class="subtitle">All pipeline runs across all pipelines</p>
+      <% end %>
     </div>
     <div class="header-actions">
-      <% if @pipeline.can_run? %>
+      <% if @pipeline&.can_run? %>
         <%= link_to "Execute New Run", pipeline_pipeline_runs_path(@pipeline), method: :post, class: "btn btn-primary", 
             confirm: "Are you sure you want to start a new pipeline run?", 
             data: { turbo_method: :post } %>
@@ -24,22 +30,29 @@
   <% if @pipeline_runs.empty? %>
     <div class="empty-state">
       <h3>No pipeline runs available</h3>
-      <p>This pipeline has not been executed yet.</p>
-      <% if @pipeline.can_run? %>
-        <%= link_to "Execute First Run", pipeline_pipeline_runs_path(@pipeline), method: :post, class: "btn btn-primary", 
-            confirm: "Are you sure you want to start the first pipeline run?", 
-            data: { turbo_method: :post } %>
+      <% if @pipeline %>
+        <p>This pipeline has not been executed yet.</p>
+        <% if @pipeline.can_run? %>
+          <%= link_to "Execute First Run", pipeline_pipeline_runs_path(@pipeline), method: :post, class: "btn btn-primary", 
+              confirm: "Are you sure you want to start the first pipeline run?", 
+              data: { turbo_method: :post } %>
+        <% end %>
+      <% else %>
+        <p>No pipeline runs have been executed yet.</p>
       <% end %>
     </div>
   <% else %>
     <div class="runs-list">
       <% @pipeline_runs.each do |run| %>
-        <%= link_to pipeline_pipeline_run_path(@pipeline, run), class: "run-row" do %>
+        <%= link_to pipeline_pipeline_run_path(run.pipeline, run), class: "run-row" do %>
           <div class="row-header">
             <div class="run-info">
               <h3 class="run-title">
+                <% unless @pipeline %>
+                  <span class="pipeline-name"><%= run.pipeline.display_name %></span> - 
+                <% end %>
                 Run #<%= run.id %>
-                <% if run == @pipeline.latest_run %>
+                <% if @pipeline && run == @pipeline.latest_run %>
                   <span class="latest-badge">Latest</span>
                 <% end %>
               </h3>
@@ -346,5 +359,10 @@
   .meta-value {
     font-weight: 500;
     color: #111827;
+  }
+
+  .pipeline-name {
+    color: #3b82f6;
+    font-weight: 600;
   }
 </style>

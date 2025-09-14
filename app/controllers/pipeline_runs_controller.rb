@@ -1,9 +1,16 @@
 class PipelineRunsController < ApplicationController
-  before_action :set_pipeline
+  before_action :set_pipeline_if_needed
   before_action :set_pipeline_run, only: [:show, :rerun, :schedule_stop]
 
   def index
-    @pipeline_runs = @pipeline.pipeline_runs.includes(:pipeline).order(created_at: :desc)
+    if params[:pipeline_id]
+      # Nested route - show runs for specific pipeline
+      @pipeline_runs = @pipeline.pipeline_runs.includes(:pipeline).order(created_at: :desc)
+    else
+      # Standalone route - show all pipeline runs
+      @pipeline_runs = PipelineRun.includes(:pipeline).order(created_at: :desc)
+      @pipeline = nil # Explicitly set to nil for standalone route
+    end
   end
 
   def show
@@ -42,6 +49,10 @@ class PipelineRunsController < ApplicationController
   end
 
   private
+
+  def set_pipeline_if_needed
+    @pipeline = Pipeline.find(params[:pipeline_id]) if params[:pipeline_id]
+  end
 
   def set_pipeline
     @pipeline = Pipeline.find(params[:pipeline_id])

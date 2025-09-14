@@ -195,4 +195,45 @@ class PipelineChainBase
   def timeframe
     time_series&.timeframe || 'D1'
   end
+  
+  # Helper method to get the latest timestamp from existing data
+  # Returns the latest timestamp + 1 day (or appropriate interval) to avoid duplicates
+  def get_start_date_from_latest_data
+    return nil unless time_series
+    
+    latest_ts = case time_series.kind
+                when 'univariate'
+                  time_series.univariates.maximum(:ts)
+                when 'aggregate'
+                  time_series.aggregates.maximum(:ts)
+                end
+    
+    return nil unless latest_ts
+    
+    # Add appropriate interval based on timeframe to get next expected data point
+    case timeframe
+    when 'M1'  # 1 minute
+      latest_ts + 1.minute
+    when 'H1'  # 1 hour
+      latest_ts + 1.hour
+    when 'D1'  # Daily
+      latest_ts + 1.day
+    when 'W1'  # Weekly
+      latest_ts + 1.week
+    when 'MN1' # Monthly
+      latest_ts + 1.month
+    when 'Q'   # Quarterly
+      latest_ts + 3.months
+    when 'Y'   # Yearly
+      latest_ts + 1.year
+    else
+      latest_ts + 1.day # Default to daily
+    end
+  end
+  
+  # Helper method to determine if we should use incremental fetch
+  # Returns true if there's existing data and we should fetch incrementally
+  def should_use_incremental_fetch?
+    time_series && get_start_date_from_latest_data.present?
+  end
 end
