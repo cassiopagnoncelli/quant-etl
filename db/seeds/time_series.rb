@@ -67,23 +67,31 @@ class TimeSeriesSeeder
     # FRED Economic Series - Univariate Time Series
     # Source IDs match the series_id used in FRED API calls
     fred_series = [
-      # Key Economic Indicators
       {
-        ticker: "M2SL",
-        timeframe: "MN1",
+        ticker: "MORTGAGE30US",
+        timeframe: "W1",
         source: "FRED",
-        source_id: "M2SL",
+        source_id: "MORTGAGE30US",
         kind: "univariate",
-        description: "M2 Money Stock (seasonally adjusted) - broad measure of money supply",
-        since: Date.new(1959, 1, 1)
+        description: "30-Year Fixed Rate Mortgage Average in the United States",
+        since: Date.new(1971, 4, 2)
       },
       {
-        ticker: "GDP",
-        timeframe: "Q",
+        ticker: "FEDFUNDS",
+        timeframe: "MN1",
         source: "FRED",
-        source_id: "GDP",
+        source_id: "FEDFUNDS",
         kind: "univariate",
-        description: "Gross Domestic Product - total economic output",
+        description: "Federal Funds Effective Rate",
+        since: Date.new(1954, 7, 1)
+      },
+      {
+        ticker: "CPIAUCSL",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "CPIAUCSL",
+        kind: "univariate",
+        description: "Consumer Price Index for All Urban Consumers: All Items in U.S. City Average",
         since: Date.new(1947, 1, 1)
       },
       {
@@ -92,20 +100,63 @@ class TimeSeriesSeeder
         source: "FRED",
         source_id: "UNRATE",
         kind: "univariate",
-        description: "Civilian Unemployment Rate - percentage of labor force unemployed",
+        description: "Unemployment Rate",
         since: Date.new(1948, 1, 1)
       },
       {
-        ticker: "CPIAUCSL",
-        timeframe: "MN1",
+        ticker: "GDP",
+        timeframe: "Q",
         source: "FRED",
-        source_id: "CPIAUCSL",
+        source_id: "GDP",
         kind: "univariate",
-        description: "Consumer Price Index for All Urban Consumers - inflation measure",
+        description: "Gross Domestic Product",
         since: Date.new(1947, 1, 1)
       },
-      
-      # Interest Rates
+      {
+        ticker: "SP500",
+        timeframe: "D1",
+        source: "FRED",
+        source_id: "SP500",
+        kind: "univariate",
+        description: "S&P 500 (close)",
+        since: Date.new(2015, 9, 14)
+      },
+      {
+        ticker: "DJIA",
+        timeframe: "D1",
+        source: "FRED",
+        source_id: "DJIA",
+        kind: "univariate",
+        description: "Dow Jones Industrial Average",
+        since: Date.new(2015, 9, 14)
+      },
+      {
+        ticker: "NASDAQCOM",
+        timeframe: "D1",
+        source: "FRED",
+        source_id: "NASDAQCOM",
+        kind: "univariate",
+        description: "NASDAQ Composite Index",
+        since: Date.new(1971, 2, 5)
+      },
+      {
+        ticker: "NASDAQ100",
+        timeframe: "D1",
+        source: "FRED",
+        source_id: "NASDAQ100",
+        kind: "univariate",
+        description: "NASDAQ 100",
+        since: Date.new(1986, 1, 2)
+      },
+      {
+        ticker: "WALCL",
+        timeframe: "W1",
+        source: "FRED",
+        source_id: "WALCL",
+        kind: "univariate",
+        description: "Assets: Total Assets: Total Assets (Less Eliminations from Consolidation): Wednesday Level",
+        since: Date.new(2002, 12, 18)
+      },
       {
         ticker: "DGS10",
         timeframe: "D1",
@@ -125,16 +176,50 @@ class TimeSeriesSeeder
         since: Date.new(1976, 6, 1)
       },
       {
-        ticker: "DFF",
+        ticker: "T10YIE",
         timeframe: "D1",
         source: "FRED",
-        source_id: "DFF",
+        source_id: "T10YIE",
         kind: "univariate",
-        description: "Effective Federal Funds Rate - overnight interbank lending rate",
-        since: Date.new(1954, 7, 1)
+        description: "10-Year Breakeven Inflation Rate",
+        since: Date.new(2003, 1, 2)
       },
-      
-      # Markets & Commodities
+      {
+        ticker: "SAHMREALTIME",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "SAHMREALTIME",
+        kind: "univariate",
+        description: "Real-time Sahm Rule Recession Indicator",
+        since: Date.new(1959, 12, 1)
+      },
+      {
+        ticker: "GFDEBTN",
+        timeframe: "Q",
+        source: "FRED",
+        source_id: "GFDEBTN",
+        kind: "univariate",
+        description: "Federal Debt: Total Public Debt",
+        since: Date.new(1966, 1, 1)
+      },
+      {
+        ticker: "GFDEGDQ188S",
+        timeframe: "Q",
+        source: "FRED",
+        source_id: "GFDEGDQ188S",
+        kind: "univariate",
+        description: "Federal Debt: Total Public Debt as Percent of Gross Domestic Product",
+        since: Date.new(1966, 1, 1)
+      },
+      {
+        ticker: "APU0000708111",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "APU0000708111",
+        kind: "univariate",
+        description: "Average Price: Eggs, Grade A, Large (Cost per Dozen) in U.S. City Average",
+        since: Date.new(1980, 1, 1)
+      },
       {
         ticker: "DTWEXBGS",
         timeframe: "D1",
@@ -143,6 +228,96 @@ class TimeSeriesSeeder
         kind: "univariate",
         description: "Trade Weighted U.S. Dollar Index: Broad - dollar strength measure",
         since: Date.new(1973, 1, 2)
+      },
+      {
+        ticker: "M1SL",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "M1SL",
+        kind: "univariate",
+        description: "M1",
+        since: Date.new(1959, 1, 1)
+      },
+      {
+        ticker: "M2SL",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "M2SL",
+        kind: "univariate",
+        description: "M2 Money Stock (seasonally adjusted) - broad measure of money supply",
+        since: Date.new(1959, 1, 1)
+      },
+      {
+        ticker: "M2V",
+        timeframe: "Q",
+        source: "FRED",
+        source_id: "M2V",
+        kind: "univariate",
+        description: "Velocity of M2 Money Stock",
+        since: Date.new(1959, 1, 1)
+      },
+      {
+        ticker: "BOGMBASE",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "BOGMBASE",
+        kind: "univariate",
+        description: "Monetary Base: Total",
+        since: Date.new(1959, 1, 1)
+      },
+      {
+        ticker: "CURRCIR",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "CURRCIR",
+        kind: "univariate",
+        description: "Currency in Circulation",
+        since: Date.new(1917, 1, 1)
+      },
+      {
+        ticker: "MEHOINUSA672N",
+        timeframe: "Y",
+        source: "FRED",
+        source_id: "MEHOINUSA672N",
+        kind: "univariate",
+        description: "Real Median Household Income in the United States",
+        since: Date.new(1984, 1, 1)
+      },
+      {
+        ticker: "DRCCLACBS",
+        timeframe: "Q",
+        source: "FRED",
+        source_id: "DRCCLACBS",
+        kind: "univariate",
+        description: "Delinquency Rate on Credit Card Loans, All Commercial Banks",
+        since: Date.new(1991, 1, 1)
+      },
+      {
+        ticker: "CIVPART",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "CIVPART",
+        kind: "univariate",
+        description: "Labor Force Participation Rate",
+        since: Date.new(1948, 1, 1)
+      },
+      {
+        ticker: "IHLIDXUSTPSOFTDEVE",
+        timeframe: "D1",
+        source: "FRED",
+        source_id: "IHLIDXUSTPSOFTDEVE",
+        kind: "univariate",
+        description: "Software Development Job Postings on Indeed in the United States",
+        since: Date.new(2020, 2, 1)
+      },
+      {
+        ticker: "IHLIDXUS",
+        timeframe: "D1",
+        source: "FRED",
+        source_id: "IHLIDXUS",
+        kind: "univariate",
+        description: "Job Postings on Indeed in the United States",
+        since: Date.new(2020, 2, 1)
       },
       {
         ticker: "DCOILWTICO",
@@ -163,22 +338,220 @@ class TimeSeriesSeeder
         since: Date.new(1987, 5, 20)
       },
       {
-        ticker: "GOLDAMGBD228NLBM",
-        timeframe: "D1",
+        ticker: "RECPROUSM156N",
+        timeframe: "MN1",
         source: "FRED",
-        source_id: "GOLDAMGBD228NLBM",
+        source_id: "RECPROUSM156N",
         kind: "univariate",
-        description: "Gold Fixing Price 3:00 P.M. (London time) in London Bullion Market",
-        since: Date.new(1968, 4, 1)
+        description: "Smoothed U.S. Recession Probabilities",
+        since: Date.new(1967, 6, 1)
       },
       {
-        ticker: "SP500",
+        ticker: "JTSJOL",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "JTSJOL",
+        kind: "univariate",
+        description: "Job Openings: Total Nonfarm",
+        since: Date.new(2000, 12, 1)
+      },
+      {
+        ticker: "CES0500000003",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "CES0500000003",
+        kind: "univariate",
+        description: "Average Hourly Earnings of All Employees, Total Private",
+        since: Date.new(2006, 3, 1)
+      },
+      {
+        ticker: "TOTALSA",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "TOTALSA",
+        kind: "univariate",
+        description: "Total Vehicle Sales",
+        since: Date.new(1976, 1, 1)
+      },
+      {
+        ticker: "EFFR",
         timeframe: "D1",
         source: "FRED",
-        source_id: "SP500",
+        source_id: "EFFR",
         kind: "univariate",
-        description: "S&P 500 Index - broad U.S. stock market benchmark",
-        since: Date.new(1971, 1, 3)
+        description: "Effective Federal Funds Rate",
+        since: Date.new(2000, 7, 3)
+      },
+      {
+        ticker: "STLFSI4",
+        timeframe: "W1",
+        source: "FRED",
+        source_id: "STLFSI4",
+        kind: "univariate",
+        description: "St. Louis Fed Financial Stress Index",
+        since: Date.new(1993, 12, 31)
+      },
+      {
+        ticker: "DPRIME",
+        timeframe: "D1",
+        source: "FRED",
+        source_id: "DPRIME",
+        kind: "univariate",
+        description: "Bank Prime Loan Rate",
+        since: Date.new(1955, 8, 4)
+      },
+      {
+        ticker: "CCLACBW027SBOG",
+        timeframe: "W1",
+        source: "FRED",
+        source_id: "CCLACBW027SBOG",
+        kind: "univariate",
+        description: "Consumer Loans: Credit Cards and Other Revolving Plans, All Commercial Banks",
+        since: Date.new(2000, 8, 26)
+      },
+      {
+        ticker: "DRCLACBS",
+        timeframe: "Q",
+        source: "FRED",
+        source_id: "DRCLACBS",
+        kind: "univariate",
+        description: "Delinquency Rate on Consumer Loans, All Commercial Banks",
+        since: Date.new(1987, 1, 1)
+      },
+      {
+        ticker: "DRSFRMACBS",
+        timeframe: "Q",
+        source: "FRED",
+        source_id: "DRSFRMACBS",
+        kind: "univariate",
+        description: "Delinquency Rate on Single-Family Residential Mortgages, Booked in Domestic Offices, All Commercial Banks",
+        since: Date.new(1991, 1, 1)
+      },
+      {
+        ticker: "APU000072610",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "APU000072610",
+        kind: "univariate",
+        description: "Average Price: Electricity per Kilowatt-Hour in U.S. City Average",
+        since: Date.new(1978, 11, 1)
+      },
+      {
+        ticker: "GVZCLS",
+        timeframe: "D1",
+        source: "FRED",
+        source_id: "GVZCLS",
+        kind: "univariate",
+        description: "CBOE Gold ETF Volatility Index",
+        since: Date.new(2008, 6, 3)
+      },
+      {
+        ticker: "PURANUSDM",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "PURANUSDM",
+        kind: "univariate",
+        description: "Global price of Uranium",
+        since: Date.new(1990, 1, 1)
+      },
+      {
+        ticker: "LNS14000006",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "LNS14000006",
+        kind: "univariate",
+        description: "Unemployment Rate - Black or African American",
+        since: Date.new(1972, 1, 1)
+      },
+      {
+        ticker: "SIPOVGINIUSA",
+        timeframe: "Y",
+        source: "FRED",
+        source_id: "SIPOVGINIUSA",
+        kind: "univariate",
+        description: "GINI Index for the United States",
+        since: Date.new(1963, 1, 1)
+      },
+      {
+        ticker: "WFRBLTP1246",
+        timeframe: "Q",
+        source: "FRED",
+        source_id: "WFRBLTP1246",
+        kind: "univariate",
+        description: "Net Worth Held by the Top 0.1% (99.9th to 100th Wealth Percentiles)",
+        since: Date.new(1989, 7, 1)
+      },
+      {
+        ticker: "HDTGPDUSQ163N",
+        timeframe: "Q",
+        source: "FRED",
+        source_id: "HDTGPDUSQ163N",
+        kind: "univariate",
+        description: "Household Debt to GDP for United States",
+        since: Date.new(2005, 1, 1)
+      },
+      {
+        ticker: "TCU",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "TCU",
+        kind: "univariate",
+        description: "Capacity Utilization: Total Index (capacity utilization for industries in manufacturing, mining, and electric and gas utilities)",
+        since: Date.new(1967, 1, 1)
+      },
+      {
+        ticker: "A229RX0",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "A229RX0",
+        kind: "univariate",
+        description: "Real Disposable Personal Income: Per Capita",
+        since: Date.new(1959, 1, 1)
+      },
+      {
+        ticker: "DSPI",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "DSPI",
+        kind: "univariate",
+        description: "Disposable Personal Income",
+        since: Date.new(1959, 1, 1)
+      },
+      {
+        ticker: "RRVRUSQ156N",
+        timeframe: "Q",
+        source: "FRED",
+        source_id: "RRVRUSQ156N",
+        kind: "univariate",
+        description: "Rental Vacancy Rate in the United States",
+        since: Date.new(1956, 1, 1)
+      },
+      {
+        ticker: "CBBTCUSD",
+        timeframe: "D1",
+        source: "FRED",
+        source_id: "CBBTCUSD",
+        kind: "univariate",
+        description: "Coinbase Bitcoin",
+        since: Date.new(2014, 12, 1)
+      },
+      {
+        ticker: "CBETHUSD",
+        timeframe: "D1",
+        source: "FRED",
+        source_id: "CBETHUSD",
+        kind: "univariate",
+        description: "Coinbase Ethereum",
+        since: Date.new(2016, 5, 18)
+      },
+      {
+        ticker: "CBLTCUSD",
+        timeframe: "D1",
+        source: "FRED",
+        source_id: "CBLTCUSD",
+        kind: "univariate",
+        description: "Coinbase Litecoin",
+        since: Date.new(2016, 8, 17)
       }
     ]
 
