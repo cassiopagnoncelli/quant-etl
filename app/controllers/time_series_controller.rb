@@ -7,7 +7,8 @@ class TimeSeriesController < ApplicationController
       earliest_ts = points.minimum(:ts)
       last_record = points.order(ts: :desc).first
       last_value = last_record&.main
-      { time_series: time_series, count: count, recent_ts: recent_ts, earliest_ts: earliest_ts, last: last_value }
+      up_to_date = time_series.up_to_date?
+      { time_series: time_series, count: count, recent_ts: recent_ts, earliest_ts: earliest_ts, last: last_value, up_to_date: up_to_date }
     end
   end
 

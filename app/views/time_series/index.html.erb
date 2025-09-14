@@ -9,7 +9,7 @@
   <% else %>
     <div class="time-series-list">
       <% @time_series.each do |ts_data| %>
-        <%= link_to time_series_path(ts_data[:time_series].ticker), class: "time-series-row" do %>
+        <%= link_to time_series_path(ts_data[:time_series].ticker), class: "time-series-row #{ts_data[:up_to_date] ? 'up-to-date' : 'not-up-to-date'}" do %>
           <div class="row-header">
             <div class="ticker-info">
               <h3 class="ticker-name">

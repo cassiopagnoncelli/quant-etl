@@ -5,6 +5,7 @@ class CreatePipeline < ActiveRecord::Migration[8.0]
 
       t.references :time_series, null: false, foreign_key: true
       t.string :chain, null: false
+      t.boolean :active, null: false, default: true
     end
   end
 end

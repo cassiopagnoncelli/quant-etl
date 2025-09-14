@@ -35,4 +35,44 @@ class TimeSeries < ApplicationRecord
   def self.find_by_source_mapping(source, source_id)
     find_by(source:, source_id:)
   end
+
+  # Determines if this time series is up to date
+  # A time series is up to date if no new data is expected to be fetched
+  def up_to_date?
+    latest_ts = points.maximum(:ts)
+    return false unless latest_ts
+
+    current_time = DateTime.current
+
+    case timeframe
+    when 'M1'  # 1 minute
+      # New data expected every minute
+      latest_ts >= current_time.beginning_of_minute
+    when 'H1'  # 1 hour
+      # New data expected every hour
+      latest_ts >= current_time.beginning_of_hour
+    when 'D1'  # Daily
+      # New data expected daily, but only after market close or next day
+      # Consider up to date if latest is yesterday or today
+      latest_ts.to_date >= current_time.to_date - 1.day
+    when 'W1'  # Weekly
+      # New data expected weekly
+      latest_ts >= current_time.beginning_of_week
+    when 'MN1' # Monthly
+      # New data expected monthly, but only after month closes
+      # Up to date if latest is from last month (current month data not ready yet)
+      latest_ts >= current_time.beginning_of_month - 1.month
+    when 'Q'   # Quarterly
+      # New data expected quarterly, but only after quarter closes
+      # Up to date if latest is from last quarter (current quarter data not ready yet)
+      latest_ts >= current_time.beginning_of_quarter - 3.months
+    when 'Y'   # Yearly
+      # New data expected yearly, but only after year closes
+      # Up to date if latest is from last year (current year data not ready yet)
+      latest_ts >= current_time.beginning_of_year - 1.year
+    else
+      # Unknown timeframe, assume not up to date
+      false
+    end
+  end
 end

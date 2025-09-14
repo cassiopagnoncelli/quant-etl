@@ -70,6 +70,27 @@ h2 {
   color: inherit;
 }
 
+/* Up-to-date status colors */
+.time-series-row.up-to-date {
+  border-left: 4px solid #27ae60;
+  background-color: #f8fff9;
+}
+
+.time-series-row.up-to-date:hover {
+  background-color: #f0fff4;
+  border-color: #27ae60;
+}
+
+.time-series-row.not-up-to-date {
+  border-left: 4px solid #f39c12;
+  background-color: #fffef8;
+}
+
+.time-series-row.not-up-to-date:hover {
+  background-color: #fffcf0;
+  border-color: #f39c12;
+}
+
 .row-header {
   display: flex;
   justify-content: space-between;
