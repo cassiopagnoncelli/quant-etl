@@ -13,40 +13,45 @@
     </div>
   </div>
 
-  <% if @pipelines.empty? %>
+  <% if @pipelines_data.empty? %>
     <div class="empty-state">
       <h3>No pipelines available</h3>
       <p>There are currently no ETL pipelines in the system.</p>
     </div>
   <% else %>
     <div class="pipelines-list">
-      <% @pipelines.each do |pipeline| %>
+      <% @pipelines_data.each do |pipeline_data| %>
+        <% pipeline = pipeline_data[:pipeline] %>
+        <% latest_run = pipeline_data[:latest_run] %>
+        <% run_counts = pipeline_data[:run_counts] %>
+        <% latest_timestamp = pipeline_data[:latest_timestamp] %>
+        
         <%= link_to pipeline_path(pipeline), class: "pipeline-row", data: { pipeline_id: pipeline.id } do %>
           <div class="row-header">
             <div class="pipeline-info">
               <h3 class="pipeline-title">
-                <%= pipeline.time_series.ticker %> <span class="latest-timestamp"><%= pipeline.latest_timestamp %></span>
+                <%= pipeline.time_series.ticker %> <span class="latest-timestamp"><%= latest_timestamp %></span>
               </h3>
               <div class="status-badges">
-                <span class="status-badge status-<%= pipeline.status %>">
-                  <%= pipeline.status.capitalize %>
+                <span class="status-badge status-<%= latest_run&.status || 'pending' %>">
+                  <%= (latest_run&.status || 'pending').capitalize %>
                 </span>
-                <span class="stage-badge stage-<%= pipeline.stage %>">
-                  <%= pipeline.stage.capitalize %>
+                <span class="stage-badge stage-<%= latest_run&.stage || 'start' %>">
+                  <%= (latest_run&.stage || 'start').capitalize %>
                 </span>
               </div>
             </div>
             <div class="pipeline-stats">
               <div class="stat-item">
-                <span class="stat-value" data-stat="total-runs"><%= pipeline.runs.count %></span>
+                <span class="stat-value" data-stat="total-runs"><%= run_counts[:total] %></span>
                 <span class="stat-label">Total Runs</span>
               </div>
               <div class="stat-item">
-                <span class="stat-value" data-stat="completed-runs"><%= pipeline.runs.where(status: 'COMPLETED').count %></span>
+                <span class="stat-value" data-stat="completed-runs"><%= run_counts[:completed] %></span>
                 <span class="stat-label">Completed</span>
               </div>
               <div class="stat-item">
-                <span class="stat-value" data-stat="failed-runs"><%= pipeline.runs.where(status: 'FAILED').count %></span>
+                <span class="stat-value" data-stat="failed-runs"><%= run_counts[:failed] %></span>
                 <span class="stat-label">Failed</span>
               </div>
             </div>

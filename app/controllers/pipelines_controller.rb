@@ -2,7 +2,72 @@ class PipelinesController < ApplicationController
   before_action :set_pipeline, only: [:show, :run, :destroy, :toggle_active]
 
   def index
-    @pipelines = Pipeline.includes(:time_series).order(created_at: :desc)
+    # Preload pipelines with their associations
+    pipelines_list = Pipeline.includes(:time_series, :pipeline_runs).order(created_at: :desc)
+    
+    # Get all pipeline IDs for bulk queries
+    pipeline_ids = pipelines_list.map(&:id)
+    
+    # Bulk query for pipeline run counts
+    run_counts = PipelineRun.where(pipeline_id: pipeline_ids)
+                           .group(:pipeline_id)
+                           .count
+    
+    # Bulk query for completed run counts
+    completed_counts = PipelineRun.where(pipeline_id: pipeline_ids, status: 'COMPLETED')
+                                 .group(:pipeline_id)
+                                 .count
+    
+    # Bulk query for failed run counts
+    failed_counts = PipelineRun.where(pipeline_id: pipeline_ids, status: 'FAILED')
+                              .group(:pipeline_id)
+                              .count
+    
+    # Bulk query for latest runs
+    latest_runs = PipelineRun.where(pipeline_id: pipeline_ids)
+                            .where(created_at: PipelineRun.where(pipeline_id: pipeline_ids)
+                                                         .group(:pipeline_id)
+                                                         .maximum(:created_at)
+                                                         .values)
+                            .index_by(&:pipeline_id)
+    
+    # Get all tickers for bulk timestamp queries
+    tickers = pipelines_list.map { |p| p.time_series.ticker }
+    
+    # Bulk query for latest timestamps - aggregates
+    aggregate_timestamps = Aggregate.where(ticker: tickers)
+                                   .group(:ticker)
+                                   .maximum(:ts)
+    
+    # Bulk query for latest timestamps - univariates  
+    univariate_timestamps = Univariate.where(ticker: tickers)
+                                      .group(:ticker)
+                                      .maximum(:ts)
+    
+    # Prepare optimized data structure
+    @pipelines_data = pipelines_list.map do |pipeline|
+      ticker = pipeline.time_series.ticker
+      latest_run = latest_runs[pipeline.id]
+      
+      # Get latest timestamp based on time series kind
+      latest_ts = case pipeline.time_series.kind
+                  when 'aggregate'
+                    aggregate_timestamps[ticker]
+                  when 'univariate'
+                    univariate_timestamps[ticker]
+                  end
+      
+      {
+        pipeline: pipeline,
+        latest_run: latest_run,
+        run_counts: {
+          total: run_counts[pipeline.id] || 0,
+          completed: completed_counts[pipeline.id] || 0,
+          failed: failed_counts[pipeline.id] || 0
+        },
+        latest_timestamp: latest_ts ? latest_ts.strftime('%Y-%m-%d') : 'N/A'
+      }
+    end
     
     respond_to do |format|
       format.html
