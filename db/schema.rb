@@ -55,6 +55,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_14_011552) do
     t.datetime "updated_at", null: false
     t.bigint "time_series_id", null: false
     t.string "chain", null: false
+    t.boolean "active", default: true, null: false
     t.index ["time_series_id"], name: "index_pipelines_on_time_series_id"
   end
 

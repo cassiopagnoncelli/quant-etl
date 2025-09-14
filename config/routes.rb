@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   resources :pipelines, only: [:index, :show, :new, :create, :destroy] do
     member do
       patch :run
+      patch :toggle_active
     end
     resources :pipeline_runs, only: [:index, :show, :create] do
       member do

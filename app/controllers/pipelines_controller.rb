@@ -1,5 +1,5 @@
 class PipelinesController < ApplicationController
-  before_action :set_pipeline, only: [:show, :run, :destroy]
+  before_action :set_pipeline, only: [:show, :run, :destroy, :toggle_active]
 
   def index
     @pipelines = Pipeline.includes(:time_series).order(created_at: :desc)
@@ -44,8 +44,19 @@ class PipelinesController < ApplicationController
   end
 
   def run
+    unless @pipeline.active?
+      redirect_to @pipeline, alert: 'Pipeline must be active to run.'
+      return
+    end
+    
     @pipeline.run_async!
     redirect_to @pipeline, notice: 'Pipeline has been started and is running in the background.'
+  end
+
+  def toggle_active
+    @pipeline.update!(active: !@pipeline.active?)
+    status_text = @pipeline.active? ? 'activated' : 'deactivated'
+    redirect_to @pipeline, notice: "Pipeline has been #{status_text}."
   end
 
   def destroy

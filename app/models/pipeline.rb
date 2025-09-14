@@ -14,6 +14,7 @@ class Pipeline < ApplicationRecord
 
   # Create a new pipeline run and execute it
   def run_async!
+    raise "Pipeline is not active" unless active?
     pipeline_run = pipeline_runs.create!
     pipeline_run.run_async!
   end
