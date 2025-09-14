@@ -95,7 +95,7 @@ class TimeSeriesController < ApplicationController
     
     outdated_series.each do |time_series|
       # Get all active pipelines for this time series that can run
-      runnable_pipelines = time_series.pipelines.where(active: true).select(&:can_run?)
+      runnable_pipelines = time_series.pipelines.where(active: true)
       
       if runnable_pipelines.any?
         time_series_had_success = false
