@@ -54,42 +54,6 @@ class TimeSeriesSeeder
         since: Date.new(2007, 12, 4)
       },
       {
-        ticker: "VVIX",
-        timeframe: "D1",
-        source: "CBOE",
-        source_id: "VVIX",
-        kind: "aggregate",
-        description: "CBOE VIX of VIX Index - volatility of volatility",
-        since: Date.new(2012, 5, 23)
-      },
-      {
-        ticker: "GVZ",
-        timeframe: "D1",
-        source: "CBOE",
-        source_id: "GVZ",
-        kind: "aggregate",
-        description: "CBOE Gold ETF Volatility Index - implied volatility of gold ETF",
-        since: Date.new(2008, 6, 3)
-      },
-      {
-        ticker: "OVX",
-        timeframe: "D1",
-        source: "CBOE",
-        source_id: "OVX",
-        kind: "aggregate",
-        description: "CBOE Crude Oil ETF Volatility Index - implied volatility of oil ETF",
-        since: Date.new(2007, 5, 10)
-      },
-      {
-        ticker: "EVZ",
-        timeframe: "D1",
-        source: "CBOE",
-        source_id: "EVZ",
-        kind: "aggregate",
-        description: "CBOE EuroCurrency ETF Volatility Index - implied volatility of euro ETF",
-        since: Date.new(2007, 12, 4)
-      },
-      {
         ticker: "RVX",
         timeframe: "D1",
         source: "CBOE",

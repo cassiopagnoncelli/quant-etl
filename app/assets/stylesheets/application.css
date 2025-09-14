@@ -37,6 +37,64 @@ h1 {
   text-align: center;
 }
 
+/* Header section with title and buttons */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.header-section h1 {
+  margin: 0;
+  text-align: left;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* Button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.btn-primary {
+  background-color: #3498db;
+  border-color: #3498db;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2980b9;
+  border-color: #2980b9;
+  color: white;
+  text-decoration: none;
+}
+
+.btn-primary:disabled {
+  background-color: #bdc3c7;
+  border-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.sync-btn {
+  font-weight: 600;
+}
+
 h2 {
   color: #34495e;
   font-size: 1.2rem;
@@ -89,6 +147,46 @@ h2 {
 .time-series-row.not-up-to-date:hover {
   background-color: #fffcf0;
   border-color: #f39c12;
+}
+
+/* No active pipelines - grey styling */
+.time-series-row.no-active-pipelines {
+  border-left: 4px solid #95a5a6;
+  background-color: #f8f9fa;
+  color: #7f8c8d;
+}
+
+.time-series-row.no-active-pipelines:hover {
+  background-color: #f1f2f6;
+  border-color: #95a5a6;
+}
+
+.time-series-row.no-active-pipelines .ticker-name {
+  color: #7f8c8d;
+}
+
+.time-series-row.no-active-pipelines .type-kind {
+  color: #95a5a6;
+}
+
+.time-series-row.no-active-pipelines .last-value {
+  color: #7f8c8d;
+}
+
+.time-series-row.no-active-pipelines .meta-label {
+  color: #95a5a6;
+}
+
+.time-series-row.no-active-pipelines .meta-value {
+  color: #7f8c8d;
+}
+
+.time-series-row.no-active-pipelines .info-icon {
+  color: #95a5a6;
+}
+
+.time-series-row.no-active-pipelines .info-icon:hover {
+  color: #7f8c8d;
 }
 
 .row-header {

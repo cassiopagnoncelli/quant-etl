@@ -4,7 +4,12 @@ Rails.application.routes.draw do
 
   get 'pages', to: 'pages#home'
 
-  resources :time_series, only: [:index, :show], param: :ticker
+  resources :time_series, only: [:index, :show], param: :ticker do
+    collection do
+      post :sync
+    end
+  end
+
   resources :pipelines, only: [:index, :show, :new, :create, :destroy] do
     member do
       patch :run

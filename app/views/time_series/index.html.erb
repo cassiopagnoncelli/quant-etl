@@ -1,5 +1,11 @@
 <div class="container">
-  <h1>Available Time Series</h1>
+  <div class="header-section">
+    <h1>Available Time Series</h1>
+    <div class="header-buttons">
+      <%= button_to "Sync", sync_time_series_index_path, method: :post, class: "btn btn-primary sync-btn", 
+                    data: { confirm: "This will run the first pipeline for each non-up-to-date time series. Continue?" } %>
+    </div>
+  </div>
 
   <% if @time_series.empty? %>
     <div class="empty-state">
@@ -9,7 +15,12 @@
   <% else %>
     <div class="time-series-list">
       <% @time_series.each do |ts_data| %>
-        <%= link_to time_series_path(ts_data[:time_series].ticker), class: "time-series-row #{ts_data[:up_to_date] ? 'up-to-date' : 'not-up-to-date'}" do %>
+        <% row_class = if ts_data[:has_active_pipelines]
+                         ts_data[:up_to_date] ? 'up-to-date' : 'not-up-to-date'
+                       else
+                         'no-active-pipelines'
+                       end %>
+        <%= link_to time_series_path(ts_data[:time_series].ticker), class: "time-series-row #{row_class}" do %>
           <div class="row-header">
             <div class="ticker-info">
               <h3 class="ticker-name">
