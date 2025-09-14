@@ -1,5 +1,5 @@
 class PipelinesController < ApplicationController
-  before_action :set_pipeline, only: [:show, :run]
+  before_action :set_pipeline, only: [:show, :run, :destroy]
 
   def index
     @pipelines = Pipeline.includes(:time_series).order(created_at: :desc)
@@ -41,6 +41,11 @@ class PipelinesController < ApplicationController
     else
       redirect_to @pipeline, alert: 'Pipeline cannot be run. It must be in pending status and start stage.'
     end
+  end
+
+  def destroy
+    @pipeline.destroy
+    redirect_to pipelines_path, notice: 'Pipeline was successfully deleted.'
   end
 
   private

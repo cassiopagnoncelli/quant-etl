@@ -1,6 +1,6 @@
 class Pipeline < ApplicationRecord
   belongs_to :time_series
-  has_many :pipeline_runs
+  has_many :pipeline_runs, dependent: :destroy
 
   validates :chain, presence: true
 
@@ -24,11 +24,11 @@ class Pipeline < ApplicationRecord
 
   # Delegate some methods to the latest run for convenience
   def status
-    latest_run&.status || 'pending'
+    latest_run&.status || 'PENDING'
   end
 
   def stage
-    latest_run&.stage || 'start'
+    latest_run&.stage || 'START'
   end
 
   def can_run?

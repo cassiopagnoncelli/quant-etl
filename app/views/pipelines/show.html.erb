@@ -25,6 +25,9 @@
             confirm: "Are you sure you want to run this pipeline?", 
             data: { turbo_method: :patch } %>
       <% end %>
+      <%= link_to "Remove", pipeline_path(@pipeline), method: :delete, class: "btn btn-danger", 
+          confirm: "Are you sure you want to delete this pipeline? This action cannot be undone.", 
+          data: { turbo_method: :delete } %>
     </div>
   </div>
 
@@ -157,9 +160,9 @@
       <div class="progress-indicator">
         <div class="progress-bar">
           <% stages = ['START', 'FETCH', 'TRANSFORM', 'IMPORT', 'POST_PROCESSING', 'FINISH'] %>
-          <% current_stage_index = stages.index(@pipeline.stage) %>
+          <% current_stage_index = stages.index(@pipeline.stage) || 0 %>
           <% stages.each_with_index do |stage, index| %>
-            <div class="progress-step <%= 'active' if index <= current_stage_index %> <%= 'current' if stage == @pipeline.stage %>">
+            <div class="progress-step <%= 'active' if current_stage_index && index <= current_stage_index %> <%= 'current' if stage == @pipeline.stage %>">
               <div class="step-marker"></div>
               <div class="step-label"><%= stage.capitalize %></div>
             </div>
@@ -234,6 +237,15 @@
 
   .btn-secondary:hover {
     background-color: #4b5563;
+  }
+
+  .btn-danger {
+    background-color: #dc2626;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background-color: #b91c1c;
   }
 
   .status-badges {

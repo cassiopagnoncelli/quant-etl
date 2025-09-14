@@ -6,7 +6,7 @@ class PipelineRun < ApplicationRecord
   enum :stage, STAGES.index_with(&:itself), default: :START
 
   belongs_to :pipeline
-  has_many :pipeline_run_logs
+  has_many :pipeline_run_logs, dependent: :destroy
 
   before_create :set_initial_values
 
