@@ -8,6 +8,7 @@ require 'date'
 
 class CboeFlat < PipelineChainBase
   BASE_URL = 'https://cdn.cboe.com/api/global/us_indices/daily_prices'
+  TRIES = 3
   
   VIX_INDICES = {
     'VIX' => 'VIX',
@@ -48,11 +49,7 @@ class CboeFlat < PipelineChainBase
     logger.info "Downloading CBOE data from: #{url}"
     
     uri = URI(url)
-    response = Net::HTTP.get_response(uri)
-    
-    unless response.is_a?(Net::HTTPSuccess)
-      raise "Failed to download CBOE data: HTTP #{response.code} - #{response.message}"
-    end
+    response = fetch_with_retry(uri)
     
     File.write(file_path, response.body)
     logger.info "CBOE data saved to: #{file_path}"
@@ -270,6 +267,30 @@ class CboeFlat < PipelineChainBase
     log_info "Cleanup completed: #{files_removed} files removed"
   end
   
+  def fetch_with_retry(uri)
+    tries = 0
+    begin
+      tries += 1
+      logger.info "Attempt #{tries}/#{TRIES} to fetch data from #{uri}"
+      
+      response = Net::HTTP.get_response(uri)
+      
+      unless response.is_a?(Net::HTTPSuccess)
+        raise "HTTP #{response.code} - #{response.message}"
+      end
+      
+      response
+    rescue StandardError => e
+      if tries < TRIES
+        logger.warn "Fetch attempt #{tries} failed: #{e.message}. Retrying..."
+        sleep(2 ** tries) # Exponential backoff: 2s, 4s, 8s
+        retry
+      else
+        raise "Failed to download CBOE data after #{TRIES} attempts: #{e.message}"
+      end
+    end
+  end
+
   def cleanup_downloaded_file
     return unless @downloaded_file_path && File.exist?(@downloaded_file_path)
     

@@ -9,6 +9,7 @@ require 'zlib'
 class PolygonFlat < PipelineChainBase
   ENDPOINT_URL = 'https://files.polygon.io'
   BUCKET_NAME = 'flatfiles'
+  TRIES = 3
   
   ASSET_CLASSES = {
     stocks: 'us_stocks_sip',
@@ -58,7 +59,7 @@ class PolygonFlat < PipelineChainBase
     
     logger.info "Downloading #{s3_path} to #{local_path}"
     
-    execute_download(s3_path, local_path)
+    download_with_retry(s3_path, local_path)
     
     @downloaded_file_path = local_path.to_s
   end
@@ -161,6 +162,26 @@ class PolygonFlat < PipelineChainBase
     subdir.join("#{date.strftime('%Y-%m-%d')}.csv.gz")
   end
   
+  def download_with_retry(s3_path, local_path)
+    tries = 0
+    begin
+      tries += 1
+      logger.info "Attempt #{tries}/#{TRIES} to download from #{s3_path}"
+      
+      execute_download(s3_path, local_path)
+      
+      logger.info "Successfully downloaded: #{local_path}"
+    rescue StandardError => e
+      if tries < TRIES
+        logger.warn "Download attempt #{tries} failed: #{e.message}. Retrying..."
+        sleep(2 ** tries) # Exponential backoff: 2s, 4s, 8s
+        retry
+      else
+        raise "Failed to download Polygon data after #{TRIES} attempts: #{e.message}"
+      end
+    end
+  end
+
   def execute_download(s3_path, local_path)
     cmd = [
       'aws', 's3', 'cp',
@@ -174,8 +195,6 @@ class PolygonFlat < PipelineChainBase
     unless status.success?
       raise "Failed to download file: #{stderr}"
     end
-    
-    logger.info "Successfully downloaded: #{local_path}"
   end
   
   def process_gzipped_file(records_to_insert, result, batch_size)

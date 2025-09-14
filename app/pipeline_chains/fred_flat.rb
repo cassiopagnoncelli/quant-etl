@@ -9,6 +9,7 @@ require 'date'
 
 class FredFlat < PipelineChainBase
   BASE_URL = 'https://api.stlouisfed.org/fred'
+  TRIES = 3
   
   def initialize(run)
     super(run)
@@ -51,21 +52,7 @@ class FredFlat < PipelineChainBase
     
     logger.info "Downloading FRED data from: #{uri}"
     
-    response = Net::HTTP.get_response(uri)
-    unless response.is_a?(Net::HTTPSuccess)
-      # Parse error response for better error messages
-      error_details = ""
-      begin
-        error_data = JSON.parse(response.body)
-        if error_data['error_message']
-          error_details = " - #{error_data['error_message']}"
-        end
-      rescue JSON::ParserError
-        # Ignore JSON parsing errors, use default message
-      end
-      
-      raise "Failed to download FRED data for series '#{ticker}': HTTP #{response.code} - #{response.message}#{error_details}"
-    end
+    response = fetch_with_retry(uri)
     
     # Parse JSON and convert to CSV
     data = JSON.parse(response.body)
@@ -419,6 +406,41 @@ class FredFlat < PipelineChainBase
     log_info "Cleanup completed: #{files_removed} files removed"
   end
   
+  def fetch_with_retry(uri)
+    tries = 0
+    begin
+      tries += 1
+      logger.info "Attempt #{tries}/#{TRIES} to fetch data from #{uri}"
+      
+      response = Net::HTTP.get_response(uri)
+      
+      unless response.is_a?(Net::HTTPSuccess)
+        # Parse error response for better error messages
+        error_details = ""
+        begin
+          error_data = JSON.parse(response.body)
+          if error_data['error_message']
+            error_details = " - #{error_data['error_message']}"
+          end
+        rescue JSON::ParserError
+          # Ignore JSON parsing errors, use default message
+        end
+        
+        raise "HTTP #{response.code} - #{response.message}#{error_details}"
+      end
+      
+      response
+    rescue StandardError => e
+      if tries < TRIES
+        logger.warn "Fetch attempt #{tries} failed: #{e.message}. Retrying..."
+        sleep(2 ** tries) # Exponential backoff: 2s, 4s, 8s
+        retry
+      else
+        raise "Failed to download FRED data for series '#{ticker}' after #{TRIES} attempts: #{e.message}"
+      end
+    end
+  end
+
   def cleanup_downloaded_file
     return unless @downloaded_file_path && File.exist?(@downloaded_file_path)
     
