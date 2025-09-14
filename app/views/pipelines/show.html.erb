@@ -77,7 +77,7 @@
         </div>
         <div class="detail-item">
           <span class="detail-label">Total Runs</span>
-          <span class="detail-value"><%= @pipeline.pipeline_runs.count %></span>
+          <span class="detail-value"><%= @pipeline.runs.count %></span>
         </div>
       </div>
     </div>
@@ -171,11 +171,11 @@
       </div>
     </div>
 
-    <% if @pipeline.latest_run&.pipeline_run_logs&.any? %>
+    <% if @pipeline.latest_run&.logs&.any? %>
       <div class="detail-section">
         <h2>Latest Run Logs</h2>
         <div class="logs-container">
-          <% @pipeline.latest_run.pipeline_run_logs.order(:created_at).each do |log| %>
+          <% @pipeline.latest_run.logs.order(:created_at).each do |log| %>
             <div class="log-entry <%= log.level %>">
               <div class="log-timestamp">
                 <%= log.created_at.strftime('%H:%M:%S.%L') %>

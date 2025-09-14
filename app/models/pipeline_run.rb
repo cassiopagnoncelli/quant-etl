@@ -7,6 +7,7 @@ class PipelineRun < ApplicationRecord
 
   belongs_to :pipeline
   has_many :pipeline_run_logs, dependent: :destroy
+  alias_method :logs, :pipeline_run_logs
 
   before_create :set_initial_values
 

@@ -1,6 +1,7 @@
 class Pipeline < ApplicationRecord
   belongs_to :time_series
   has_many :pipeline_runs, dependent: :destroy
+  alias_method :runs, :pipeline_runs
 
   validates :chain, presence: true
 
