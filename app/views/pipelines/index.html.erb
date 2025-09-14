@@ -16,7 +16,7 @@
           <div class="row-header">
             <div class="pipeline-info">
               <h3 class="pipeline-title">
-                <%= pipeline.time_series.ticker %> <span class="timestamp-badge"><%= pipeline.display_name.split(' ').last %></span>
+                <%= pipeline.time_series.ticker %> <span class="latest-timestamp"><%= pipeline.latest_timestamp %></span>
               </h3>
               <div class="status-badges">
                 <span class="status-badge status-<%= pipeline.status %>">
@@ -149,6 +149,13 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+  }
+
+  .latest-timestamp {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: #6b7280;
+    margin-left: 0.5rem;
   }
 
   .timestamp-badge {

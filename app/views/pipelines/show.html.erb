@@ -9,7 +9,7 @@
   
   <div class="page-header">
     <div class="header-left">
-      <h1><%= @pipeline.time_series.ticker %> <span class="timestamp-badge"><%= @pipeline.display_name.split(' ').last %></span></h1>
+      <h1><%= @pipeline.time_series.ticker %> <span class="latest-timestamp"><%= @pipeline.latest_timestamp %></span></h1>
       <div class="status-badges">
         <span class="status-badge status-<%= @pipeline.status %>">
           <%= @pipeline.status.capitalize %>
@@ -260,6 +260,13 @@
     display: flex;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
+  }
+
+  .latest-timestamp {
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: #6b7280;
+    margin-left: 0.5rem;
   }
 
   .timestamp-badge {

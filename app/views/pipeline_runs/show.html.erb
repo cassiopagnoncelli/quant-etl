@@ -11,7 +11,7 @@
     <div class="header-left">
       <h1>Pipeline Run #<%= @pipeline_run.id %></h1>
       <p class="subtitle">
-        <%= @pipeline.time_series.ticker %> <span class="timestamp-badge"><%= @pipeline.display_name.split(' ').last %></span>
+        <%= @pipeline.time_series.ticker %> <span class="latest-timestamp"><%= @pipeline.latest_timestamp %></span>
         <% if @pipeline_run == @pipeline.latest_run %>
           <span class="latest-badge">Latest Run</span>
         <% end %>
@@ -203,6 +203,7 @@
     margin: 0 0 0.5rem 0;
     font-size: 2rem;
     font-weight: 700;
+    text-align: left;
   }
 
   .subtitle {
@@ -272,6 +273,13 @@
     gap: 0.5rem;
     margin-bottom: 0.5rem;
     flex-wrap: wrap;
+  }
+
+  .latest-timestamp {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #6b7280;
+    margin-left: 0.5rem;
   }
 
   .timestamp-badge {

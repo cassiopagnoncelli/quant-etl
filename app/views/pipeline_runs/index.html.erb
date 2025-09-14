@@ -10,7 +10,7 @@
   <div class="page-header">
     <div class="header-left">
       <h1>Pipeline Runs</h1>
-      <p class="subtitle"><%= @pipeline.time_series.ticker %> <span class="timestamp-badge"><%= @pipeline.display_name.split(' ').last %></span></p>
+      <p class="subtitle"><%= @pipeline.time_series.ticker %> <span class="latest-timestamp"><%= @pipeline.latest_timestamp %></span></p>
     </div>
     <div class="header-actions">
       <% if @pipeline.can_run? %>
@@ -140,6 +140,13 @@
     margin: 0 0 0.5rem 0;
     color: #6b7280;
     font-size: 1rem;
+  }
+
+  .latest-timestamp {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #6b7280;
+    margin-left: 0.5rem;
   }
 
   .timestamp-badge {
