@@ -1,7 +1,16 @@
-<div class="container">
+<div class="container" data-controller="live-update" data-live-update-url-value="<%= pipelines_path(format: :json) %>" data-live-update-enabled-value="false">
   <div class="page-header">
     <h1>ETL Pipelines</h1>
-    <%= link_to "New Pipeline", new_pipeline_path, class: "btn btn-primary" %>
+    <div class="header-controls">
+      <div class="live-update-toggle">
+        <label class="toggle-label">
+          <input type="checkbox" data-live-update-target="toggle" data-action="change->live-update#toggle">
+          <span class="toggle-slider"></span>
+          Live Updates
+        </label>
+      </div>
+      <%= link_to "New Pipeline", new_pipeline_path, class: "btn btn-primary" %>
+    </div>
   </div>
 
   <% if @pipelines.empty? %>
@@ -12,7 +21,7 @@
   <% else %>
     <div class="pipelines-list">
       <% @pipelines.each do |pipeline| %>
-        <%= link_to pipeline_path(pipeline), class: "pipeline-row" do %>
+        <%= link_to pipeline_path(pipeline), class: "pipeline-row", data: { pipeline_id: pipeline.id } do %>
           <div class="row-header">
             <div class="pipeline-info">
               <h3 class="pipeline-title">
@@ -29,15 +38,15 @@
             </div>
             <div class="pipeline-stats">
               <div class="stat-item">
-                <span class="stat-value"><%= pipeline.runs.count %></span>
+                <span class="stat-value" data-stat="total-runs"><%= pipeline.runs.count %></span>
                 <span class="stat-label">Total Runs</span>
               </div>
               <div class="stat-item">
-                <span class="stat-value"><%= pipeline.runs.where(status: 'COMPLETED').count %></span>
+                <span class="stat-value" data-stat="completed-runs"><%= pipeline.runs.where(status: 'COMPLETED').count %></span>
                 <span class="stat-label">Completed</span>
               </div>
               <div class="stat-item">
-                <span class="stat-value"><%= pipeline.runs.where(status: 'FAILED').count %></span>
+                <span class="stat-value" data-stat="failed-runs"><%= pipeline.runs.where(status: 'FAILED').count %></span>
                 <span class="stat-label">Failed</span>
               </div>
             </div>

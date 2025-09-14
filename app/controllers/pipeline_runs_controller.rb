@@ -7,6 +7,10 @@ class PipelineRunsController < ApplicationController
   end
 
   def show
+    respond_to do |format|
+      format.html
+      format.json { render json: live_update_data_for_pipeline_run(@pipeline_run) }
+    end
   end
 
   def create
@@ -45,5 +49,27 @@ class PipelineRunsController < ApplicationController
 
   def set_pipeline_run
     @pipeline_run = @pipeline.pipeline_runs.find(params[:id])
+  end
+
+  def live_update_data_for_pipeline_run(pipeline_run)
+    {
+      id: pipeline_run.id,
+      status: pipeline_run.status,
+      stage: pipeline_run.stage,
+      updated_at: pipeline_run.updated_at,
+      latest_timestamp: pipeline_run.pipeline.latest_timestamp,
+      statistics: {
+        n_successful: pipeline_run.n_successful,
+        n_failed: pipeline_run.n_failed,
+        n_skipped: pipeline_run.n_skipped
+      },
+      logs: pipeline_run.logs.order(:created_at).limit(50).map do |log|
+        {
+          level: log.level,
+          message: log.message,
+          created_at: log.created_at
+        }
+      end
+    }
   end
 end

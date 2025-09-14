@@ -57,6 +57,49 @@ class PipelineRun < ApplicationRecord
     chain_instance.execute
   end
 
+  # Determines if this pipeline run is up to date
+  # A pipeline run is up to date if no new data is expected to be fetched
+  def up_to_date?
+    return false unless pipeline&.time_series
+
+    latest_ts = pipeline.time_series.points.maximum(:ts)
+    return false unless latest_ts
+
+    current_time = DateTime.current
+    timeframe = pipeline.time_series.timeframe
+
+    case timeframe
+    when 'M1'  # 1 minute
+      # New data expected every minute
+      latest_ts >= current_time.beginning_of_minute
+    when 'H1'  # 1 hour
+      # New data expected every hour
+      latest_ts >= current_time.beginning_of_hour
+    when 'D1'  # Daily
+      # New data expected daily, but only after market close or next day
+      # Consider up to date if latest is yesterday or today
+      latest_ts.to_date >= current_time.to_date - 1.day
+    when 'W1'  # Weekly
+      # New data expected weekly
+      latest_ts >= current_time.beginning_of_week
+    when 'MN1' # Monthly
+      # New data expected monthly, but only after month closes
+      # Up to date if latest is from last month (current month data not ready yet)
+      latest_ts >= current_time.beginning_of_month - 1.month
+    when 'Q'   # Quarterly
+      # New data expected quarterly, but only after quarter closes
+      # Up to date if latest is from last quarter (current quarter data not ready yet)
+      latest_ts >= current_time.beginning_of_quarter - 3.months
+    when 'Y'   # Yearly
+      # New data expected yearly, but only after year closes
+      # Up to date if latest is from last year (current year data not ready yet)
+      latest_ts >= current_time.beginning_of_year - 1.year
+    else
+      # Unknown timeframe, assume not up to date
+      false
+    end
+  end
+
   private
 
   def set_initial_values

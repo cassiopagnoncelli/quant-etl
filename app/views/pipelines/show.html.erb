@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container" data-controller="live-update" data-live-update-url-value="<%= pipeline_path(@pipeline, format: :json) %>" data-live-update-enabled-value="true">
   <%= link_to pipelines_path, class: 'back-link' do %>
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M19 12H5"></path>
@@ -20,6 +20,13 @@
       </div>
     </div>
     <div class="header-actions">
+      <div class="live-update-toggle">
+        <label class="toggle-label">
+          <input type="checkbox" data-live-update-target="toggle" data-action="change->live-update#toggle">
+          <span class="toggle-slider"></span>
+          Live Updates
+        </label>
+      </div>
       <%= link_to "Remove", pipeline_path(@pipeline), method: :delete, class: "btn btn-danger", 
           confirm: "Are you sure you want to delete this pipeline? This action cannot be undone. All pipeline runs and logs will be permanently lost.", 
           data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this pipeline? This action cannot be undone. All pipeline runs and logs will be permanently lost." } %>
@@ -75,7 +82,7 @@
         </div>
         <div class="detail-item">
           <span class="detail-label">Total Runs</span>
-          <span class="detail-value"><%= @pipeline.runs.count %></span>
+          <span class="detail-value" data-stat="total-runs"><%= @pipeline.runs.count %></span>
         </div>
       </div>
     </div>
@@ -87,28 +94,28 @@
           <div class="stat-card success">
             <div class="stat-icon">✓</div>
             <div class="stat-content">
-              <div class="stat-value"><%= number_with_delimiter(@pipeline.n_successful) %></div>
+              <div class="stat-value" data-stat="successful"><%= number_with_delimiter(@pipeline.n_successful) %></div>
               <div class="stat-label">Successful Operations</div>
             </div>
           </div>
           <div class="stat-card failed">
             <div class="stat-icon">✗</div>
             <div class="stat-content">
-              <div class="stat-value"><%= number_with_delimiter(@pipeline.n_failed) %></div>
+              <div class="stat-value" data-stat="failed"><%= number_with_delimiter(@pipeline.n_failed) %></div>
               <div class="stat-label">Failed Operations</div>
             </div>
           </div>
           <div class="stat-card skipped">
             <div class="stat-icon">⊘</div>
             <div class="stat-content">
-              <div class="stat-value"><%= number_with_delimiter(@pipeline.n_skipped) %></div>
+              <div class="stat-value" data-stat="skipped"><%= number_with_delimiter(@pipeline.n_skipped) %></div>
               <div class="stat-label">Skipped Operations</div>
             </div>
           </div>
           <div class="stat-card total">
             <div class="stat-icon">Σ</div>
             <div class="stat-content">
-              <div class="stat-value"><%= number_with_delimiter(@pipeline.n_successful + @pipeline.n_failed + @pipeline.n_skipped) %></div>
+              <div class="stat-value" data-stat="total"><%= number_with_delimiter(@pipeline.n_successful + @pipeline.n_failed + @pipeline.n_skipped) %></div>
               <div class="stat-label">Total Operations</div>
             </div>
           </div>
