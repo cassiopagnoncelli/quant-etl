@@ -1,11 +1,21 @@
 <div class="container" data-controller="live-update" data-live-update-url-value="<%= pipeline_path(@pipeline, format: :json) %>" data-live-update-enabled-value="true">
-  <%= link_to pipelines_path, class: 'back-link' do %>
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M19 12H5"></path>
-      <path d="M12 19l-7-7 7-7"></path>
-    </svg>
-    Back to Pipelines
-  <% end %>
+  <div class="top-navigation">
+    <%= link_to pipelines_path, class: 'back-link' do %>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5"></path>
+        <path d="M12 19l-7-7 7-7"></path>
+      </svg>
+      Back to Pipelines
+    <% end %>
+    
+    <div class="live-update-toggle">
+      <label class="toggle-label">
+        <input type="checkbox" data-live-update-target="toggle" data-action="change->live-update#toggle">
+        <span class="toggle-slider"></span>
+        Live Updates
+      </label>
+    </div>
+  </div>
   
   <div class="page-header">
     <div class="header-left">
@@ -20,13 +30,6 @@
       </div>
     </div>
     <div class="header-actions">
-      <div class="live-update-toggle">
-        <label class="toggle-label">
-          <input type="checkbox" data-live-update-target="toggle" data-action="change->live-update#toggle">
-          <span class="toggle-slider"></span>
-          Live Updates
-        </label>
-      </div>
       <%= link_to "Remove", pipeline_path(@pipeline), method: :delete, class: "btn btn-danger", 
           confirm: "Are you sure you want to delete this pipeline? This action cannot be undone. All pipeline runs and logs will be permanently lost.", 
           data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this pipeline? This action cannot be undone. All pipeline runs and logs will be permanently lost." } %>
@@ -200,6 +203,26 @@
 </div>
 
 <style>
+  .top-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 0.875rem;
+  }
+
+  .back-link:hover {
+    color: #3b82f6;
+  }
+
   .page-header {
     display: flex;
     justify-content: space-between;
