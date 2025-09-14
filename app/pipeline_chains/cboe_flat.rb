@@ -38,7 +38,7 @@ class CboeFlat < PipelineChainBase
     file_path = @download_dir.join("#{ticker}_#{Date.current.strftime('%Y%m%d')}.csv")
     
     if file_path.exist?
-      logger.info "File already exists: #{file_path}"
+      log_info "File already exists: #{file_path}"
       @downloaded_file_path = file_path.to_s
       return
     end
@@ -46,13 +46,13 @@ class CboeFlat < PipelineChainBase
     cboe_symbol = VIX_INDICES[ticker] || ticker
     url = "#{BASE_URL}/#{cboe_symbol}_History.csv"
     
-    logger.info "Downloading CBOE data from: #{url}"
+    log_info "Downloading CBOE data from: #{url}"
     
     uri = URI(url)
     response = fetch_with_retry(uri)
     
     File.write(file_path, response.body)
-    logger.info "CBOE data saved to: #{file_path}"
+    log_info "CBOE data saved to: #{file_path}"
     
     @downloaded_file_path = file_path.to_s
   end
@@ -60,8 +60,8 @@ class CboeFlat < PipelineChainBase
   def execute_import_stage
     raise "No file to import" unless @downloaded_file_path && File.exist?(@downloaded_file_path)
     
-    logger.info "Importing CBOE data from: #{@downloaded_file_path}"
-    logger.info "Ticker: #{ticker}, Timeframe: #{timeframe}"
+    log_info "Importing CBOE data from: #{@downloaded_file_path}"
+    log_info "Ticker: #{ticker}, Timeframe: #{timeframe}"
 
     result = {
       file: @downloaded_file_path,
@@ -114,12 +114,12 @@ class CboeFlat < PipelineChainBase
         result[:errors] += 1
         error_detail = "Row #{index + 2}: #{e.message}"
         result[:error_details] << error_detail
-        logger.error error_detail
+        log_error error_detail
         increment_counter(:failed)
         
         # Stop processing if too many errors
         if result[:errors] > 100
-          logger.error "Too many errors, stopping import"
+          log_error "Too many errors, stopping import"
           break
         end
       end
@@ -202,7 +202,7 @@ class CboeFlat < PipelineChainBase
       records.count
     rescue ActiveRecord::RecordNotUnique
       # Handle duplicates by inserting one by one
-      logger.warn "Duplicate records detected, falling back to individual inserts"
+      log_warn "Duplicate records detected, falling back to individual inserts"
       
       inserted = 0
       records.each do |record_attributes|
@@ -216,29 +216,29 @@ class CboeFlat < PipelineChainBase
       
       inserted
     rescue StandardError => e
-      logger.error "Failed to batch insert aggregates: #{e.message}"
+      log_error "Failed to batch insert aggregates: #{e.message}"
       0
     end
   end
   
   def log_import_results(result)
-    logger.info "=" * 50
-    logger.info "Import completed for #{result[:ticker]}"
-    logger.info "File: #{result[:file]}"
-    logger.info "Total rows: #{result[:total_rows]}"
-    logger.info "Imported: #{result[:imported]}"
-    logger.info "Updated: #{result[:updated]}"
-    logger.info "Skipped: #{result[:skipped]}"
-    logger.info "Errors: #{result[:errors]}"
+    log_info "=" * 50
+    log_info "Import completed for #{result[:ticker]}"
+    log_info "File: #{result[:file]}"
+    log_info "Total rows: #{result[:total_rows]}"
+    log_info "Imported: #{result[:imported]}"
+    log_info "Updated: #{result[:updated]}"
+    log_info "Skipped: #{result[:skipped]}"
+    log_info "Errors: #{result[:errors]}"
     
     if result[:error_details].any?
-      logger.info "Error details (first 10):"
+      log_info "Error details (first 10):"
       result[:error_details].first(10).each do |error|
-        logger.info "  - #{error}"
+        log_info "  - #{error}"
       end
     end
     
-    logger.info "=" * 50
+    log_info "=" * 50
   end
   
   def cleanup_old_files
@@ -271,7 +271,7 @@ class CboeFlat < PipelineChainBase
     tries = 0
     begin
       tries += 1
-      logger.info "Attempt #{tries}/#{TRIES} to fetch data from #{uri}"
+      log_info "Attempt #{tries}/#{TRIES} to fetch data from #{uri}"
       
       response = Net::HTTP.get_response(uri)
       
@@ -282,7 +282,7 @@ class CboeFlat < PipelineChainBase
       response
     rescue StandardError => e
       if tries < TRIES
-        logger.warn "Fetch attempt #{tries} failed: #{e.message}. Retrying..."
+        log_warn "Fetch attempt #{tries} failed: #{e.message}. Retrying..."
         sleep(2 ** tries) # Exponential backoff: 2s, 4s, 8s
         retry
       else

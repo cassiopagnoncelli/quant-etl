@@ -14,7 +14,8 @@ class PipelineChainBase
     @logger = Rails.logger
   end
 
-  # Log message to both Rails logger and PipelineRunLog
+  # PipelineRun logger methods - log to both Rails logger and PipelineRunLog
+  # These methods should be used instead of direct Rails.logger calls
   def log_info(message)
     @logger.info message
     create_log_entry(message, 'info') if @run.persisted?

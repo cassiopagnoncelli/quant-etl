@@ -29,7 +29,7 @@ class FredFlat < PipelineChainBase
     file_path = @download_dir.join("#{ticker}_#{Date.current.strftime('%Y%m%d')}.csv")
     
     if file_path.exist?
-      logger.info "File already exists: #{file_path}"
+      log_info "File already exists: #{file_path}"
       @downloaded_file_path = file_path.to_s
       return
     end
@@ -45,12 +45,12 @@ class FredFlat < PipelineChainBase
     }
     
     # Fetch all historical data (no start date specified)
-    logger.info "Fetching all available historical data for #{ticker} (from series inception)"
+    log_info "Fetching all available historical data for #{ticker} (from series inception)"
     
     uri = URI("#{BASE_URL}/series/observations")
     uri.query = URI.encode_www_form(params)
     
-    logger.info "Downloading FRED data from: #{uri}"
+    log_info "Downloading FRED data from: #{uri}"
     
     response = fetch_with_retry(uri)
     
@@ -58,15 +58,15 @@ class FredFlat < PipelineChainBase
     data = JSON.parse(response.body)
     convert_json_to_csv(data, file_path)
     
-    logger.info "FRED data saved to: #{file_path}"
+    log_info "FRED data saved to: #{file_path}"
     @downloaded_file_path = file_path.to_s
   end
   
   def execute_import_stage
     raise "No file to import" unless @downloaded_file_path && File.exist?(@downloaded_file_path)
     
-    logger.info "Importing FRED data from: #{@downloaded_file_path}"
-    logger.info "Ticker: #{ticker}, Timeframe: #{timeframe}"
+    log_info "Importing FRED data from: #{@downloaded_file_path}"
+    log_info "Ticker: #{ticker}, Timeframe: #{timeframe}"
 
     # Determine model based on time_series kind
     model = determine_model
@@ -174,12 +174,12 @@ class FredFlat < PipelineChainBase
         result[:errors] += 1
         error_detail = "Row #{index + 2}: #{e.message}"
         result[:error_details] << error_detail
-        logger.error error_detail
+        log_error error_detail
         increment_counter(:failed)
         
         # Stop processing if too many errors
         if result[:errors] > 100
-          logger.error "Too many errors, stopping import"
+          log_error "Too many errors, stopping import"
           break
         end
       end
@@ -234,12 +234,12 @@ class FredFlat < PipelineChainBase
         result[:errors] += 1
         error_detail = "Row #{index + 2}: #{e.message}"
         result[:error_details] << error_detail
-        logger.error error_detail
+        log_error error_detail
         increment_counter(:failed)
         
         # Stop processing if too many errors
         if result[:errors] > 100
-          logger.error "Too many errors, stopping import"
+          log_error "Too many errors, stopping import"
           break
         end
       end
@@ -314,7 +314,7 @@ class FredFlat < PipelineChainBase
       records.count
     rescue ActiveRecord::RecordNotUnique
       # Handle duplicates by inserting one by one
-      logger.warn "Duplicate records detected, falling back to individual inserts"
+      log_warn "Duplicate records detected, falling back to individual inserts"
       
       inserted = 0
       records.each do |record_attributes|
@@ -328,7 +328,7 @@ class FredFlat < PipelineChainBase
       
       inserted
     rescue StandardError => e
-      logger.error "Failed to batch insert univariates: #{e.message}"
+      log_error "Failed to batch insert univariates: #{e.message}"
       0
     end
   end
@@ -341,7 +341,7 @@ class FredFlat < PipelineChainBase
       records.count
     rescue ActiveRecord::RecordNotUnique
       # Handle duplicates by inserting one by one
-      logger.warn "Duplicate records detected, falling back to individual inserts"
+      log_warn "Duplicate records detected, falling back to individual inserts"
       
       inserted = 0
       records.each do |record_attributes|
@@ -355,29 +355,29 @@ class FredFlat < PipelineChainBase
       
       inserted
     rescue StandardError => e
-      logger.error "Failed to batch insert aggregates: #{e.message}"
+      log_error "Failed to batch insert aggregates: #{e.message}"
       0
     end
   end
   
   def log_import_results(result)
-    logger.info "=" * 50
-    logger.info "Import completed for #{result[:ticker]} (#{result[:model]})"
-    logger.info "File: #{result[:file]}"
-    logger.info "Total rows: #{result[:total_rows]}"
-    logger.info "Imported: #{result[:imported]}"
-    logger.info "Updated: #{result[:updated]}"
-    logger.info "Skipped: #{result[:skipped]}"
-    logger.info "Errors: #{result[:errors]}"
+    log_info "=" * 50
+    log_info "Import completed for #{result[:ticker]} (#{result[:model]})"
+    log_info "File: #{result[:file]}"
+    log_info "Total rows: #{result[:total_rows]}"
+    log_info "Imported: #{result[:imported]}"
+    log_info "Updated: #{result[:updated]}"
+    log_info "Skipped: #{result[:skipped]}"
+    log_info "Errors: #{result[:errors]}"
     
     if result[:error_details].any?
-      logger.info "Error details (first 10):"
+      log_info "Error details (first 10):"
       result[:error_details].first(10).each do |error|
-        logger.info "  - #{error}"
+        log_info "  - #{error}"
       end
     end
     
-    logger.info "=" * 50
+    log_info "=" * 50
   end
   
   def cleanup_old_files
@@ -410,7 +410,7 @@ class FredFlat < PipelineChainBase
     tries = 0
     begin
       tries += 1
-      logger.info "Attempt #{tries}/#{TRIES} to fetch data from #{uri}"
+      log_info "Attempt #{tries}/#{TRIES} to fetch data from #{uri}"
       
       response = Net::HTTP.get_response(uri)
       
@@ -432,7 +432,7 @@ class FredFlat < PipelineChainBase
       response
     rescue StandardError => e
       if tries < TRIES
-        logger.warn "Fetch attempt #{tries} failed: #{e.message}. Retrying..."
+        log_warn "Fetch attempt #{tries} failed: #{e.message}. Retrying..."
         sleep(2 ** tries) # Exponential backoff: 2s, 4s, 8s
         retry
       else
