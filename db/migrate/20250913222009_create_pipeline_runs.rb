@@ -1,9 +1,9 @@
-class CreatePipelines < ActiveRecord::Migration[8.0]
+class CreatePipelineRuns < ActiveRecord::Migration[8.0]
   def change
-    create_table :pipelines, if_not_exists: true do |t|
+    create_table :pipeline_runs, if_not_exists: true do |t|
       t.timestamps
 
-      t.references :time_series, null: false, foreign_key: true
+      t.references :pipeline, null: false, foreign_key: true
 
       t.string :status, null: false
       t.string :stage, null: false

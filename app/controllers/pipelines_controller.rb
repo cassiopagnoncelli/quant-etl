@@ -11,6 +11,11 @@ class PipelinesController < ApplicationController
   def new
     @pipeline = Pipeline.new
     @time_series_options = TimeSeries.all.map { |ts| [ts.ticker, ts.id] }
+    @chain_options = [
+      ['CBOE Flat', 'CboeFlat'],
+      ['Fred Flat', 'FredFlat'],
+      ['Polygon Flat', 'PolygonFlat']
+    ]
   end
 
   def create
@@ -20,6 +25,11 @@ class PipelinesController < ApplicationController
       redirect_to @pipeline, notice: 'Pipeline was successfully created.'
     else
       @time_series_options = TimeSeries.all.map { |ts| [ts.ticker, ts.id] }
+      @chain_options = [
+        ['CBOE Flat', 'CboeFlat'],
+        ['Fred Flat', 'FredFlat'],
+        ['Polygon Flat', 'PolygonFlat']
+      ]
       render :new, status: :unprocessable_entity
     end
   end
@@ -40,6 +50,6 @@ class PipelinesController < ApplicationController
   end
 
   def pipeline_params
-    params.require(:pipeline).permit(:time_series_id, :status, :stage, :n_successful, :n_failed, :n_skipped)
+    params.require(:pipeline).permit(:time_series_id, :chain)
   end
 end

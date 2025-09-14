@@ -14,7 +14,8 @@ class TimeSeriesSeeder
         source: "CBOE",
         source_id: "VIX",
         kind: "aggregate",
-        description: "CBOE Volatility Index - 30-day implied volatility of S&P 500 options"
+        description: "CBOE Volatility Index - 30-day implied volatility of S&P 500 options",
+        since: Date.new(1990, 1, 2)
       },
       {
         ticker: "VIX9D",
@@ -22,7 +23,8 @@ class TimeSeriesSeeder
         source: "CBOE",
         source_id: "VIX9D",
         kind: "aggregate",
-        description: "CBOE 9-Day Volatility Index - 9-day implied volatility"
+        description: "CBOE 9-Day Volatility Index - 9-day implied volatility",
+        since: Date.new(2007, 12, 4)
       },
       {
         ticker: "VIX3M",
@@ -30,7 +32,8 @@ class TimeSeriesSeeder
         source: "CBOE",
         source_id: "VIX3M",
         kind: "aggregate",
-        description: "CBOE 3-Month Volatility Index - 3-month implied volatility"
+        description: "CBOE 3-Month Volatility Index - 3-month implied volatility",
+        since: Date.new(2007, 12, 4)
       },
       {
         ticker: "VIX6M",
@@ -38,7 +41,8 @@ class TimeSeriesSeeder
         source: "CBOE",
         source_id: "VIX6M",
         kind: "aggregate",
-        description: "CBOE 6-Month Volatility Index - 6-month implied volatility"
+        description: "CBOE 6-Month Volatility Index - 6-month implied volatility",
+        since: Date.new(2007, 12, 4)
       },
       {
         ticker: "VIX1Y",
@@ -46,7 +50,8 @@ class TimeSeriesSeeder
         source: "CBOE",
         source_id: "VIX1Y",
         kind: "aggregate",
-        description: "CBOE 1-Year Volatility Index - 1-year implied volatility"
+        description: "CBOE 1-Year Volatility Index - 1-year implied volatility",
+        since: Date.new(2007, 12, 4)
       },
       {
         ticker: "VVIX",
@@ -54,7 +59,8 @@ class TimeSeriesSeeder
         source: "CBOE",
         source_id: "VVIX",
         kind: "aggregate",
-        description: "CBOE VIX of VIX Index - volatility of volatility"
+        description: "CBOE VIX of VIX Index - volatility of volatility",
+        since: Date.new(2012, 5, 23)
       },
       {
         ticker: "GVZ",
@@ -62,7 +68,8 @@ class TimeSeriesSeeder
         source: "CBOE",
         source_id: "GVZ",
         kind: "aggregate",
-        description: "CBOE Gold ETF Volatility Index - implied volatility of gold ETF"
+        description: "CBOE Gold ETF Volatility Index - implied volatility of gold ETF",
+        since: Date.new(2008, 6, 3)
       },
       {
         ticker: "OVX",
@@ -70,7 +77,8 @@ class TimeSeriesSeeder
         source: "CBOE",
         source_id: "OVX",
         kind: "aggregate",
-        description: "CBOE Crude Oil ETF Volatility Index - implied volatility of oil ETF"
+        description: "CBOE Crude Oil ETF Volatility Index - implied volatility of oil ETF",
+        since: Date.new(2007, 5, 10)
       },
       {
         ticker: "EVZ",
@@ -78,7 +86,8 @@ class TimeSeriesSeeder
         source: "CBOE",
         source_id: "EVZ",
         kind: "aggregate",
-        description: "CBOE EuroCurrency ETF Volatility Index - implied volatility of euro ETF"
+        description: "CBOE EuroCurrency ETF Volatility Index - implied volatility of euro ETF",
+        since: Date.new(2007, 12, 4)
       },
       {
         ticker: "RVX",
@@ -86,7 +95,8 @@ class TimeSeriesSeeder
         source: "CBOE",
         source_id: "RVX",
         kind: "aggregate",
-        description: "CBOE Russell 2000 Volatility Index - implied volatility of Russell 2000"
+        description: "CBOE Russell 2000 Volatility Index - implied volatility of Russell 2000",
+        since: Date.new(2004, 1, 2)
       }
     ]
 
@@ -100,7 +110,8 @@ class TimeSeriesSeeder
         source: "FRED",
         source_id: "M2SL",
         kind: "univariate",
-        description: "M2 Money Stock (seasonally adjusted) - broad measure of money supply"
+        description: "M2 Money Stock (seasonally adjusted) - broad measure of money supply",
+        since: Date.new(1959, 1, 1)
       },
       {
         ticker: "GDP",
@@ -108,7 +119,8 @@ class TimeSeriesSeeder
         source: "FRED",
         source_id: "GDP",
         kind: "univariate",
-        description: "Gross Domestic Product - total economic output"
+        description: "Gross Domestic Product - total economic output",
+        since: Date.new(1947, 1, 1)
       },
       {
         ticker: "UNRATE",
@@ -116,7 +128,8 @@ class TimeSeriesSeeder
         source: "FRED",
         source_id: "UNRATE",
         kind: "univariate",
-        description: "Civilian Unemployment Rate - percentage of labor force unemployed"
+        description: "Civilian Unemployment Rate - percentage of labor force unemployed",
+        since: Date.new(1948, 1, 1)
       },
       {
         ticker: "CPIAUCSL",
@@ -124,7 +137,8 @@ class TimeSeriesSeeder
         source: "FRED",
         source_id: "CPIAUCSL",
         kind: "univariate",
-        description: "Consumer Price Index for All Urban Consumers - inflation measure"
+        description: "Consumer Price Index for All Urban Consumers - inflation measure",
+        since: Date.new(1947, 1, 1)
       },
       
       # Interest Rates
@@ -134,7 +148,8 @@ class TimeSeriesSeeder
         source: "FRED",
         source_id: "DGS10",
         kind: "univariate",
-        description: "10-Year Treasury Constant Maturity Rate - long-term interest rate benchmark"
+        description: "10-Year Treasury Constant Maturity Rate - long-term interest rate benchmark",
+        since: Date.new(1962, 1, 2)
       },
       {
         ticker: "DGS2",
@@ -142,7 +157,8 @@ class TimeSeriesSeeder
         source: "FRED",
         source_id: "DGS2",
         kind: "univariate",
-        description: "2-Year Treasury Constant Maturity Rate - short-term interest rate benchmark"
+        description: "2-Year Treasury Constant Maturity Rate - short-term interest rate benchmark",
+        since: Date.new(1976, 6, 1)
       },
       {
         ticker: "DFF",
@@ -150,7 +166,8 @@ class TimeSeriesSeeder
         source: "FRED",
         source_id: "DFF",
         kind: "univariate",
-        description: "Effective Federal Funds Rate - overnight interbank lending rate"
+        description: "Effective Federal Funds Rate - overnight interbank lending rate",
+        since: Date.new(1954, 7, 1)
       },
       
       # Markets & Commodities
@@ -160,7 +177,8 @@ class TimeSeriesSeeder
         source: "FRED",
         source_id: "DTWEXBGS",
         kind: "univariate",
-        description: "Trade Weighted U.S. Dollar Index: Broad - dollar strength measure"
+        description: "Trade Weighted U.S. Dollar Index: Broad - dollar strength measure",
+        since: Date.new(1973, 1, 2)
       },
       {
         ticker: "DCOILWTICO",
@@ -168,7 +186,8 @@ class TimeSeriesSeeder
         source: "FRED",
         source_id: "DCOILWTICO",
         kind: "univariate",
-        description: "Crude Oil Prices: West Texas Intermediate (WTI) - oil price benchmark"
+        description: "Crude Oil Prices: West Texas Intermediate (WTI) - oil price benchmark",
+        since: Date.new(1986, 1, 2)
       },
       {
         ticker: "DCOILBRENTEU",
@@ -176,7 +195,8 @@ class TimeSeriesSeeder
         source: "FRED",
         source_id: "DCOILBRENTEU",
         kind: "univariate",
-        description: "Crude Oil Prices: Brent - Europe - international oil price benchmark"
+        description: "Crude Oil Prices: Brent - Europe - international oil price benchmark",
+        since: Date.new(1987, 5, 20)
       },
       {
         ticker: "GOLDAMGBD228NLBM",
@@ -184,7 +204,8 @@ class TimeSeriesSeeder
         source: "FRED",
         source_id: "GOLDAMGBD228NLBM",
         kind: "univariate",
-        description: "Gold Fixing Price 3:00 P.M. (London time) in London Bullion Market"
+        description: "Gold Fixing Price 3:00 P.M. (London time) in London Bullion Market",
+        since: Date.new(1968, 4, 1)
       },
       {
         ticker: "SP500",
@@ -192,7 +213,8 @@ class TimeSeriesSeeder
         source: "FRED",
         source_id: "SP500",
         kind: "univariate",
-        description: "S&P 500 Index - broad U.S. stock market benchmark"
+        description: "S&P 500 Index - broad U.S. stock market benchmark",
+        since: Date.new(1957, 1, 3)
       }
     ]
 

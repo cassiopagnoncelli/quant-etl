@@ -9,6 +9,7 @@ class CreateTimeSeries < ActiveRecord::Migration[8.0]
       t.string :source_id, null: false
       t.string :kind, null: false
       t.string :description
+      t.date :since
     end
   end
 end

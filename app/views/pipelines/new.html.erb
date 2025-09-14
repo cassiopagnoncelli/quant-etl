@@ -28,45 +28,12 @@
           <div class="form-help">Choose the time series this pipeline will process.</div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <%= form.label :status, class: "form-label" %>
-            <%= form.select :status, options_for_select(Pipeline::STATUSES.map { |s| [s.capitalize, s] }, @pipeline.status), 
-                           {}, { class: "form-select" } %>
-            <div class="form-help">Current status of the pipeline.</div>
-          </div>
-
-          <div class="form-group">
-            <%= form.label :stage, class: "form-label" %>
-            <%= form.select :stage, options_for_select(Pipeline::STAGES.map { |s| [s.capitalize, s] }, @pipeline.stage), 
-                           {}, { class: "form-select" } %>
-            <div class="form-help">Current stage of the pipeline process.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <h2>Operation Counters</h2>
-        <div class="form-help section-help">These counters track the number of operations performed by the pipeline.</div>
-        
-        <div class="form-row">
-          <div class="form-group">
-            <%= form.label :n_successful, "Successful Operations", class: "form-label" %>
-            <%= form.number_field :n_successful, min: 0, class: "form-input", placeholder: "0" %>
-            <div class="form-help">Number of successful operations.</div>
-          </div>
-
-          <div class="form-group">
-            <%= form.label :n_failed, "Failed Operations", class: "form-label" %>
-            <%= form.number_field :n_failed, min: 0, class: "form-input", placeholder: "0" %>
-            <div class="form-help">Number of failed operations.</div>
-          </div>
-
-          <div class="form-group">
-            <%= form.label :n_skipped, "Skipped Operations", class: "form-label" %>
-            <%= form.number_field :n_skipped, min: 0, class: "form-input", placeholder: "0" %>
-            <div class="form-help">Number of skipped operations.</div>
-          </div>
+        <div class="form-group">
+          <%= form.label :chain, "Pipeline Chain", class: "form-label" %>
+          <%= form.select :chain, options_for_select(@chain_options), 
+                         { prompt: "Select a pipeline chain..." }, 
+                         { class: "form-select" } %>
+          <div class="form-help">Choose the pipeline chain implementation to use.</div>
         </div>
       </div>
 

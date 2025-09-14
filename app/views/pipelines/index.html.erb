@@ -19,6 +19,7 @@
               <h3 class="pipeline-title">
                 Pipeline #<%= pipeline.id %>
                 <span class="ticker-badge"><%= pipeline.time_series.ticker %></span>
+                <span class="chain-badge"><%= pipeline.chain %></span>
               </h3>
               <div class="status-badges">
                 <span class="status-badge status-<%= pipeline.status %>">
@@ -30,18 +31,25 @@
               </div>
             </div>
             <div class="pipeline-stats">
-              <div class="stat-item success">
-                <span class="stat-value"><%= number_with_delimiter(pipeline.n_successful) %></span>
-                <span class="stat-label">Success</span>
-              </div>
-              <div class="stat-item failed">
-                <span class="stat-value"><%= number_with_delimiter(pipeline.n_failed) %></span>
-                <span class="stat-label">Failed</span>
-              </div>
-              <div class="stat-item skipped">
-                <span class="stat-value"><%= number_with_delimiter(pipeline.n_skipped) %></span>
-                <span class="stat-label">Skipped</span>
-              </div>
+              <% if pipeline.latest_run %>
+                <div class="stat-item success">
+                  <span class="stat-value"><%= number_with_delimiter(pipeline.latest_run.n_successful) %></span>
+                  <span class="stat-label">Success</span>
+                </div>
+                <div class="stat-item failed">
+                  <span class="stat-value"><%= number_with_delimiter(pipeline.latest_run.n_failed) %></span>
+                  <span class="stat-label">Failed</span>
+                </div>
+                <div class="stat-item skipped">
+                  <span class="stat-value"><%= number_with_delimiter(pipeline.latest_run.n_skipped) %></span>
+                  <span class="stat-label">Skipped</span>
+                </div>
+              <% else %>
+                <div class="stat-item">
+                  <span class="stat-value">-</span>
+                  <span class="stat-label">No runs yet</span>
+                </div>
+              <% end %>
             </div>
           </div>
           

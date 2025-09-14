@@ -7,238 +7,59 @@ RSpec.describe Pipeline, type: :model do
   describe 'validations' do
     subject { described_class.new(valid_attributes) }
 
-    it { is_expected.to validate_presence_of(:status) }
-    it { is_expected.to validate_presence_of(:stage) }
-    it { is_expected.to validate_presence_of(:n_successful) }
-    it { is_expected.to validate_presence_of(:n_failed) }
-    it { is_expected.to validate_presence_of(:n_skipped) }
+    it { is_expected.to validate_presence_of(:chain) }
 
-    it { is_expected.to validate_numericality_of(:n_successful).is_greater_than_or_equal_to(0) }
-    it { is_expected.to validate_numericality_of(:n_failed).is_greater_than_or_equal_to(0) }
-    it { is_expected.to validate_numericality_of(:n_skipped).is_greater_than_or_equal_to(0) }
-
-    it 'validates status inclusion' do
-      pipeline = described_class.new(valid_attributes.merge(status: 'pending'))
-      expect(pipeline).to be_valid
-
-      pipeline = described_class.new(valid_attributes.merge(status: 'working'))
-      expect(pipeline).to be_valid
-
-      pipeline = described_class.new(valid_attributes.merge(status: 'complete'))
-      expect(pipeline).to be_valid
-    end
-
-    it 'validates stage inclusion' do
-      pipeline = described_class.new(valid_attributes.merge(stage: 'start'))
-      expect(pipeline).to be_valid
-
-      pipeline = described_class.new(valid_attributes.merge(stage: 'download'))
-      expect(pipeline).to be_valid
-
-      pipeline = described_class.new(valid_attributes.merge(stage: 'import'))
-      expect(pipeline).to be_valid
-
-      pipeline = described_class.new(valid_attributes.merge(stage: 'finish'))
-      expect(pipeline).to be_valid
-    end
-
-    context 'when status is invalid' do
-      it 'raises an error with an unsupported status' do
-        expect {
-          described_class.new(valid_attributes.merge(status: 'invalid_status'))
-        }.to raise_error(ArgumentError, "'invalid_status' is not a valid status")
-      end
-    end
-
-    context 'when stage is invalid' do
-      it 'raises an error with an unsupported stage' do
-        expect {
-          described_class.new(valid_attributes.merge(stage: 'invalid_stage'))
-        }.to raise_error(ArgumentError, "'invalid_stage' is not a valid stage")
-      end
-    end
-
-    context 'when numeric fields are negative' do
-      it 'is invalid with negative n_successful' do
-        pipeline = described_class.new(valid_attributes.merge(n_successful: -1))
-        expect(pipeline).not_to be_valid
-        expect(pipeline.errors[:n_successful]).to include('must be greater than or equal to 0')
-      end
-
-      it 'is invalid with negative n_failed' do
-        pipeline = described_class.new(valid_attributes.merge(n_failed: -1))
-        expect(pipeline).not_to be_valid
-        expect(pipeline.errors[:n_failed]).to include('must be greater than or equal to 0')
-      end
-
-      it 'is invalid with negative n_skipped' do
-        pipeline = described_class.new(valid_attributes.merge(n_skipped: -1))
-        expect(pipeline).not_to be_valid
-        expect(pipeline.errors[:n_skipped]).to include('must be greater than or equal to 0')
-      end
-    end
   end
 
   describe 'associations' do
     it { is_expected.to belong_to(:time_series) }
-  end
-
-  describe 'enums' do
-    it 'defines status enum with correct values' do
-      expect(described_class.statuses).to eq({
-        'pending' => 'pending',
-        'working' => 'working',
-        'complete' => 'complete',
-        'error' => 'error'
-      })
-    end
-
-    it 'defines stage enum with correct values' do
-      expect(described_class.stages).to eq({
-        'start' => 'start',
-        'download' => 'download',
-        'import' => 'import',
-        'finish' => 'finish'
-      })
-    end
-
-    it 'allows setting status to valid values' do
-      pipeline = described_class.new(valid_attributes.merge(status: 'pending'))
-      expect(pipeline.status).to eq('pending')
-      expect(pipeline.pending?).to be true
-
-      pipeline.status = 'working'
-      expect(pipeline.status).to eq('working')
-      expect(pipeline.working?).to be true
-
-      pipeline.status = 'complete'
-      expect(pipeline.status).to eq('complete')
-      expect(pipeline.complete?).to be true
-    end
-
-    it 'allows setting stage to valid values' do
-      pipeline = described_class.new(valid_attributes.merge(stage: 'start'))
-      expect(pipeline.stage).to eq('start')
-      expect(pipeline.start?).to be true
-
-      pipeline.stage = 'download'
-      expect(pipeline.stage).to eq('download')
-      expect(pipeline.download?).to be true
-
-      pipeline.stage = 'import'
-      expect(pipeline.stage).to eq('import')
-      expect(pipeline.import?).to be true
-
-      pipeline.stage = 'finish'
-      expect(pipeline.stage).to eq('finish')
-      expect(pipeline.finish?).to be true
-    end
-  end
-
-  describe 'constants' do
-    it 'defines STATUSES constant' do
-      expect(described_class::STATUSES).to eq(%w[pending working complete error])
-    end
-
-    it 'defines STAGES constant' do
-      expect(described_class::STAGES).to eq(%w[start download import finish])
-    end
+    it { is_expected.to have_many(:pipeline_runs) }
   end
 
   describe 'scopes' do
-    let!(:pending_pipeline) { create(:pipeline, time_series: time_series, status: 'pending') }
-    let!(:working_pipeline) { create(:pipeline, :working, time_series: time_series) }
-    let!(:complete_pipeline) { create(:pipeline, :complete, time_series: time_series) }
-    let!(:download_pipeline) { create(:pipeline, time_series: time_series, stage: 'download') }
-    let!(:import_pipeline) { create(:pipeline, time_series: time_series, stage: 'import') }
+    let!(:cboe_pipeline) { create(:pipeline, time_series: time_series, chain: 'CboeFlat') }
+    let!(:fred_pipeline) { create(:pipeline, :fred_flat, time_series: time_series) }
 
-    describe '.by_status' do
-      it 'returns pipelines with the specified status' do
-        result = described_class.by_status('pending')
-        expect(result).to include(pending_pipeline)
-        expect(result).not_to include(working_pipeline, complete_pipeline)
-      end
-    end
-
-    describe '.by_stage' do
-      it 'returns pipelines with the specified stage' do
-        result = described_class.by_stage('download')
-        expect(result).to include(download_pipeline)
-        expect(result).not_to include(import_pipeline)
-      end
-    end
-
-    describe '.pending' do
-      it 'returns only pending pipelines' do
-        result = described_class.pending
-        expect(result).to include(pending_pipeline)
-        expect(result).not_to include(working_pipeline, complete_pipeline)
-      end
-    end
-
-    describe '.working' do
-      it 'returns only working pipelines' do
-        result = described_class.working
-        expect(result).to include(working_pipeline)
-        expect(result).not_to include(pending_pipeline, complete_pipeline)
-      end
-    end
-
-    describe '.complete' do
-      it 'returns only complete pipelines' do
-        result = described_class.complete
-        expect(result).to include(complete_pipeline)
-        expect(result).not_to include(pending_pipeline, working_pipeline)
+    describe '.by_chain' do
+      it 'returns pipelines with the specified chain' do
+        result = described_class.by_chain('CboeFlat')
+        expect(result).to include(cboe_pipeline)
+        expect(result).not_to include(fred_pipeline)
       end
     end
   end
 
-  describe 'default values' do
-    it 'sets default status to pending' do
-      pipeline = described_class.new(time_series: time_series)
-      expect(pipeline.status).to eq('pending')
-    end
-
-    it 'sets default stage to start' do
-      pipeline = described_class.new(time_series: time_series)
-      expect(pipeline.stage).to eq('start')
-    end
-
-    it 'sets default numeric values to 0' do
-      pipeline = described_class.new(time_series: time_series)
-      expect(pipeline.n_successful).to eq(0)
-      expect(pipeline.n_failed).to eq(0)
-      expect(pipeline.n_skipped).to eq(0)
+  describe 'chain methods' do
+    it 'returns the chain class' do
+      pipeline = create(:pipeline, chain: 'CboeFlat')
+      expect(pipeline.chain_class).to eq(CboeFlat)
     end
   end
 
-  describe 'database constraints' do
-    it 'requires time_series to be present' do
-      pipeline = described_class.new(valid_attributes.except(:time_series))
-      expect(pipeline).not_to be_valid
-      expect(pipeline.errors[:time_series]).to include('must exist')
+  describe 'delegation methods' do
+    context 'with no runs' do
+      let(:pipeline) { create(:pipeline) }
+
+      it 'returns default values' do
+        expect(pipeline.status).to eq('pending')
+        expect(pipeline.stage).to eq('start')
+        expect(pipeline.n_successful).to eq(0)
+        expect(pipeline.n_failed).to eq(0)
+        expect(pipeline.n_skipped).to eq(0)
+        expect(pipeline.can_run?).to be true
+      end
     end
 
-    it 'requires status to be present' do
-      pipeline = described_class.new(valid_attributes.merge(status: nil))
-      expect(pipeline).not_to be_valid
-      expect(pipeline.errors[:status]).to include("can't be blank")
-    end
+    context 'with runs' do
+      let(:pipeline) { create(:pipeline, :with_run) }
 
-    it 'requires stage to be present' do
-      pipeline = described_class.new(valid_attributes.merge(stage: nil))
-      expect(pipeline).not_to be_valid
-      expect(pipeline.errors[:stage]).to include("can't be blank")
-    end
-  end
-
-  describe 'foreign key constraint' do
-    it 'validates time_series existence' do
-      pipeline = described_class.new(valid_attributes)
-      pipeline.time_series_id = 99999 # Non-existent ID
-      pipeline.time_series = nil # Clear the association
-      expect(pipeline).not_to be_valid
-      expect(pipeline.errors[:time_series]).to include('must exist')
+      it 'delegates to latest run' do
+        expect(pipeline.status).to eq(pipeline.latest_run.status)
+        expect(pipeline.stage).to eq(pipeline.latest_run.stage)
+        expect(pipeline.n_successful).to eq(pipeline.latest_run.n_successful)
+        expect(pipeline.n_failed).to eq(pipeline.latest_run.n_failed)
+        expect(pipeline.n_skipped).to eq(pipeline.latest_run.n_skipped)
+      end
     end
   end
 

@@ -66,37 +66,55 @@
     </div>
 
     <div class="detail-section">
-      <h2>Pipeline Statistics</h2>
-      <div class="stats-grid">
-        <div class="stat-card success">
-          <div class="stat-icon">✓</div>
-          <div class="stat-content">
-            <div class="stat-value"><%= number_with_delimiter(@pipeline.n_successful) %></div>
-            <div class="stat-label">Successful Operations</div>
-          </div>
+      <h2>Pipeline Chain Information</h2>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">Chain Type</span>
+          <span class="detail-value"><%= @pipeline.chain %></span>
         </div>
-        <div class="stat-card failed">
-          <div class="stat-icon">✗</div>
-          <div class="stat-content">
-            <div class="stat-value"><%= number_with_delimiter(@pipeline.n_failed) %></div>
-            <div class="stat-label">Failed Operations</div>
-          </div>
-        </div>
-        <div class="stat-card skipped">
-          <div class="stat-icon">⊘</div>
-          <div class="stat-content">
-            <div class="stat-value"><%= number_with_delimiter(@pipeline.n_skipped) %></div>
-            <div class="stat-label">Skipped Operations</div>
-          </div>
-        </div>
-        <div class="stat-card total">
-          <div class="stat-icon">Σ</div>
-          <div class="stat-content">
-            <div class="stat-value"><%= number_with_delimiter(@pipeline.n_successful + @pipeline.n_failed + @pipeline.n_skipped) %></div>
-            <div class="stat-label">Total Operations</div>
-          </div>
+        <div class="detail-item">
+          <span class="detail-label">Total Runs</span>
+          <span class="detail-value"><%= @pipeline.pipeline_runs.count %></span>
         </div>
       </div>
+    </div>
+
+    <div class="detail-section">
+      <h2>Latest Run Statistics</h2>
+      <% if @pipeline.latest_run %>
+        <div class="stats-grid">
+          <div class="stat-card success">
+            <div class="stat-icon">✓</div>
+            <div class="stat-content">
+              <div class="stat-value"><%= number_with_delimiter(@pipeline.n_successful) %></div>
+              <div class="stat-label">Successful Operations</div>
+            </div>
+          </div>
+          <div class="stat-card failed">
+            <div class="stat-icon">✗</div>
+            <div class="stat-content">
+              <div class="stat-value"><%= number_with_delimiter(@pipeline.n_failed) %></div>
+              <div class="stat-label">Failed Operations</div>
+            </div>
+          </div>
+          <div class="stat-card skipped">
+            <div class="stat-icon">⊘</div>
+            <div class="stat-content">
+              <div class="stat-value"><%= number_with_delimiter(@pipeline.n_skipped) %></div>
+              <div class="stat-label">Skipped Operations</div>
+            </div>
+          </div>
+          <div class="stat-card total">
+            <div class="stat-icon">Σ</div>
+            <div class="stat-content">
+              <div class="stat-value"><%= number_with_delimiter(@pipeline.n_successful + @pipeline.n_failed + @pipeline.n_skipped) %></div>
+              <div class="stat-label">Total Operations</div>
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <p>No runs have been executed yet.</p>
+      <% end %>
     </div>
 
     <div class="detail-section">

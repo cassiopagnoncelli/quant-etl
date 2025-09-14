@@ -1,30 +1,26 @@
 FactoryBot.define do
   factory :pipeline do
     association :time_series
-    status { 'pending' }
-    stage { 'start' }
-    n_successful { 0 }
-    n_failed { 0 }
-    n_skipped { 0 }
+    chain { 'CboeFlat' }
 
-    trait :working do
-      status { 'working' }
-      stage { 'download' }
+    trait :fred_flat do
+      chain { 'FredFlat' }
     end
 
-    trait :complete do
-      status { 'complete' }
-      stage { 'finish' }
+    trait :polygon_flat do
+      chain { 'PolygonFlat' }
     end
 
-    trait :error do
-      status { 'error' }
+    trait :with_run do
+      after(:create) do |pipeline|
+        create(:pipeline_run, pipeline: pipeline)
+      end
     end
 
-    trait :with_results do
-      n_successful { 5 }
-      n_failed { 1 }
-      n_skipped { 2 }
+    trait :with_completed_run do
+      after(:create) do |pipeline|
+        create(:pipeline_run, :complete, pipeline: pipeline)
+      end
     end
   end
 end
