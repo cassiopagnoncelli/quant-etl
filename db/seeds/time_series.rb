@@ -555,14 +555,155 @@ class TimeSeriesSeeder
       }
     ]
 
+    # CoinGecko Crypto Series - Univariate Time Series
+    # Source IDs match the ticker used in CoinGecko API calls
+    coingecko_series = [
+      # Bitcoin Dominance Chart series
+      {
+        ticker: "bitcoin_dominance_btc",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "bitcoin_dominance_btc",
+        kind: "univariate",
+        description: "Bitcoin Dominance Percentage",
+        since: Date.new(2013, 4, 28)
+      },
+      {
+        ticker: "bitcoin_dominance_eth",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "bitcoin_dominance_eth",
+        kind: "univariate",
+        description: "Ethereum Dominance Percentage",
+        since: Date.new(2015, 8, 7)
+      },
+      {
+        ticker: "bitcoin_dominance_stablecoins",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "bitcoin_dominance_stablecoins",
+        kind: "univariate",
+        description: "Stablecoins Dominance Percentage",
+        since: Date.new(2014, 10, 6)
+      },
+      {
+        ticker: "bitcoin_dominance_others",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "bitcoin_dominance_others",
+        kind: "univariate",
+        description: "Others Dominance Percentage",
+        since: Date.new(2013, 4, 28)
+      },
+      
+      # DeFi Market Cap Chart series
+      {
+        ticker: "defi_market_cap_defi",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "defi_market_cap_defi",
+        kind: "univariate",
+        description: "DeFi Market Cap",
+        since: Date.new(2020, 6, 15)
+      },
+      {
+        ticker: "defi_market_cap_all",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "defi_market_cap_all",
+        kind: "univariate",
+        description: "All DeFi Including DeFi Coins Market Cap",
+        since: Date.new(2020, 6, 15)
+      },
+      
+      # Stablecoin Market Cap Chart series
+      {
+        ticker: "stablecoin_market_cap_tether",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "stablecoin_market_cap_tether",
+        kind: "univariate",
+        description: "Tether (USDT) Market Cap",
+        since: Date.new(2014, 10, 6)
+      },
+      {
+        ticker: "stablecoin_market_cap_usdc",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "stablecoin_market_cap_usdc",
+        kind: "univariate",
+        description: "USD Coin Market Cap",
+        since: Date.new(2018, 10, 8)
+      },
+      {
+        ticker: "stablecoin_market_cap_ethena_usde",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "stablecoin_market_cap_ethena_usde",
+        kind: "univariate",
+        description: "Ethena USDe Market Cap",
+        since: Date.new(2024, 2, 19)
+      },
+      {
+        ticker: "stablecoin_market_cap_usds",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "stablecoin_market_cap_usds",
+        kind: "univariate",
+        description: "USDS Market Cap",
+        since: Date.new(2024, 9, 18)
+      },
+      {
+        ticker: "stablecoin_market_cap_dai",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "stablecoin_market_cap_dai",
+        kind: "univariate",
+        description: "MakerDAO Dai Market Cap",
+        since: Date.new(2017, 12, 27)
+      },
+      {
+        ticker: "stablecoin_market_cap_usd1",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "stablecoin_market_cap_usd1",
+        kind: "univariate",
+        description: "USD1 Market Cap",
+        since: Date.new(2024, 8, 15)
+      },
+      {
+        ticker: "stablecoin_market_cap_usdtb",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "stablecoin_market_cap_usdtb",
+        kind: "univariate",
+        description: "USDtb Market Cap",
+        since: Date.new(2024, 9, 1)
+      },
+      
+      # Altcoin Market Cap Chart
+      {
+        ticker: "altcoin_market_cap",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "altcoin_market_cap",
+        kind: "univariate",
+        description: "Altcoin Market Cap (All cryptocurrencies except Bitcoin)",
+        since: Date.new(2013, 4, 28)
+      }
+    ]
+
     # Create VIX series
     vix_count = create_series(vix_series, "📊 Creating VIX time series (aggregate)...")
     
     # Create FRED series
     fred_count = create_series(fred_series, "\n📈 Creating FRED economic series (univariate)...")
 
+    # Create CoinGecko series
+    coingecko_count = create_series(coingecko_series, "\n🪙 Creating CoinGecko crypto series (univariate)...")
+
     # Summary
-    display_summary(vix_count, fred_count)
+    display_summary(vix_count, fred_count, coingecko_count)
   end
 
   private
@@ -598,6 +739,8 @@ class TimeSeriesSeeder
                     'FredFlat'
                   when 'Polygon'
                     'PolygonFlat'
+                  when 'CoinGecko'
+                    'CoingeckoFlat'
                   else
                     raise "Unknown source: #{time_series.source}"
                   end
@@ -612,12 +755,13 @@ class TimeSeriesSeeder
     end
   end
 
-  def self.display_summary(vix_count, fred_count)
+  def self.display_summary(vix_count, fred_count, coingecko_count)
     puts "\n" + "="*80
     puts "🎯 SEED SUMMARY"
     puts "="*80
     puts "📊 VIX Indices (aggregate): #{vix_count} series created"
     puts "📈 FRED Economic (univariate): #{fred_count} series created"
+    puts "🪙 CoinGecko Crypto (univariate): #{coingecko_count} series created"
     puts "📋 Total TimeSeries records: #{TimeSeries.count}"
     puts "🔗 Total Pipeline records: #{Pipeline.count}"
     puts "="*80
