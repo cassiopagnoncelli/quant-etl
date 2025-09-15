@@ -31,9 +31,17 @@ class TimeSeries < ApplicationRecord
     end
   end
 
+  def enabled?
+    pipelines.pluck(:active).any?
+  end
+
   # Helper method to find time series by source and source_id
   def self.find_by_source_mapping(source, source_id)
     find_by(source:, source_id:)
+  end
+
+  def self.outdated_enabled
+    self.outdated.keep_if(&:enabled?)
   end
 
   # Returns all time series that are outdated (not up to date)

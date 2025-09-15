@@ -108,7 +108,7 @@ class TimeSeriesController < ApplicationController
 
   def sync
     # Find all time series that are not up to date
-    outdated_series = TimeSeries.outdated
+    outdated_series = TimeSeries.outdated_enabled
     
     synced_pipelines_count = 0
     failed_pipelines_count = 0
