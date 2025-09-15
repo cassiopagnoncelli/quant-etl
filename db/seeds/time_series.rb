@@ -560,7 +560,7 @@ class TimeSeriesSeeder
     coingecko_series = [
       # Bitcoin Dominance Chart series
       {
-        ticker: "bitcoin_dominance_btc",
+        ticker: "CGBTCDOM",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "bitcoin_dominance_btc",
@@ -569,7 +569,7 @@ class TimeSeriesSeeder
         since: Date.new(2013, 4, 28)
       },
       {
-        ticker: "bitcoin_dominance_eth",
+        ticker: "CGETHDOM",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "bitcoin_dominance_eth",
@@ -578,7 +578,7 @@ class TimeSeriesSeeder
         since: Date.new(2015, 8, 7)
       },
       {
-        ticker: "bitcoin_dominance_stablecoins",
+        ticker: "CGSTABLEDOM",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "bitcoin_dominance_stablecoins",
@@ -587,7 +587,7 @@ class TimeSeriesSeeder
         since: Date.new(2014, 10, 6)
       },
       {
-        ticker: "bitcoin_dominance_others",
+        ticker: "CGOTHERSDOM",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "bitcoin_dominance_others",
@@ -598,7 +598,7 @@ class TimeSeriesSeeder
       
       # DeFi Market Cap Chart series
       {
-        ticker: "defi_market_cap_defi",
+        ticker: "CGDEFIMCAPDEFI",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "defi_market_cap_defi",
@@ -607,7 +607,7 @@ class TimeSeriesSeeder
         since: Date.new(2020, 6, 15)
       },
       {
-        ticker: "defi_market_cap_all",
+        ticker: "CGDEFIMCAPALL",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "defi_market_cap_all",
@@ -618,7 +618,7 @@ class TimeSeriesSeeder
       
       # Stablecoin Market Cap Chart series
       {
-        ticker: "stablecoin_market_cap_tether",
+        ticker: "CGSTABLEMCAPTETHER",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "stablecoin_market_cap_tether",
@@ -627,7 +627,7 @@ class TimeSeriesSeeder
         since: Date.new(2014, 10, 6)
       },
       {
-        ticker: "stablecoin_market_cap_usdc",
+        ticker: "CGSTABLEMCAPUSDC",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "stablecoin_market_cap_usdc",
@@ -636,7 +636,7 @@ class TimeSeriesSeeder
         since: Date.new(2018, 10, 8)
       },
       {
-        ticker: "stablecoin_market_cap_ethena_usde",
+        ticker: "CGSTABLEMCAPUSDE",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "stablecoin_market_cap_ethena_usde",
@@ -645,7 +645,7 @@ class TimeSeriesSeeder
         since: Date.new(2024, 2, 19)
       },
       {
-        ticker: "stablecoin_market_cap_usds",
+        ticker: "CGSTABLEMCAPUSDS",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "stablecoin_market_cap_usds",
@@ -654,7 +654,7 @@ class TimeSeriesSeeder
         since: Date.new(2024, 9, 18)
       },
       {
-        ticker: "stablecoin_market_cap_dai",
+        ticker: "CGSTABLEMCAPDAI",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "stablecoin_market_cap_dai",
@@ -663,7 +663,7 @@ class TimeSeriesSeeder
         since: Date.new(2017, 12, 27)
       },
       {
-        ticker: "stablecoin_market_cap_usd1",
+        ticker: "CGSTABLEMCAPUSD1",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "stablecoin_market_cap_usd1",
@@ -672,7 +672,7 @@ class TimeSeriesSeeder
         since: Date.new(2024, 8, 15)
       },
       {
-        ticker: "stablecoin_market_cap_usdtb",
+        ticker: "CGSTABLEMCAPUSDTB",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "stablecoin_market_cap_usdtb",
@@ -683,7 +683,7 @@ class TimeSeriesSeeder
       
       # Total Crypto Market Cap Chart
       {
-        ticker: "total_market_cap",
+        ticker: "CGMCAP",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "total_market_cap",
@@ -692,7 +692,7 @@ class TimeSeriesSeeder
         since: Date.new(2013, 4, 28)
       },
       {
-        ticker: "total_volume",
+        ticker: "CGVOL",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "total_volume",
@@ -703,7 +703,7 @@ class TimeSeriesSeeder
       
       # Altcoin Market Cap Chart
       {
-        ticker: "altcoin_market_cap",
+        ticker: "CGALTMCAP",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "altcoin_market_cap",
@@ -712,7 +712,7 @@ class TimeSeriesSeeder
         since: Date.new(2013, 4, 28)
       },
       {
-        ticker: "altcoin_volume",
+        ticker: "CGALTVOL",
         timeframe: "D1",
         source: "CoinGecko",
         source_id: "altcoin_volume",
