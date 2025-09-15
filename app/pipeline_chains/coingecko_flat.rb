@@ -132,12 +132,18 @@ class CoingeckoFlat < PipelineChainBase
       description: 'USDtb Market Cap'
     },
     
-    # Altcoin Market Cap Chart (single series)
+    # Altcoin Market Cap Chart - has two series: market cap and volume
     'altcoin_market_cap' => {
       endpoint: '/global_charts/altcoin_market_data',
       params: { locale: 'en' },
-      series_name: nil, # Single series, no specific name
+      series_name: 'market_cap', # Specify which series we want
       description: 'Altcoin Market Cap'
+    },
+    'altcoin_volume' => {
+      endpoint: '/global_charts/altcoin_market_data',
+      params: { locale: 'en' },
+      series_name: 'volume', # Volume series
+      description: 'Altcoin Volume'
     }
   }
   
@@ -238,44 +244,51 @@ class CoingeckoFlat < PipelineChainBase
     CSV.open(file_path, 'w') do |csv|
       csv << ['Date', 'Value', 'Series', 'Ticker']
       
-      if data.is_a?(Array) && data.first.is_a?(Hash) && data.first.key?('name')
+      # Handle different data formats
+      if data.is_a?(Hash)
+        # Check if it's altcoin market data format with market_cap and volume keys
+        if config[:series_name] == 'market_cap' && data.key?('market_cap')
+          process_time_series_data(csv, data['market_cap'], 'market_cap', config)
+        elsif config[:series_name] == 'volume' && data.key?('volume')
+          process_time_series_data(csv, data['volume'], 'volume', config)
+        elsif data.key?('data') && data['data'].is_a?(Array)
+          # Handle single series in hash format
+          process_time_series_data(csv, data['data'], config[:series_name] || 'data', config)
+        else
+          log_error "Expected key '#{config[:series_name]}' not found in data. Available keys: #{data.keys.join(', ')}"
+        end
+      elsif data.is_a?(Array) && data.first.is_a?(Hash) && data.first.key?('name')
         # Multiple time series format - find the specific series we want
         target_series = data.find { |series| series['name'] == config[:series_name] }
         
         if target_series && target_series['data']
-          target_series['data'].each do |point|
-            if point.is_a?(Array) && point.length >= 2
-              timestamp = Time.at(point[0] / 1000.0).to_date
-              value = point[1]
-              
-              csv << [
-                timestamp.strftime('%Y-%m-%d'),
-                value,
-                config[:series_name],
-                ticker
-              ]
-            end
-          end
+          process_time_series_data(csv, target_series['data'], config[:series_name], config)
         else
-          log_warn "Series '#{config[:series_name]}' not found in data"
+          log_warn "Series '#{config[:series_name]}' not found in data. Available series: #{data.map { |s| s['name'] }.join(', ')}"
         end
       elsif data.is_a?(Array) && data.first.is_a?(Array)
-        # Single time series format (like altcoin market cap)
-        data.each do |point|
-          if point.is_a?(Array) && point.length >= 2
-            timestamp = Time.at(point[0] / 1000.0).to_date
-            value = point[1]
-            
-            csv << [
-              timestamp.strftime('%Y-%m-%d'),
-              value,
-              'Altcoin Market Cap',
-              ticker
-            ]
-          end
-        end
+        # Single time series format (array of [timestamp, value] pairs)
+        process_time_series_data(csv, data, config[:series_name] || 'data', config)
       else
-        log_error "Unexpected data format: #{data.class}"
+        log_error "Unexpected data format: #{data.class}. Data sample: #{data.is_a?(Hash) ? data.keys.first(5) : data.class}"
+      end
+    end
+  end
+  
+  def process_time_series_data(csv, time_series_data, series_name, config)
+    return unless time_series_data.is_a?(Array)
+    
+    time_series_data.each do |point|
+      if point.is_a?(Array) && point.length >= 2
+        timestamp = Time.at(point[0] / 1000.0).to_date
+        value = point[1]
+        
+        csv << [
+          timestamp.strftime('%Y-%m-%d'),
+          value,
+          series_name,
+          ticker
+        ]
       end
     end
   end

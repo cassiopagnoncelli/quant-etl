@@ -8,6 +8,9 @@ Rails.application.routes.draw do
     collection do
       post :sync
     end
+    member do
+      delete :cleanup
+    end
   end
 
   resources :pipeline_runs, only: [:index]

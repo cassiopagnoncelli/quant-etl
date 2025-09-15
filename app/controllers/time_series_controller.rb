@@ -164,6 +164,33 @@ class TimeSeriesController < ApplicationController
     @last_value = last_record&.main
   end
 
+  def cleanup
+    @time_series = TimeSeries.find_by(ticker: params[:ticker])
+    if @time_series.nil?
+      redirect_to time_series_index_path, alert: 'Time series not found'
+      return
+    end
+
+    # Count data points before deletion
+    points_count = @time_series.points.count
+    
+    if points_count == 0
+      redirect_to time_series_path(@time_series.ticker), notice: 'No data points to clean up'
+      return
+    end
+
+    # Delete all associated data points
+    case @time_series.kind
+    when 'univariate'
+      @time_series.univariates.destroy_all
+    when 'aggregate'
+      @time_series.aggregates.destroy_all
+    end
+
+    redirect_to time_series_path(@time_series.ticker), 
+                notice: "Successfully cleaned up #{points_count} data points for #{@time_series.ticker}"
+  end
+
   private
 
   def calculate_up_to_date_status(time_series, latest_ts)
