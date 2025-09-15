@@ -1,5 +1,5 @@
 class TimeSeriesController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: [:sync]
+  skip_before_action :verify_authenticity_token, only: [:sync, :toggle_source_pipelines]
   
   def index
     # Preload pipelines to avoid N+1 queries
@@ -87,6 +87,23 @@ class TimeSeriesController < ApplicationController
     # Group time series by source
     @time_series_by_source = time_series_data.group_by { |ts_data| ts_data[:time_series].source }
                                            .sort_by { |source, _| source }
+    
+    # Get pipeline status for each source
+    @source_pipeline_status = {}
+    @time_series_by_source.each do |source, _|
+      pipelines = Pipeline.joins(:time_series).where(time_series: { source: source })
+      active_count = pipelines.where(active: true).count
+      total_count = pipelines.count
+      
+      @source_pipeline_status[source] = {
+        has_pipelines: total_count > 0,
+        all_active: total_count > 0 && active_count == total_count,
+        some_active: active_count > 0 && active_count < total_count,
+        none_active: active_count == 0,
+        active_count: active_count,
+        total_count: total_count
+      }
+    end
   end
 
   def sync
@@ -162,6 +179,48 @@ class TimeSeriesController < ApplicationController
     @earliest_ts = points.minimum(:ts)
     last_record = points.order(ts: :desc).first
     @last_value = last_record&.main
+  end
+
+  def toggle_source_pipelines
+    # Handle both direct params and nested params
+    source = params[:source] || params.dig(:time_series, :source)
+    active_param = params[:active] || params.dig(:time_series, :active)
+    active = active_param == true || active_param == 'true'
+    
+    if source.blank?
+      render json: { error: 'Source parameter is required' }, status: :bad_request
+      return
+    end
+    
+    # Find all time series for this source
+    time_series_list = TimeSeries.where(source: source)
+    
+    if time_series_list.empty?
+      render json: { error: 'No time series found for this source' }, status: :not_found
+      return
+    end
+    
+    # Get all pipelines for time series from this source
+    pipelines = Pipeline.joins(:time_series).where(time_series: { source: source })
+    
+    if pipelines.empty?
+      render json: { error: 'No pipelines found for this source' }, status: :not_found
+      return
+    end
+    
+    # Update all pipelines
+    updated_count = pipelines.update_all(active: active)
+    
+    action_word = active ? 'activated' : 'deactivated'
+    message = "Successfully #{action_word} #{updated_count} pipelines for source #{source}"
+    
+    render json: { 
+      success: true, 
+      message: message,
+      updated_count: updated_count,
+      source: source,
+      active: active
+    }
   end
 
   def cleanup

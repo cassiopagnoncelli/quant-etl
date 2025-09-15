@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   resources :time_series, only: [:index, :show], param: :ticker do
     collection do
       post :sync
+      patch :toggle_source_pipelines
     end
     member do
       delete :cleanup

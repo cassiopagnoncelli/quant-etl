@@ -1,6 +1,6 @@
 <% content_for :title, "Time Series" %>
 
-<div class="container">
+<div class="container" data-controller="pipeline-toggle">
   <div class="header-section">
     <h1>Available Time Series</h1>
     <div class="header-buttons">
@@ -25,10 +25,27 @@
   <% else %>
     <% @time_series_by_source.each do |source, time_series_list| %>
       <div class="source-group" style="margin-bottom: 2rem;">
-        <h2 style="color: #333; border-bottom: 2px solid #e0e0e0; padding-bottom: 0.5rem; margin-bottom: 1rem;">
-          <%= source %> 
-          <span style="font-size: 0.7em; color: #666; font-weight: normal;">(<%= pluralize(time_series_list.count, 'series') %>)</span>
-        </h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e0e0e0; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+          <h2 style="color: #333; margin: 0;">
+            <%= source %> 
+            <span style="font-size: 0.7em; color: #666; font-weight: normal;">(<%= pluralize(time_series_list.count, 'series') %>)</span>
+          </h2>
+          
+          <% pipeline_status = @source_pipeline_status[source] %>
+          <% if pipeline_status[:has_pipelines] %>
+            <div class="pipeline-toggle-container">
+              <label class="toggle-switch" data-source="<%= source %>">
+                <input type="checkbox" 
+                       class="pipeline-toggle" 
+                       data-source="<%= source %>"
+                       <%= 'checked' if pipeline_status[:all_active] %>>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          <% else %>
+            <span style="font-size: 0.8em; color: #999; font-style: italic;">No pipelines</span>
+          <% end %>
+        </div>
         
         <div class="time-series-list">
           <% time_series_list.each do |ts_data| %>
