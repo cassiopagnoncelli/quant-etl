@@ -17,62 +17,67 @@
     </div>
   </div>
 
-  <% if @time_series.empty? %>
+  <% if @time_series_by_source.empty? %>
     <div class="empty-state">
       <h3>No time series available</h3>
       <p>There are currently no time series in the system.</p>
     </div>
   <% else %>
-    <div class="time-series-list">
-      <% @time_series.each do |ts_data| %>
-        <% row_class = if ts_data[:has_active_pipelines]
-                         ts_data[:up_to_date] ? 'up-to-date' : 'not-up-to-date'
-                       else
-                         'no-active-pipelines'
-                       end %>
-        <%= link_to time_series_path(ts_data[:time_series].ticker), class: "time-series-row #{row_class}" do %>
-          <div class="row-header">
-            <div class="ticker-info">
-              <h3 class="ticker-name"><%= ts_data[:time_series].ticker %></h3>
-              <span class="type-kind"><%= ts_data[:time_series].kind %></span>
-            </div>
-            <% if ts_data[:last].present? %>
-              <div class="last-value">
-                <%= number_with_precision(ts_data[:last], precision: 2, delimiter: ',') %>
+    <% @time_series_by_source.each do |source, time_series_list| %>
+      <div class="source-group" style="margin-bottom: 2rem;">
+        <h2 style="color: #333; border-bottom: 2px solid #e0e0e0; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+          <%= source %> 
+          <span style="font-size: 0.7em; color: #666; font-weight: normal;">(<%= pluralize(time_series_list.count, 'series') %>)</span>
+        </h2>
+        
+        <div class="time-series-list">
+          <% time_series_list.each do |ts_data| %>
+            <% row_class = if ts_data[:has_active_pipelines]
+                             ts_data[:up_to_date] ? 'up-to-date' : 'not-up-to-date'
+                           else
+                             'no-active-pipelines'
+                           end %>
+            <%= link_to time_series_path(ts_data[:time_series].ticker), class: "time-series-row #{row_class}" do %>
+              <div class="row-header">
+                <div class="ticker-info">
+                  <h3 class="ticker-name"><%= ts_data[:time_series].ticker %></h3>
+                  <span class="type-kind"><%= ts_data[:time_series].kind %></span>
+                </div>
+                <% if ts_data[:last].present? %>
+                  <div class="last-value">
+                    <%= number_with_precision(ts_data[:last], precision: 2, delimiter: ',') %>
+                  </div>
+                <% end %>
               </div>
-            <% end %>
-          </div>
 
-          <% if ts_data[:time_series].description.present? %>
-              <div class="description-text" style="font-size: 0.8em; margin-bottom: 8px;"><%= ts_data[:time_series].description %></div>
+              <% if ts_data[:time_series].description.present? %>
+                  <div class="description-text" style="font-size: 0.8em; margin-bottom: 8px;"><%= ts_data[:time_series].description %></div>
+                <% end %>
+              
+              <div class="row-content">
+                <div class="row-meta">
+                  <div class="meta-group">
+                    <span class="meta-label">Timeframe:</span>
+                    <span class="meta-value"><%= ts_data[:time_series].timeframe %></span>
+                  </div>
+                  <div class="meta-group">
+                    <span class="meta-label">Data Points:</span>
+                    <span class="meta-value"><%= number_with_delimiter(ts_data[:count]) %></span>
+                  </div>
+                  <div class="meta-group">
+                    <span class="meta-label">Since:</span>
+                    <span class="meta-value"><%= ts_data[:earliest_ts]&.strftime('%Y-%m-%d') || 'N/A' %></span>
+                  </div>
+                  <div class="meta-group">
+                    <span class="meta-label">Latest:</span>
+                    <span class="meta-value"><%= ts_data[:recent_ts]&.strftime('%Y-%m-%d') || 'N/A' %></span>
+                  </div>
+                </div>
+              </div>
             <% end %>
-          
-          <div class="row-content">
-            <div class="row-meta">
-              <div class="meta-group">
-                <span class="meta-label">Source:</span>
-                <span class="meta-value"><%= ts_data[:time_series].source %></span>
-              </div>
-              <div class="meta-group">
-                <span class="meta-label">Timeframe:</span>
-                <span class="meta-value"><%= ts_data[:time_series].timeframe %></span>
-              </div>
-              <div class="meta-group">
-                <span class="meta-label">Data Points:</span>
-                <span class="meta-value"><%= number_with_delimiter(ts_data[:count]) %></span>
-              </div>
-              <div class="meta-group">
-                <span class="meta-label">Since:</span>
-                <span class="meta-value"><%= ts_data[:earliest_ts]&.strftime('%Y-%m-%d') || 'N/A' %></span>
-              </div>
-              <div class="meta-group">
-                <span class="meta-label">Latest:</span>
-                <span class="meta-value"><%= ts_data[:recent_ts]&.strftime('%Y-%m-%d') || 'N/A' %></span>
-              </div>
-            </div>
-          </div>
-        <% end %>
-      <% end %>
-    </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
   <% end %>
 </div>

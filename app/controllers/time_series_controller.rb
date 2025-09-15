@@ -42,7 +42,7 @@ class TimeSeriesController < ApplicationController
                                     .pluck('time_series.ticker')
                                     .to_set
     
-    @time_series = time_series_list.map do |time_series|
+    time_series_data = time_series_list.map do |time_series|
       ticker = time_series.ticker
       
       # Get stats based on time series kind
@@ -83,6 +83,10 @@ class TimeSeriesController < ApplicationController
         has_active_pipelines: has_active_pipelines 
       }
     end
+    
+    # Group time series by source
+    @time_series_by_source = time_series_data.group_by { |ts_data| ts_data[:time_series].source }
+                                           .sort_by { |source, _| source }
   end
 
   def sync
