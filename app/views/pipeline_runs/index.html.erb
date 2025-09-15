@@ -116,6 +116,90 @@
         <% end %>
       <% end %>
     </div>
+    
+    <div class="pagination-container" style="margin-top: 2rem; display: flex; justify-content: center; align-items: center; gap: 1rem;">
+      <div class="pagination-info" style="color: #7f8c8d; font-size: 0.9rem;">
+        Showing <%= (@pipeline_runs.current_page - 1) * @pipeline_runs.limit_value + 1 %>-<%= [@pipeline_runs.current_page * @pipeline_runs.limit_value, @pipeline_runs.total_count].min %> of <%= number_with_delimiter(@pipeline_runs.total_count) %> runs
+      </div>
+      
+      <div class="pagination-controls" style="display: flex; gap: 0.5rem; align-items: center;">
+        <!-- First Page -->
+        <% if @pipeline_runs.current_page > 1 %>
+          <%= link_to @pipeline ? pipeline_pipeline_runs_path(@pipeline, page: 1) : pipeline_runs_path(page: 1), 
+              class: 'pagination-btn', 
+              style: 'padding: 0.5rem 0.75rem; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;',
+              title: 'First Page' do %>
+            &laquo;&laquo; First
+          <% end %>
+        <% else %>
+          <span class="pagination-btn disabled" 
+                style="padding: 0.5rem 0.75rem; background: #bdc3c7; color: #7f8c8d; border-radius: 4px; font-size: 0.9rem;">
+            &laquo;&laquo; First
+          </span>
+        <% end %>
+        
+        <!-- Previous Page -->
+        <% if @pipeline_runs.current_page > 1 %>
+          <%= link_to @pipeline ? pipeline_pipeline_runs_path(@pipeline, page: @pipeline_runs.current_page - 1) : pipeline_runs_path(page: @pipeline_runs.current_page - 1), 
+              class: 'pagination-btn', 
+              style: 'padding: 0.5rem 0.75rem; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;' do %>
+            &laquo; Previous
+          <% end %>
+        <% else %>
+          <span class="pagination-btn disabled" 
+                style="padding: 0.5rem 0.75rem; background: #bdc3c7; color: #7f8c8d; border-radius: 4px; font-size: 0.9rem;">
+            &laquo; Previous
+          </span>
+        <% end %>
+        
+        <!-- Page Numbers -->
+        <% start_page = [@pipeline_runs.current_page - 2, 1].max %>
+        <% end_page = [start_page + 4, @pipeline_runs.total_pages].min %>
+        <% start_page = [end_page - 4, 1].max if end_page - start_page < 4 %>
+        
+        <% (start_page..end_page).each do |page_num| %>
+          <% if page_num == @pipeline_runs.current_page %>
+            <span class="pagination-btn current" 
+                  style="padding: 0.5rem 0.75rem; background: #2c3e50; color: white; border-radius: 4px; font-size: 0.9rem; font-weight: bold;">
+              <%= page_num %>
+            </span>
+          <% else %>
+            <%= link_to page_num, @pipeline ? pipeline_pipeline_runs_path(@pipeline, page: page_num) : pipeline_runs_path(page: page_num), 
+                class: 'pagination-btn', 
+                style: 'padding: 0.5rem 0.75rem; background: #ecf0f1; color: #2c3e50; text-decoration: none; border-radius: 4px; font-size: 0.9rem;' %>
+          <% end %>
+        <% end %>
+        
+        <!-- Next Page -->
+        <% if @pipeline_runs.current_page < @pipeline_runs.total_pages %>
+          <%= link_to @pipeline ? pipeline_pipeline_runs_path(@pipeline, page: @pipeline_runs.current_page + 1) : pipeline_runs_path(page: @pipeline_runs.current_page + 1), 
+              class: 'pagination-btn', 
+              style: 'padding: 0.5rem 0.75rem; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;' do %>
+            Next &raquo;
+          <% end %>
+        <% else %>
+          <span class="pagination-btn disabled" 
+                style="padding: 0.5rem 0.75rem; background: #bdc3c7; color: #7f8c8d; border-radius: 4px; font-size: 0.9rem;">
+            Next &raquo;
+          </span>
+        <% end %>
+        
+        <!-- Last Page -->
+        <% if @pipeline_runs.current_page < @pipeline_runs.total_pages %>
+          <%= link_to @pipeline ? pipeline_pipeline_runs_path(@pipeline, page: @pipeline_runs.total_pages) : pipeline_runs_path(page: @pipeline_runs.total_pages), 
+              class: 'pagination-btn', 
+              style: 'padding: 0.5rem 0.75rem; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;',
+              title: 'Last Page' do %>
+            Last &raquo;&raquo;
+          <% end %>
+        <% else %>
+          <span class="pagination-btn disabled" 
+                style="padding: 0.5rem 0.75rem; background: #bdc3c7; color: #7f8c8d; border-radius: 4px; font-size: 0.9rem;">
+            Last &raquo;&raquo;
+          </span>
+        <% end %>
+      </div>
+    </div>
   <% end %>
 </div>
 
@@ -153,6 +237,7 @@
     margin: 0 0 0.5rem 0;
     font-size: 2rem;
     font-weight: 700;
+    text-align: left;
   }
 
   .subtitle {

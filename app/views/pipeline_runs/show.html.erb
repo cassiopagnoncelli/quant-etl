@@ -1,21 +1,31 @@
 <% content_for :title, "#{@pipeline.time_series.ticker} Pipeline Run ##{@pipeline_run.id}" %>
 
 <div class="container" data-controller="live-update" data-live-update-url-value="<%= pipeline_pipeline_run_path(@pipeline, @pipeline_run, format: :json) %>" data-live-update-enabled-value="true">
-  <% 
-    # Determine the correct back link based on the referer
-    back_path = if request.referer&.include?('/pipeline_runs') && !request.referer&.include?('/pipelines/')
-                  pipeline_runs_path
-                else
-                  pipeline_pipeline_runs_path(@pipeline)
-                end
-  %>
-  <%= link_to back_path, class: 'back-link' do %>
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M19 12H5"></path>
-      <path d="M12 19l-7-7 7-7"></path>
-    </svg>
-    Back to Pipeline Runs
-  <% end %>
+  <div class="top-navigation">
+    <% 
+      # Determine the correct back link based on the referer
+      back_path = if request.referer&.include?('/pipeline_runs') && !request.referer&.include?('/pipelines/')
+                    pipeline_runs_path
+                  else
+                    pipeline_pipeline_runs_path(@pipeline)
+                  end
+    %>
+    <%= link_to back_path, class: 'back-link' do %>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5"></path>
+        <path d="M12 19l-7-7 7-7"></path>
+      </svg>
+      Back to Pipeline Runs
+    <% end %>
+    
+    <div class="live-updates-container">
+      <span class="live-updates-text">Live Updates</span>
+      <label class="custom-toggle">
+        <input type="checkbox" data-live-update-target="toggle" data-action="change->live-update#toggle">
+        <span class="toggle-switch"></span>
+      </label>
+    </div>
+  </div>
   
   <div class="page-header">
     <div class="header-left">
@@ -36,13 +46,6 @@
       </div>
     </div>
     <div class="header-actions">
-      <div class="live-update-toggle">
-        <label class="toggle-label">
-          <input type="checkbox" data-live-update-target="toggle" data-action="change->live-update#toggle">
-          <span class="toggle-slider"></span>
-          Live Updates
-        </label>
-      </div>
       <%= link_to "View Pipeline", pipeline_path(@pipeline), class: "btn btn-secondary" %>
       <% if @pipeline_run.can_run? %>
         <%= link_to "Rerun", rerun_pipeline_pipeline_run_path(@pipeline, @pipeline_run), method: :patch, class: "btn btn-primary", 
@@ -193,18 +196,88 @@
     padding: 2rem;
   }
 
+  /* Top Navigation with Live Updates Toggle */
+  .top-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
   .back-link {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     color: #6b7280;
     text-decoration: none;
-    margin-bottom: 1.5rem;
     font-size: 0.875rem;
   }
 
   .back-link:hover {
     color: #3b82f6;
+  }
+
+  /* Live Updates Toggle - Matching pipelines index style */
+  .live-updates-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .live-updates-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .custom-toggle {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+    cursor: pointer;
+  }
+
+  .custom-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-switch {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 26px;
+    transition: 0.3s;
+  }
+
+  .toggle-switch:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .custom-toggle input:checked + .toggle-switch {
+    background-color: #3b82f6;
+  }
+
+  .custom-toggle input:checked + .toggle-switch:before {
+    transform: translateX(24px);
+  }
+
+  .custom-toggle:hover .toggle-switch {
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
   }
 
   .page-header {
