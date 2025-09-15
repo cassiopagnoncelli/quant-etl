@@ -132,6 +132,20 @@ class CoingeckoFlat < PipelineChainBase
       description: 'USDtb Market Cap'
     },
     
+    # Total Crypto Market Cap Chart
+    'total_market_cap' => {
+      endpoint: '/market_cap/total_charts_data',
+      params: { locale: 'en', vs_currency: 'usd' },
+      series_name: 'market_cap', # Total market cap series
+      description: 'Total Crypto Market Cap'
+    },
+    'total_volume' => {
+      endpoint: '/market_cap/total_charts_data',
+      params: { locale: 'en', vs_currency: 'usd' },
+      series_name: 'volume', # Total volume series
+      description: 'Total Crypto Volume'
+    },
+    
     # Altcoin Market Cap Chart - has two series: market cap and volume
     'altcoin_market_cap' => {
       endpoint: '/global_charts/altcoin_market_data',

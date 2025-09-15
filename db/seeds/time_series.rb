@@ -681,6 +681,26 @@ class TimeSeriesSeeder
         since: Date.new(2024, 9, 1)
       },
       
+      # Total Crypto Market Cap Chart
+      {
+        ticker: "total_market_cap",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "total_market_cap",
+        kind: "univariate",
+        description: "Total Crypto Market Cap (All cryptocurrencies)",
+        since: Date.new(2013, 4, 28)
+      },
+      {
+        ticker: "total_volume",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "total_volume",
+        kind: "univariate",
+        description: "Total Crypto Volume (24h trading volume)",
+        since: Date.new(2013, 4, 28)
+      },
+      
       # Altcoin Market Cap Chart
       {
         ticker: "altcoin_market_cap",
@@ -689,6 +709,15 @@ class TimeSeriesSeeder
         source_id: "altcoin_market_cap",
         kind: "univariate",
         description: "Altcoin Market Cap (All cryptocurrencies except Bitcoin)",
+        since: Date.new(2013, 4, 28)
+      },
+      {
+        ticker: "altcoin_volume",
+        timeframe: "D1",
+        source: "CoinGecko",
+        source_id: "altcoin_volume",
+        kind: "univariate",
+        description: "Altcoin Volume (24h trading volume excluding Bitcoin)",
         since: Date.new(2013, 4, 28)
       }
     ]
