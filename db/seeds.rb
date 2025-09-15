@@ -8,6 +8,10 @@ puts "🚀 Starting database seeding..."
 require_relative 'seeds/time_series'
 TimeSeriesSeeder.seed!
 
+# Load and execute Pipeline seeder
+require_relative 'seeds/pipelines'
+PipelineSeeder.seed!
+
 # Add other seeders here as needed
 # require_relative 'seeds/other_model'
 # OtherModelSeeder.seed!
