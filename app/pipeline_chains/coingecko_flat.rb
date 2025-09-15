@@ -165,7 +165,7 @@ class CoingeckoFlat < PipelineChainBase
     super(run)
     @user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
     
-    @download_dir = Rails.root.join('tmp', 'flat_files', "coingecko_#{ticker}")
+    @download_dir = Rails.root.join('tmp', 'flat_files', "coingecko_#{source_id}")
     @downloaded_file_path = nil
     ensure_download_directory
   end
@@ -176,9 +176,9 @@ class CoingeckoFlat < PipelineChainBase
     return if @downloaded_file_path && File.exist?(@downloaded_file_path)
     
     config = get_chart_config
-    raise ArgumentError, "Unknown ticker: #{ticker}. Available tickers: #{CHART_CONFIGS.keys.join(', ')}" unless config
+    raise ArgumentError, "Unknown source_id: #{source_id}. Available source_ids: #{CHART_CONFIGS.keys.join(', ')}" unless config
     
-    file_path = @download_dir.join("#{ticker}_#{Date.current.strftime('%Y%m%d')}.csv")
+    file_path = @download_dir.join("#{source_id}_#{Date.current.strftime('%Y%m%d')}.csv")
     
     if file_path.exist?
       log_info "File already exists: #{file_path}"
@@ -207,7 +207,7 @@ class CoingeckoFlat < PipelineChainBase
     raise "No file to import" unless @downloaded_file_path && File.exist?(@downloaded_file_path)
     
     log_info "Importing CoinGecko data from: #{@downloaded_file_path}"
-    log_info "Ticker: #{ticker}, Timeframe: #{timeframe}"
+    log_info "Ticker: #{ticker}, Source ID: #{source_id}, Timeframe: #{timeframe}"
 
     # Determine model based on time_series kind
     model = determine_model
@@ -247,7 +247,7 @@ class CoingeckoFlat < PipelineChainBase
   end
   
   def get_chart_config
-    CHART_CONFIGS[ticker]
+    CHART_CONFIGS[source_id]
   end
   
   def ensure_download_directory
@@ -620,7 +620,7 @@ class CoingeckoFlat < PipelineChainBase
         sleep(2 ** tries) # Exponential backoff: 2s, 4s, 8s
         retry
       else
-        raise "Failed to download CoinGecko data for ticker '#{ticker}' after #{TRIES} attempts: #{e.message}"
+        raise "Failed to download CoinGecko data for source_id '#{source_id}' after #{TRIES} attempts: #{e.message}"
       end
     end
   end

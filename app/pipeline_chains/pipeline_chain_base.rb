@@ -191,6 +191,11 @@ class PipelineChainBase
     time_series&.ticker
   end
   
+  # Helper method to get source_id from time_series
+  def source_id
+    time_series&.source_id
+  end
+  
   # Helper method to get timeframe from time_series
   def timeframe
     time_series&.timeframe || 'D1'
