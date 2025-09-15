@@ -527,6 +527,24 @@ class TimeSeriesSeeder
         since: Date.new(1956, 1, 1)
       },
       {
+        ticker: "CP",
+        timeframe: "Q",
+        source: "FRED",
+        source_id: "CP",
+        kind: "univariate",
+        description: "Corporate Profits After Tax (without IVA and CCAdj)",
+        since: Date.new(1947, 1, 1)
+      },
+      {
+        ticker: "USPHCI",
+        timeframe: "MN1",
+        source: "FRED",
+        source_id: "USPHCI",
+        kind: "univariate",
+        description: "Coincident Economic Activity Index for the United States, includes nonfarm payroll employment, the unemployment rate, average hours worked in manufacturing and wages and salaries. The trend matches matches gross product.",
+        since: Date.new(1979, 1, 1)
+      },
+      {
         ticker: "CBBTCUSD",
         timeframe: "D1",
         source: "FRED",
