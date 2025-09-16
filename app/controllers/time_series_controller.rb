@@ -104,11 +104,16 @@ class TimeSeriesController < ApplicationController
         total_count: total_count
       }
     end
+    
+    # Calculate outdated count efficiently using the data we already have
+    @outdated_count = time_series_data.count do |ts_data|
+      ts_data[:has_active_pipelines] && !ts_data[:up_to_date]
+    end
   end
 
   def sync
-    # Find all time series that are not up to date
-    outdated_series = TimeSeries.outdated_enabled
+    # Find all time series that are not up to date using optimized queries
+    outdated_series = find_outdated_enabled_time_series
     
     synced_pipelines_count = 0
     failed_pipelines_count = 0
@@ -251,6 +256,51 @@ class TimeSeriesController < ApplicationController
   end
 
   private
+
+  def find_outdated_enabled_time_series
+    # Preload pipelines to avoid N+1 queries
+    time_series_list = TimeSeries.includes(:pipelines).all
+    
+    # Get all tickers for bulk queries
+    tickers = time_series_list.map(&:ticker)
+    
+    # Bulk query aggregates statistics
+    aggregate_stats = Aggregate.where(ticker: tickers)
+                              .group(:ticker)
+                              .select('ticker, MAX(ts) as max_ts')
+                              .index_by(&:ticker)
+    
+    # Bulk query univariate statistics  
+    univariate_stats = Univariate.where(ticker: tickers)
+                                 .group(:ticker)
+                                 .select('ticker, MAX(ts) as max_ts')
+                                 .index_by(&:ticker)
+    
+    # Check which time series have active pipelines
+    active_pipeline_tickers = Pipeline.joins(:time_series)
+                                    .where(active: true, time_series: { ticker: tickers })
+                                    .pluck('time_series.ticker')
+                                    .to_set
+    
+    # Filter for outdated and enabled time series
+    time_series_list.select do |time_series|
+      ticker = time_series.ticker
+      
+      # Skip if no active pipelines
+      next false unless active_pipeline_tickers.include?(ticker)
+      
+      # Get latest timestamp based on time series kind
+      latest_ts = case time_series.kind
+                  when 'aggregate'
+                    aggregate_stats[ticker]&.max_ts
+                  when 'univariate'
+                    univariate_stats[ticker]&.max_ts
+                  end
+      
+      # Check if not up to date
+      !calculate_up_to_date_status(time_series, latest_ts)
+    end
+  end
 
   def calculate_up_to_date_status(time_series, latest_ts)
     return false unless latest_ts
