@@ -230,6 +230,15 @@ class TimeSeriesSeeder
         since: Date.new(1973, 1, 2)
       },
       {
+        ticker: "DXYLOOKALIKE",
+        timeframe: "D1",
+        source: "FRED",
+        source_id: "DTWEXAFEGS",
+        kind: "univariate",
+        description: "Nominal Advanced Foreign Economies U.S. Dollar Index - Closely resembles DXY for dollar strength",
+        since: Date.new(2006, 1, 2)
+      },
+      {
         ticker: "M1SL",
         timeframe: "MN1",
         source: "FRED",

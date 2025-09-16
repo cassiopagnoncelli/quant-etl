@@ -38,7 +38,7 @@ class FredFlat < PipelineChainBase
     end_date = Date.current
     
     params = {
-      series_id: ticker,
+      series_id: source_id,
       api_key: @api_key,
       file_type: 'json',
       observation_end: end_date.strftime('%Y-%m-%d')
@@ -48,9 +48,9 @@ class FredFlat < PipelineChainBase
     if should_use_incremental_fetch?
       start_date = get_start_date_from_latest_data.to_date
       params[:observation_start] = start_date.strftime('%Y-%m-%d')
-      log_info "Fetching incremental FRED data for #{ticker} from #{start_date} (latest existing data + 1 day)"
+      log_info "Fetching incremental FRED data for #{source_id} from #{start_date} (latest existing data + 1 day)"
     else
-      log_info "Fetching all available historical data for #{ticker} (from series inception - no existing data found)"
+      log_info "Fetching all available historical data for #{source_id} (from series inception - no existing data found)"
     end
     
     uri = URI("#{BASE_URL}/series/observations")
@@ -439,7 +439,7 @@ class FredFlat < PipelineChainBase
         sleep(2 ** tries) # Exponential backoff: 2s, 4s, 8s
         retry
       else
-        raise "Failed to download FRED data for series '#{ticker}' after #{TRIES} attempts: #{e.message}"
+        raise "Failed to download FRED data for series '#{source_id}' after #{TRIES} attempts: #{e.message}"
       end
     end
   end
