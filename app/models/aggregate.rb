@@ -21,6 +21,6 @@ class Aggregate < ApplicationRecord
   end
 
   def main
-    aclose || close
+    adjusted || close
   end
 end

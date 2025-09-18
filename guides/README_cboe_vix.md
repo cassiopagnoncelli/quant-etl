@@ -146,7 +146,7 @@ Data is stored in the `aggregates` table with the following mapping:
 - `timeframe`: Always "D1" (daily)
 - `ts`: Date timestamp
 - `open`, `high`, `low`, `close`: Price values
-- `aclose`: Same as close (VIX doesn't have adjusted close)
+- `adjusted`: Same as close (VIX doesn't have adjusted close)
 - `volume`: NULL (VIX indices don't have volume)
 
 ## Statistics Calculation

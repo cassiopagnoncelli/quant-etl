@@ -152,7 +152,7 @@
                 <td><%= number_with_precision(point.high, precision: 2, delimiter: ',') if point.high %></td>
                 <td><%= number_with_precision(point.low, precision: 2, delimiter: ',') if point.low %></td>
                 <td><%= number_with_precision(point.close, precision: 2, delimiter: ',') if point.close %></td>
-                <td><%= number_with_precision(point.aclose, precision: 2, delimiter: ',') if point.aclose %></td>
+                <td><%= number_with_precision(point.adjusted, precision: 2, delimiter: ',') if point.adjusted %></td>
                 <td><%= number_with_delimiter(point.volume) if point.volume %></td>
               </tr>
             <% end %>

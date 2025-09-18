@@ -309,7 +309,7 @@ class PolygonFlat < PipelineChainBase
       high: high_val,
       low: low_val,
       close: close_val,
-      aclose: close_val, # Assume close = adjusted close if not provided
+      adjusted: close_val, # Assume close = adjusted close if not provided
       volume: volume_val
     }
   end
@@ -344,7 +344,7 @@ class PolygonFlat < PipelineChainBase
   end
   
   def aggregate_changed?(aggregate, new_attributes)
-    %i[open high low close aclose volume].any? do |attr|
+    %i[open high low close adjusted volume].any? do |attr|
       existing_val = aggregate.send(attr)
       new_val = new_attributes[attr]
       

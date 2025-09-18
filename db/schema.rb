@@ -24,7 +24,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_14_011552) do
     t.float "high", null: false
     t.float "low", null: false
     t.float "close", null: false
-    t.float "aclose", null: false
+    t.float "adjusted", null: false
     t.float "volume"
     t.index ["timeframe", "ticker", "ts"], name: "index_aggregates_on_timeframe_and_ticker_and_ts", unique: true
   end

@@ -202,7 +202,7 @@ FRED data is stored in the Aggregate model with the following mapping:
   - Monthly data → "MN1"
   - Quarterly data → "Q1"
 - **ts**: Observation date
-- **open, high, low, close, aclose**: All set to the same value (point-in-time measurement)
+- **open, high, low, close, adjusted**: All set to the same value (point-in-time measurement)
 - **volume**: NULL (economic indicators don't have volume)
 
 ### Example Database Query

@@ -71,7 +71,7 @@ rake etl:cleanup
 - **Table**: `aggregates`
 - **Purpose**: Stores OHLC (Open, High, Low, Close) data
 - **Used for**: VIX indices and other aggregate time series
-- **Fields**: ticker, timeframe, ts, open, high, low, close, aclose, volume
+- **Fields**: ticker, timeframe, ts, open, high, low, close, adjusted, volume
 
 ### Univariate Model
 - **Table**: `univariates`

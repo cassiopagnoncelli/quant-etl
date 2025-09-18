@@ -7,7 +7,7 @@ FactoryBot.define do
     high { 155.0 }
     low { 148.0 }
     close { 152.0 }
-    aclose { 152.5 }
+    adjusted { 152.5 }
     volume { 1000000 }
 
     trait :with_different_ticker do
@@ -22,12 +22,12 @@ FactoryBot.define do
       timeframe { 'W1' }
     end
 
-    trait :without_aclose do
-      aclose { nil }
+    trait :without_adjusted do
+      adjusted { nil }
     end
 
-    trait :zero_aclose do
-      aclose { 0 }
+    trait :zero_adjusted do
+      adjusted { 0 }
     end
 
     trait :yesterday do

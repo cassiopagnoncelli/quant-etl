@@ -71,23 +71,23 @@ RSpec.describe Aggregate, type: :model do
 
   describe 'instance methods' do
     describe '#main' do
-      context 'when aclose is present' do
-        it 'returns aclose value' do
-          aggregate = described_class.new(valid_attributes.merge(aclose: 153.0, close: 152.0))
+      context 'when adjusted is present' do
+        it 'returns adjusted value' do
+          aggregate = described_class.new(valid_attributes.merge(adjusted: 153.0, close: 152.0))
           expect(aggregate.main).to eq(153.0)
         end
       end
 
-      context 'when aclose is nil' do
+      context 'when adjusted is nil' do
         it 'returns close value' do
-          aggregate = described_class.new(valid_attributes.merge(aclose: nil, close: 152.0))
+          aggregate = described_class.new(valid_attributes.merge(adjusted: nil, close: 152.0))
           expect(aggregate.main).to eq(152.0)
         end
       end
 
-      context 'when aclose is 0' do
-        it 'returns aclose value (0)' do
-          aggregate = described_class.new(valid_attributes.merge(aclose: 0, close: 152.0))
+      context 'when adjusted is 0' do
+        it 'returns adjusted value (0)' do
+          aggregate = described_class.new(valid_attributes.merge(adjusted: 0, close: 152.0))
           expect(aggregate.main).to eq(0.0)
         end
       end

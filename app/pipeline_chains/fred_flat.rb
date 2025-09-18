@@ -301,13 +301,13 @@ class FredFlat < PipelineChainBase
       high: value,
       low: value,
       close: value,
-      aclose: value,
+      adjusted: value,
       volume: nil
     }
   end
   
   def aggregate_changed?(aggregate, new_attributes)
-    %i[open high low close aclose].any? do |attr|
+    %i[open high low close adjusted].any? do |attr|
       aggregate.send(attr).to_f != new_attributes[attr].to_f
     end
   end

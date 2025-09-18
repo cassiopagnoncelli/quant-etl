@@ -150,7 +150,7 @@ Aggregate
 ├── high (Decimal)       # High price
 ├── low (Decimal)        # Low price
 ├── close (Decimal)      # Closing price
-├── aclose (Decimal)     # Adjusted close (same as close for VIX)
+├── adjusted (Decimal)     # Adjusted close (same as close for VIX)
 └── volume (Integer)     # nil (VIX doesn't have volume)
 ```
 

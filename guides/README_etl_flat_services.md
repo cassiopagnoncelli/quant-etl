@@ -106,7 +106,7 @@ All services import data into the `aggregates` table with the following structur
 - `timeframe`: Time period (e.g., 'D1' for daily)
 - `ts`: Timestamp
 - `open`, `high`, `low`, `close`: Price data
-- `aclose`: Adjusted close
+- `adjusted`: Adjusted close
 - `volume`: Trading volume (where applicable)
 
 ## Environment Variables

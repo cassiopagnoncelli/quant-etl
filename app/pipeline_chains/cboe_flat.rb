@@ -185,7 +185,7 @@ class CboeFlat < PipelineChainBase
       high: high_val,
       low: low_val,
       close: close_val,
-      aclose: close_val, # VIX doesn't have adjusted close
+      adjusted: close_val, # VIX doesn't have adjusted close
       volume: nil # VIX doesn't have volume
     }
   end
@@ -198,7 +198,7 @@ class CboeFlat < PipelineChainBase
   end
   
   def aggregate_changed?(aggregate, new_attributes)
-    %i[open high low close aclose].any? do |attr|
+    %i[open high low close adjusted].any? do |attr|
       aggregate.send(attr).to_f != new_attributes[attr].to_f
     end
   end
