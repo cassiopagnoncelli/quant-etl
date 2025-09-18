@@ -582,6 +582,20 @@ class TimeSeriesSeeder
       }
     ]
 
+    # Polygon Series - Univariate Time Series  
+    # Source IDs match the ticker used in Polygon API calls
+    polygon_series = [
+      # {
+      #   ticker: "XAUUSD",
+      #   timeframe: "D1",
+      #   source: "Polygon",
+      #   source_id: "C:XAUUSD",
+      #   kind: "univariate",
+      #   description: "Gold Price in US Dollars (XAU/USD) - spot gold price from forex markets",
+      #   since: Date.new(1980, 1, 1)
+      # }
+    ]
+
     # CoinGecko Crypto Series - Univariate Time Series
     # Source IDs match the ticker used in CoinGecko API calls
     coingecko_series = [
@@ -755,11 +769,14 @@ class TimeSeriesSeeder
     # Create FRED series
     fred_count = create_series(fred_series, "\n📈 Creating FRED economic series (univariate)...")
 
+    # Create Polygon series
+    polygon_count = create_series(polygon_series, "\n🏅 Creating Polygon series (univariate)...")
+
     # Create CoinGecko series
     coingecko_count = create_series(coingecko_series, "\n🪙 Creating CoinGecko crypto series (univariate)...")
 
     # Summary
-    display_summary(vix_count, fred_count, coingecko_count)
+    display_summary(vix_count, fred_count, polygon_count, coingecko_count)
   end
 
   private
@@ -811,12 +828,13 @@ class TimeSeriesSeeder
     end
   end
 
-  def self.display_summary(vix_count, fred_count, coingecko_count)
+  def self.display_summary(vix_count, fred_count, polygon_count, coingecko_count)
     puts "\n" + "="*80
     puts "🎯 SEED SUMMARY"
     puts "="*80
     puts "📊 VIX Indices (aggregate): #{vix_count} series created"
     puts "📈 FRED Economic (univariate): #{fred_count} series created"
+    puts "🏅 Polygon (univariate): #{polygon_count} series created"
     puts "🪙 CoinGecko Crypto (univariate): #{coingecko_count} series created"
     puts "📋 Total TimeSeries records: #{TimeSeries.count}"
     puts "🔗 Total Pipeline records: #{Pipeline.count}"

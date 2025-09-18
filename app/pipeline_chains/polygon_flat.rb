@@ -129,9 +129,17 @@ class PolygonFlat < PipelineChainBase
   end
   
   def determine_asset_class
-    # Default to stocks, but this could be enhanced based on time_series attributes
-    # or ticker patterns (e.g., forex pairs, crypto symbols, etc.)
-    :stocks
+    # Determine asset class based on ticker pattern or time_series source_id
+    if time_series&.source_id&.start_with?('C:')
+      # Forex symbols in Polygon start with 'C:' (e.g., C:XAUUSD, C:EURUSD)
+      :forex
+    elsif ticker.match?(/^[A-Z]{6}$/) && ticker.include?('USD')
+      # Crypto pairs (e.g., BTCUSD, ETHUSD)
+      :crypto
+    else
+      # Default to stocks for everything else
+      :stocks
+    end
   end
   
   def determine_data_type
