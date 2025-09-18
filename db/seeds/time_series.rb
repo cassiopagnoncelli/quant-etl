@@ -607,6 +607,78 @@ class TimeSeriesSeeder
         kind: "aggregate",
         description: "Gold Futures (XAU/USD) - Daily OHLCV data from Yahoo Finance",
         since: Date.new(1980, 1, 1)
+      },
+      {
+        ticker: "AAPL",
+        timeframe: "D1",
+        source: "Yahoo",
+        source_id: "AAPL",
+        kind: "aggregate",
+        description: "Apple Inc. (AAPL) - Daily OHLCV data from Yahoo Finance",
+        since: Date.new(1980, 12, 12)
+      },
+      {
+        ticker: "GOOG",
+        timeframe: "D1",
+        source: "Yahoo",
+        source_id: "GOOG",
+        kind: "aggregate",
+        description: "Alphabet Inc. (GOOG) - Daily OHLCV data from Yahoo Finance",
+        since: Date.new(2004, 8, 19)
+      },
+      {
+        ticker: "META",
+        timeframe: "D1",
+        source: "Yahoo",
+        source_id: "META",
+        kind: "aggregate",
+        description: "Meta Platforms, Inc. (META) - Daily OHLCV data from Yahoo Finance",
+        since: Date.new(2012, 5, 18)
+      },
+      {
+        ticker: "AMZN",
+        timeframe: "D1",
+        source: "Yahoo",
+        source_id: "AMZN",
+        kind: "aggregate",
+        description: "Amazon.com, Inc. (AMZN) - Daily OHLCV data from Yahoo Finance",
+        since: Date.new(1997, 5, 15)
+      },
+      {
+        ticker: "NFLX",
+        timeframe: "D1",
+        source: "Yahoo",
+        source_id: "NFLX",
+        kind: "aggregate",
+        description: "Netflix, Inc. (NFLX) - Daily OHLCV data from Yahoo Finance",
+        since: Date.new(2002, 5, 23)
+      },
+      {
+        ticker: "NFLX",
+        timeframe: "D1",
+        source: "Yahoo",
+        source_id: "NFLX",
+        kind: "aggregate",
+        description: "Netflix, Inc. (NFLX) - Daily OHLCV data from Yahoo Finance",
+        since: Date.new(2002, 5, 23)
+      },
+      {
+        ticker: "MSFT",
+        timeframe: "D1",
+        source: "Yahoo",
+        source_id: "MSFT",
+        kind: "aggregate",
+        description: "Microsoft Corporation (MSFT) - Daily OHLCV data from Yahoo Finance",
+        since: Date.new(1986, 3, 13)
+      },
+      {
+        ticker: "NVDA",
+        timeframe: "D1",
+        source: "Yahoo",
+        source_id: "NVDA",
+        kind: "aggregate",
+        description: "NVIDIA Corporation (NVDA) - Daily OHLCV data from Yahoo Finance",
+        since: Date.new(1999, 1, 22)
       }
     ]
 
