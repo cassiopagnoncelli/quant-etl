@@ -596,6 +596,20 @@ class TimeSeriesSeeder
       # }
     ]
 
+    # Yahoo Finance Series - Aggregate Time Series
+    # Source IDs match the ticker symbols used in Yahoo Finance API calls
+    yahoo_series = [
+      {
+        ticker: "XAUUSD",
+        timeframe: "D1",
+        source: "Yahoo",
+        source_id: "GC=F",
+        kind: "aggregate",
+        description: "Gold Futures (XAU/USD) - Daily OHLCV data from Yahoo Finance",
+        since: Date.new(1980, 1, 1)
+      }
+    ]
+
     # CoinGecko Crypto Series - Univariate Time Series
     # Source IDs match the ticker used in CoinGecko API calls
     coingecko_series = [
@@ -772,11 +786,14 @@ class TimeSeriesSeeder
     # Create Polygon series
     polygon_count = create_series(polygon_series, "\n🏅 Creating Polygon series (univariate)...")
 
+    # Create Yahoo series
+    yahoo_count = create_series(yahoo_series, "\n🏦 Creating Yahoo Finance series (aggregate)...")
+
     # Create CoinGecko series
     coingecko_count = create_series(coingecko_series, "\n🪙 Creating CoinGecko crypto series (univariate)...")
 
     # Summary
-    display_summary(vix_count, fred_count, polygon_count, coingecko_count)
+    display_summary(vix_count, fred_count, polygon_count, yahoo_count, coingecko_count)
   end
 
   private
@@ -814,6 +831,8 @@ class TimeSeriesSeeder
                     'PolygonFlat'
                   when 'CoinGecko'
                     'CoingeckoFlat'
+                  when 'Yahoo'
+                    'YahooFlat'
                   else
                     raise "Unknown source: #{time_series.source}"
                   end
@@ -828,13 +847,14 @@ class TimeSeriesSeeder
     end
   end
 
-  def self.display_summary(vix_count, fred_count, polygon_count, coingecko_count)
+  def self.display_summary(vix_count, fred_count, polygon_count, yahoo_count, coingecko_count)
     puts "\n" + "="*80
     puts "🎯 SEED SUMMARY"
     puts "="*80
     puts "📊 VIX Indices (aggregate): #{vix_count} series created"
     puts "📈 FRED Economic (univariate): #{fred_count} series created"
     puts "🏅 Polygon (univariate): #{polygon_count} series created"
+    puts "🏦 Yahoo Finance (aggregate): #{yahoo_count} series created"
     puts "🪙 CoinGecko Crypto (univariate): #{coingecko_count} series created"
     puts "📋 Total TimeSeries records: #{TimeSeries.count}"
     puts "🔗 Total Pipeline records: #{Pipeline.count}"
