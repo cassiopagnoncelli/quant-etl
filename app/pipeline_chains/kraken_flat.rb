@@ -12,12 +12,12 @@ class KrakenFlat < PipelineChainBase
   TRIES = 3
   MAX_RECORDS_PER_REQUEST = 720 # Kraken's limit for OHLC data
   
-  # Kraken pair mappings
+  # Kraken pair mappings - request pair => response pair
   PAIR_MAPPINGS = {
-    'BTCUSD' => 'XBTUSD',
-    'BTCUSDT' => 'XBTUSD', # Use BTC/USD as proxy for BTC/USDT
-    'ETHUSD' => 'ETHUSD',
-    'ETHUSDT' => 'ETHUSD'
+    'BTCUSD' => { request: 'XBTUSD', response: 'XXBTZUSD' },
+    'BTCUSDT' => { request: 'XBTUSD', response: 'XXBTZUSD' }, # Use BTC/USD as proxy for BTC/USDT
+    'ETHUSD' => { request: 'ETHUSD', response: 'XETHZUSD' },
+    'ETHUSDT' => { request: 'ETHUSD', response: 'XETHZUSD' }
   }.freeze
   
   # Kraken interval mappings (in minutes)
@@ -106,7 +106,15 @@ class KrakenFlat < PipelineChainBase
     # Extract base ticker from new format (e.g., KRBTCUSDH1 -> BTCUSD)
     # Format: {source}{ticker}{timeframe} - remove first 2 chars (KR) and last 2 chars (H1)
     base_ticker = ticker[2..-3].upcase
-    PAIR_MAPPINGS[base_ticker]
+    pair_config = PAIR_MAPPINGS[base_ticker]
+    pair_config ? pair_config[:request] : nil
+  end
+  
+  def get_kraken_response_pair
+    # Get the response pair name for parsing API results
+    base_ticker = ticker[2..-3].upcase
+    pair_config = PAIR_MAPPINGS[base_ticker]
+    pair_config ? pair_config[:response] : nil
   end
   
   def get_kraken_interval
@@ -186,8 +194,9 @@ class KrakenFlat < PipelineChainBase
             current_date += (MAX_RECORDS_PER_REQUEST * interval_days(interval)).days
           end
           
-          # Rate limiting - be respectful to Kraken
-          sleep(1) if current_date <= end_date
+          # Rate limiting - be respectful to Kraken API limits
+          # Kraken allows 1 request per second for public endpoints
+          sleep(2) if current_date <= end_date
           
         rescue StandardError => e
           log_error "Failed to fetch chunk starting #{current_date}: #{e.message}"
@@ -226,18 +235,41 @@ class KrakenFlat < PipelineChainBase
     response = fetch_with_retry(uri)
     data = JSON.parse(response.body)
     
+    # Check for API errors first
     if data['error'] && data['error'].any?
-      raise "Kraken API error: #{data['error'].join(', ')}"
+      error_msg = data['error'].join(', ')
+      log_error "Kraken API error: #{error_msg}"
+      
+      # Handle rate limiting specifically
+      if error_msg.include?('Too many requests')
+        log_warn "Rate limited by Kraken API, waiting longer before retry"
+        sleep(10) # Wait 10 seconds for rate limit
+        raise "Rate limited: #{error_msg}"
+      else
+        raise "Kraken API error: #{error_msg}"
+      end
     end
     
-    if data['result'] && data['result'][pair]
-      ohlc_data = data['result'][pair]
+    # Check if we have a valid result structure
+    if data['result'].nil?
+      log_warn "No result data in API response"
+      return [[], nil]
+    end
+    
+    # Get the response pair name (different from request pair name)
+    response_pair = get_kraken_response_pair
+    
+    # The result should contain the pair data using the response pair name
+    if data['result'][response_pair]
+      ohlc_data = data['result'][response_pair]
       last_timestamp = data['result']['last']
       
       parsed_data = parse_kraken_ohlc(ohlc_data)
       [parsed_data, last_timestamp]
     else
-      log_warn "Unexpected API response format: #{data.keys.join(', ')}"
+      # Log available keys for debugging
+      available_keys = data['result'].keys rescue []
+      log_warn "Response pair '#{response_pair}' not found in result. Available keys: #{available_keys.join(', ')}"
       [[], nil]
     end
   end
@@ -494,6 +526,12 @@ class KrakenFlat < PipelineChainBase
           error_data = JSON.parse(response.body)
           if error_data['error'] && error_data['error'].any?
             error_details = " - #{error_data['error'].join(', ')}"
+            
+            # Handle rate limiting at HTTP level
+            if error_details.include?('Too many requests')
+              log_warn "Rate limited at HTTP level, waiting before retry"
+              sleep(15) # Wait longer for rate limits
+            end
           end
         rescue JSON::ParserError
           # Ignore JSON parsing errors, use default message
@@ -505,8 +543,15 @@ class KrakenFlat < PipelineChainBase
       response
     rescue StandardError => e
       if tries < TRIES
-        log_warn "Fetch attempt #{tries} failed: #{e.message}. Retrying..."
-        sleep(2 ** tries) # Exponential backoff: 2s, 4s, 8s
+        # Determine wait time based on error type
+        wait_time = if e.message.include?('Rate limited') || e.message.include?('Too many requests')
+                      15 + (tries * 5) # 15s, 20s, 25s for rate limits
+                    else
+                      2 ** tries # 2s, 4s, 8s for other errors
+                    end
+        
+        log_warn "Fetch attempt #{tries} failed: #{e.message}. Retrying in #{wait_time}s..."
+        sleep(wait_time)
         retry
       else
         raise "Failed to download Kraken data for source_id '#{source_id}' after #{TRIES} attempts: #{e.message}"

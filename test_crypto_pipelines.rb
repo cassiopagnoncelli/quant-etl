@@ -21,11 +21,6 @@ test_cases = [
     chain_class: KrakenFlat
   },
   {
-    name: "CoinCap BTCUSD",
-    ticker: "BTCUSD_CAP", 
-    chain_class: CoincapFlat
-  },
-  {
     name: "Coinbase BTCUSD",
     ticker: "BTCUSD_CB",
     chain_class: CoinbaseFlat
@@ -86,10 +81,6 @@ test_cases.each do |test_case|
       pair = chain_instance.send(:get_kraken_pair)
       interval = chain_instance.send(:get_kraken_interval)
       puts "   - Kraken pair: #{pair}, interval: #{interval}"
-    when 'CoincapFlat'
-      asset = chain_instance.send(:get_coincap_asset)
-      interval = chain_instance.send(:get_coincap_interval)
-      puts "   - CoinCap asset: #{asset}, interval: #{interval}"
     when 'CoinbaseFlat'
       product = chain_instance.send(:get_coinbase_product)
       granularity = chain_instance.send(:get_coinbase_granularity)
@@ -109,7 +100,7 @@ puts "🏁 Testing completed!"
 
 # Show summary of created TimeSeries
 puts "\n📊 Crypto TimeSeries Summary:"
-crypto_series = TimeSeries.where(source: ['Bitstamp', 'Kraken', 'CoinCap', 'Coinbase'])
+crypto_series = TimeSeries.where(source: ['Bitstamp', 'Kraken', 'Coinbase'])
 crypto_series.each do |ts|
   pipeline = ts.pipelines.first
   puts "  #{ts.ticker} (#{ts.source}) - #{pipeline&.chain} - Active: #{pipeline&.active}"

@@ -708,16 +708,6 @@ class TimeSeriesSeeder
         since: Date.new(2015, 1, 1)
       },
       
-      # CoinCap - Tertiary source (backup/validation)
-      {
-        ticker: "CCBTCUSDH1",
-        timeframe: "H1",
-        source: "CoinCap",
-        source_id: "bitcoin",
-        kind: "aggregate",
-        description: "Bitcoin/USD Hourly OHLC from CoinCap (Tertiary source)",
-        since: Date.new(2015, 1, 1)
-      },
       
       # Coinbase - Additional validation source
       {
@@ -961,8 +951,6 @@ class TimeSeriesSeeder
                     'BitstampFlat'
                   when 'Kraken'
                     'KrakenFlat'
-                  when 'CoinCap'
-                    'CoincapFlat'
                   when 'Coinbase'
                     'CoinbaseFlat'
                   else

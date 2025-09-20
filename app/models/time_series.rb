@@ -1,6 +1,6 @@
 class TimeSeries < ApplicationRecord
   KINDS = %w[univariate aggregate].freeze
-  SOURCES = %w[DB FRED CBOE Polygon CoinGecko Yahoo Bitstamp Kraken CoinCap Coinbase].freeze
+  SOURCES = %w[DB FRED CBOE Polygon CoinGecko Yahoo Bitstamp Kraken Coinbase].freeze
   TIMEFRAMES = %w[M1 H1 D1 W1 MN1 Q Y].freeze
 
   enum :kind, KINDS.index_with(&:itself), default: :univariate
