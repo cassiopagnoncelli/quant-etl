@@ -117,6 +117,20 @@ class CoinbaseFlat < PipelineChainBase
     granularity_seconds.to_f / 86400.0 # Convert seconds to days
   end
   
+  def calculate_safe_chunk_days(granularity)
+    # Calculate the maximum number of days we can fetch without exceeding 300 candles
+    max_days_float = MAX_CANDLES_PER_REQUEST * granularity_days(granularity)
+    # Add a small buffer to be safe (90% of max)
+    safe_days_float = max_days_float * 0.9
+    safe_days_float.days
+  end
+  
+  def calculate_expected_candles(start_date, end_date, granularity)
+    # Calculate the expected number of candles for a date range
+    total_seconds = (end_date.end_of_day - start_date.beginning_of_day).to_i
+    (total_seconds / granularity.to_f).ceil
+  end
+  
   def determine_date_range
     if should_use_incremental_fetch?
       start_date = get_start_date_from_latest_data.to_date
@@ -140,10 +154,20 @@ class CoinbaseFlat < PipelineChainBase
       
       while current_date <= end_date
         # Calculate chunk end date based on max candles and granularity
-        chunk_days = (MAX_CANDLES_PER_REQUEST * granularity_days(granularity)).days
+        # Ensure we don't exceed the 300 candle limit
+        chunk_days = calculate_safe_chunk_days(granularity)
         chunk_end = [current_date + chunk_days, end_date].min
         
-        log_info "Fetching chunk: #{current_date} to #{chunk_end}"
+        # Double-check that this chunk won't exceed the limit
+        expected_candles = calculate_expected_candles(current_date, chunk_end, granularity)
+        if expected_candles > MAX_CANDLES_PER_REQUEST
+          # Reduce chunk size to stay within limit
+          chunk_days = (MAX_CANDLES_PER_REQUEST * granularity_days(granularity)).days
+          chunk_end = current_date + chunk_days
+          log_warn "Reduced chunk size to stay within 300 candle limit: #{current_date} to #{chunk_end}"
+        end
+        
+        log_info "Fetching chunk: #{current_date} to #{chunk_end} (expected candles: #{calculate_expected_candles(current_date, chunk_end, granularity)})"
         
         begin
           data = fetch_candles_chunk(product, granularity, current_date, chunk_end)
@@ -175,6 +199,21 @@ class CoinbaseFlat < PipelineChainBase
           
         rescue StandardError => e
           log_error "Failed to fetch chunk #{current_date} to #{chunk_end}: #{e.message}"
+          
+          # If we get a "granularity too small" error, try with a smaller chunk
+          if e.message.include?("granularity too small") || e.message.include?("exceeds 300")
+            log_warn "Chunk too large, trying with smaller chunk size"
+            # Try with half the chunk size
+            smaller_chunk_days = chunk_days / 2
+            if smaller_chunk_days >= 1.day
+              chunk_end = current_date + smaller_chunk_days
+              log_info "Retrying with smaller chunk: #{current_date} to #{chunk_end}"
+              retry
+            else
+              log_error "Cannot reduce chunk size further, skipping this period"
+            end
+          end
+          
           # Skip this chunk and continue
           current_date = chunk_end + 1.day
         end
@@ -466,11 +505,25 @@ class CoinbaseFlat < PipelineChainBase
           # Ignore JSON parsing errors, use default message
         end
         
-        raise "HTTP #{response.code} - #{response.message}#{error_details}"
+        error_message = "HTTP #{response.code} - #{response.message}#{error_details}"
+        
+        # Don't retry certain errors that won't be fixed by retrying
+        if response.code == '400' && (error_details.include?('granularity too small') || error_details.include?('exceeds 300'))
+          log_error "API limit error that won't be fixed by retrying: #{error_message}"
+          raise error_message
+        end
+        
+        raise error_message
       end
       
       response
     rescue StandardError => e
+      # Don't retry API limit errors
+      if e.message.include?('granularity too small') || e.message.include?('exceeds 300')
+        log_error "API limit error detected, not retrying: #{e.message}"
+        raise e
+      end
+      
       if tries < TRIES
         log_warn "Fetch attempt #{tries} failed: #{e.message}. Retrying..."
         sleep(2 ** tries) # Exponential backoff: 2s, 4s, 8s

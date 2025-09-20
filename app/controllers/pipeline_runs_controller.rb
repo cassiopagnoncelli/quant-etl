@@ -65,7 +65,7 @@ class PipelineRunsController < ApplicationController
   end
 
   def filter_params
-    params.slice(:status, :stage).reject { |_, v| v.blank? }
+    params.permit(:status, :stage).reject { |_, v| v.blank? }
   end
   helper_method :filter_params
 
