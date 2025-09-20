@@ -553,33 +553,6 @@ class TimeSeriesSeeder
         description: "Coincident Economic Activity Index for the United States, includes nonfarm payroll employment, the unemployment rate, average hours worked in manufacturing and wages and salaries. The trend matches matches gross product.",
         since: Date.new(1979, 1, 1)
       },
-      {
-        ticker: "CBBTCUSD",
-        timeframe: "D1",
-        source: "FRED",
-        source_id: "CBBTCUSD",
-        kind: "univariate",
-        description: "Coinbase Bitcoin",
-        since: Date.new(2014, 12, 1)
-      },
-      {
-        ticker: "CBETHUSD",
-        timeframe: "D1",
-        source: "FRED",
-        source_id: "CBETHUSD",
-        kind: "univariate",
-        description: "Coinbase Ethereum",
-        since: Date.new(2016, 5, 18)
-      },
-      {
-        ticker: "CBLTCUSD",
-        timeframe: "D1",
-        source: "FRED",
-        source_id: "CBLTCUSD",
-        kind: "univariate",
-        description: "Coinbase Litecoin",
-        since: Date.new(2016, 8, 17)
-      }
     ]
 
     # Polygon Series - Univariate Time Series  
@@ -698,17 +671,6 @@ class TimeSeriesSeeder
       },
       
       
-      # Coinbase - Additional validation source
-      {
-        ticker: "CBBTCUSDH1",
-        timeframe: "H1",
-        source: "Coinbase",
-        source_id: "BTC-USD",
-        kind: "aggregate",
-        description: "Bitcoin/USD Hourly OHLC from Coinbase (Validation source)",
-        since: Date.new(2015, 1, 1)
-      },
-      
       # TwelveData - Multi-exchange aggregated source
       {
         ticker: "TDBTCUSDH1",
@@ -716,7 +678,7 @@ class TimeSeriesSeeder
         source: "TwelveData",
         source_id: "TDBTCUSDH1",
         kind: "aggregate",
-        description: "Bitcoin/USD Hourly OHLC from TwelveData (Binance, Bitfinex, Coinbase Pro)",
+        description: "Bitcoin/USD Hourly OHLC from TwelveData (Binance, Bitfinex)",
         since: Date.new(2017, 1, 1)
       }
     ]
@@ -949,8 +911,6 @@ class TimeSeriesSeeder
                     'YahooFlat'
                   when 'Bitstamp'
                     'BitstampFlat'
-                  when 'Coinbase'
-                    'CoinbaseFlat'
                   when 'TwelveData'
                     'TwelveDataFlat'
                   else

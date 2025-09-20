@@ -26,7 +26,6 @@ class TwelveDataFlat < PipelineChainBase
   EXCHANGE_MAPPINGS = {
     'Binance' => 'Binance',
     'Bitfinex' => 'Bitfinex',
-    'Coinbase Pro' => 'Coinbase Pro'
   }.freeze
   
   # Symbol mappings
@@ -143,7 +142,7 @@ class TwelveDataFlat < PipelineChainBase
   def get_exchanges_from_ticker
     # For BTC/USD, return the specified exchanges
     if ticker.include?('BTCUSD')
-      ['Binance', 'Bitfinex', 'Coinbase Pro']
+      ['Binance', 'Bitfinex']
     else
       []
     end
