@@ -12,6 +12,7 @@ class BitstampFlat < PipelineChainBase
   TRIES = 3
   MAX_RECORDS_PER_REQUEST = 1000
   SECONDS_PER_DAY = 86400
+  SECONDS_PER_HOUR = 3600
   
   # Bitstamp pair mappings
   PAIR_MAPPINGS = {
@@ -98,6 +99,22 @@ class BitstampFlat < PipelineChainBase
     PAIR_MAPPINGS[base_ticker]
   end
   
+  def get_step_seconds
+    # Extract timeframe from ticker (e.g., BSBTCUSDH1 -> H1)
+    # Format: {source}{ticker}{timeframe} - get last 2 chars
+    timeframe_code = ticker[-2..-1].upcase
+    
+    case timeframe_code
+    when 'H1'
+      SECONDS_PER_HOUR  # 3600 seconds = 1 hour
+    when 'D1'
+      SECONDS_PER_DAY   # 86400 seconds = 1 day
+    else
+      # Default to hourly for H1 timeframe
+      SECONDS_PER_HOUR
+    end
+  end
+  
   def determine_date_range
     if should_use_incremental_fetch?
       start_date = get_start_date_from_latest_data.to_date
@@ -168,9 +185,12 @@ class BitstampFlat < PipelineChainBase
     start_timestamp = start_date.to_time.to_i
     end_timestamp = end_date.end_of_day.to_time.to_i
     
+    # Determine step size based on timeframe
+    step_seconds = get_step_seconds
+    
     uri = URI("#{BASE_URL}/ohlc/#{pair}/")
     params = {
-      step: SECONDS_PER_DAY, # Daily candles
+      step: step_seconds,
       limit: MAX_RECORDS_PER_REQUEST,
       start: start_timestamp,
       end: end_timestamp
@@ -192,20 +212,40 @@ class BitstampFlat < PipelineChainBase
     return [] unless ohlc_data.is_a?(Array)
     
     ohlc_data.map do |candle|
-      next unless candle.is_a?(Array) && candle.length >= 6
+      # Handle both object format (current API) and array format (legacy)
+      if candle.is_a?(Hash)
+        # Current API format: {"timestamp": "1420156800", "open": "313.82", ...}
+        timestamp = candle['timestamp'].to_i
+        open_price = Float(candle['open'])
+        high_price = Float(candle['high'])
+        low_price = Float(candle['low'])
+        close_price = Float(candle['close'])
+        volume = Float(candle['volume'])
+      elsif candle.is_a?(Array) && candle.length >= 6
+        # Legacy array format: [timestamp, open, high, low, close, volume]
+        timestamp = candle[0].to_i
+        open_price = Float(candle[1])
+        high_price = Float(candle[2])
+        low_price = Float(candle[3])
+        close_price = Float(candle[4])
+        volume = Float(candle[5])
+      else
+        next
+      end
       
-      timestamp = candle[0].to_i
-      open_price = Float(candle[1])
-      high_price = Float(candle[2])
-      low_price = Float(candle[3])
-      close_price = Float(candle[4])
-      volume = Float(candle[5])
+      # Convert timestamp to datetime (preserve hour for H1 data)
+      datetime = Time.at(timestamp)
       
-      # Convert timestamp to date
-      date = Time.at(timestamp).to_date
+      # Format based on timeframe
+      timeframe_code = ticker[-2..-1].upcase
+      date_string = if timeframe_code == 'H1'
+        datetime.strftime('%Y-%m-%d %H:%M:%S')  # Include time for hourly data
+      else
+        datetime.to_date.strftime('%Y-%m-%d')   # Date only for daily data
+      end
       
       {
-        date: date.strftime('%Y-%m-%d'),
+        date: date_string,
         open: open_price,
         high: high_price,
         low: low_price,
@@ -276,11 +316,18 @@ class BitstampFlat < PipelineChainBase
   end
   
   def parse_aggregate_row(row)
-    # Parse date
+    # Parse date/datetime
     date_str = row['Date']
     return nil if date_str.nil? || date_str.strip.empty?
 
-    date = Date.parse(date_str.strip)
+    # Handle both date and datetime formats
+    datetime = if date_str.include?(' ')
+      # Datetime format for hourly data: "2015-01-01 12:00:00"
+      DateTime.parse(date_str.strip)
+    else
+      # Date format for daily data: "2015-01-01"
+      Date.parse(date_str.strip).to_datetime
+    end
 
     # Parse OHLC values
     open_val = parse_float(row['Open'])
@@ -293,14 +340,14 @@ class BitstampFlat < PipelineChainBase
 
     # Validate OHLC consistency
     unless valid_ohlc?(open_val, high_val, low_val, close_val)
-      log_warn "Invalid OHLC data for #{date}: O=#{open_val}, H=#{high_val}, L=#{low_val}, C=#{close_val}"
+      log_warn "Invalid OHLC data for #{datetime}: O=#{open_val}, H=#{high_val}, L=#{low_val}, C=#{close_val}"
       return nil
     end
 
     {
       ticker: ticker,
       timeframe: timeframe,
-      ts: date.to_datetime,
+      ts: datetime,
       open: open_val,
       high: high_val,
       low: low_val,

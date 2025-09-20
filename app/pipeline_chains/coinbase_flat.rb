@@ -10,7 +10,7 @@ require 'date'
 class CoinbaseFlat < PipelineChainBase
   BASE_URL = 'https://api.exchange.coinbase.com'
   TRIES = 3
-  MAX_CANDLES_PER_REQUEST = 300 # Coinbase Pro limit
+  MAX_CANDLES_PER_REQUEST = 290 # Coinbase Pro limit with safety buffer
   
   # Coinbase product mappings
   PRODUCT_MAPPINGS = {
@@ -118,17 +118,47 @@ class CoinbaseFlat < PipelineChainBase
   end
   
   def calculate_safe_chunk_days(granularity)
-    # Calculate the maximum number of days we can fetch without exceeding 300 candles
-    max_days_float = MAX_CANDLES_PER_REQUEST * granularity_days(granularity)
-    # Add a small buffer to be safe (90% of max)
-    safe_days_float = max_days_float * 0.9
-    safe_days_float.days
+    # For hourly data (H1), directly calculate based on hours to avoid precision issues
+    case timeframe
+    when 'H1'
+      # For H1, we can fetch MAX_CANDLES_PER_REQUEST hours worth of data
+      # Convert hours to days, but subtract 1 day to be extra safe: 289 hours = ~12 days
+      ((MAX_CANDLES_PER_REQUEST - 1).to_f / 24.0).days
+    when 'D1'
+      # For daily data, we can fetch MAX_CANDLES_PER_REQUEST days
+      MAX_CANDLES_PER_REQUEST.days
+    when 'M1'
+      # For minute data, 290 minutes = ~4.8 hours
+      (MAX_CANDLES_PER_REQUEST.to_f / (24.0 * 60.0)).days
+    else
+      # Fallback to original calculation for other timeframes
+      max_days_float = MAX_CANDLES_PER_REQUEST * granularity_days(granularity)
+      safe_days_float = max_days_float * 0.9
+      safe_days_float.days
+    end
   end
   
   def calculate_expected_candles(start_date, end_date, granularity)
     # Calculate the expected number of candles for a date range
-    total_seconds = (end_date.end_of_day - start_date.beginning_of_day).to_i
-    (total_seconds / granularity.to_f).ceil
+    # For more accurate calculation, use the actual time difference
+    case timeframe
+    when 'H1'
+      # For hourly data, calculate total hours between dates
+      # Use a more precise calculation that doesn't include partial hours
+      total_hours = ((end_date.beginning_of_day - start_date.beginning_of_day) / 1.hour).to_i + 24
+      total_hours
+    when 'D1'
+      # For daily data, calculate total days
+      (end_date - start_date).to_i + 1
+    when 'M1'
+      # For minute data, calculate total minutes
+      minutes_diff = ((end_date.end_of_day - start_date.beginning_of_day) / 1.minute).ceil
+      minutes_diff
+    else
+      # Fallback to original calculation
+      total_seconds = (end_date.end_of_day - start_date.beginning_of_day).to_i
+      (total_seconds / granularity.to_f).ceil
+    end
   end
   
   def determine_date_range
@@ -136,8 +166,8 @@ class CoinbaseFlat < PipelineChainBase
       start_date = get_start_date_from_latest_data.to_date
       log_info "Using incremental fetch starting from #{start_date} (latest existing data + 1 day)"
     else
-      # Default to fetching from 2015 for historical data
-      start_date = Date.new(2015, 1, 1)
+      # Start from June 2016 when Coinbase Pro (GDAX) launched with reliable data
+      start_date = Date.new(2016, 6, 1)
       log_info "No existing data found, fetching from #{start_date}"
     end
     
@@ -161,10 +191,26 @@ class CoinbaseFlat < PipelineChainBase
         # Double-check that this chunk won't exceed the limit
         expected_candles = calculate_expected_candles(current_date, chunk_end, granularity)
         if expected_candles > MAX_CANDLES_PER_REQUEST
-          # Reduce chunk size to stay within limit
-          chunk_days = (MAX_CANDLES_PER_REQUEST * granularity_days(granularity)).days
-          chunk_end = current_date + chunk_days
-          log_warn "Reduced chunk size to stay within 300 candle limit: #{current_date} to #{chunk_end}"
+          # More aggressive chunk size reduction
+          case timeframe
+          when 'H1'
+            # For H1, use exactly MAX_CANDLES_PER_REQUEST hours
+            chunk_end = current_date + (MAX_CANDLES_PER_REQUEST / 24.0).days
+          when 'D1'
+            # For D1, use exactly MAX_CANDLES_PER_REQUEST days
+            chunk_end = current_date + MAX_CANDLES_PER_REQUEST.days
+          when 'M1'
+            # For M1, use exactly MAX_CANDLES_PER_REQUEST minutes
+            chunk_end = current_date + (MAX_CANDLES_PER_REQUEST / (24.0 * 60.0)).days
+          else
+            # Fallback
+            chunk_days = (MAX_CANDLES_PER_REQUEST * granularity_days(granularity)).days
+            chunk_end = current_date + chunk_days
+          end
+          
+          # Ensure chunk_end doesn't exceed end_date
+          chunk_end = [chunk_end, end_date].min
+          log_warn "Reduced chunk size to stay within #{MAX_CANDLES_PER_REQUEST} candle limit: #{current_date} to #{chunk_end}"
         end
         
         log_info "Fetching chunk: #{current_date} to #{chunk_end} (expected candles: #{calculate_expected_candles(current_date, chunk_end, granularity)})"
@@ -203,15 +249,51 @@ class CoinbaseFlat < PipelineChainBase
           # If we get a "granularity too small" error, try with a smaller chunk
           if e.message.include?("granularity too small") || e.message.include?("exceeds 300")
             log_warn "Chunk too large, trying with smaller chunk size"
-            # Try with half the chunk size
-            smaller_chunk_days = chunk_days / 2
-            if smaller_chunk_days >= 1.day
-              chunk_end = current_date + smaller_chunk_days
-              log_info "Retrying with smaller chunk: #{current_date} to #{chunk_end}"
-              retry
+            
+            # More aggressive chunk size reduction based on timeframe
+            case timeframe
+            when 'H1'
+              # For H1, try with 7 days (168 hours) first, then 3 days (72 hours)
+              if chunk_days > 7.days
+                chunk_end = current_date + 7.days
+              elsif chunk_days > 3.days
+                chunk_end = current_date + 3.days
+              elsif chunk_days > 1.day
+                chunk_end = current_date + 1.day
+              else
+                log_error "Cannot reduce chunk size further for H1 data, skipping this period"
+                current_date = chunk_end + 1.day
+                next
+              end
+            when 'D1'
+              # For D1, try with smaller day chunks
+              if chunk_days > 100.days
+                chunk_end = current_date + 100.days
+              elsif chunk_days > 50.days
+                chunk_end = current_date + 50.days
+              elsif chunk_days > 1.day
+                chunk_end = current_date + 1.day
+              else
+                log_error "Cannot reduce chunk size further for D1 data, skipping this period"
+                current_date = chunk_end + 1.day
+                next
+              end
             else
-              log_error "Cannot reduce chunk size further, skipping this period"
+              # Fallback: try with half the chunk size
+              smaller_chunk_days = chunk_days / 2
+              if smaller_chunk_days >= 1.day
+                chunk_end = current_date + smaller_chunk_days
+              else
+                log_error "Cannot reduce chunk size further, skipping this period"
+                current_date = chunk_end + 1.day
+                next
+              end
             end
+            
+            # Ensure chunk_end doesn't exceed end_date
+            chunk_end = [chunk_end, end_date].min
+            log_info "Retrying with smaller chunk: #{current_date} to #{chunk_end}"
+            retry
           end
           
           # Skip this chunk and continue
