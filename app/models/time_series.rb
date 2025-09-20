@@ -19,6 +19,14 @@ class TimeSeries < ApplicationRecord
   scope :by_ticker, ->(ticker) { where(ticker:) }
   scope :by_source, ->(source) { where(source:) }
   scope :by_source_id, ->(source_id) { where(source_id:) }
+  scope :text_filter, ->(query) {
+    return all if query.blank?
+    
+    where(
+      "ticker ILIKE ? OR source ILIKE ? OR source_id ILIKE ? OR description ILIKE ?",
+      "%#{query}%", "%#{query}%", "%#{query}%", "%#{query}%"
+    )
+  }
 
   normalizes :ticker, with: ->(s) { s.to_s.strip.presence }
 

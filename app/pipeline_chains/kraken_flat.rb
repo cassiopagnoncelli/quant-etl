@@ -64,8 +64,8 @@ class KrakenFlat < PipelineChainBase
     log_info "Interval: #{interval} minutes (#{timeframe})"
     log_info "Expected records: ~#{((end_date - start_date).to_i / interval_days(interval)).to_i}"
     
-    # Fetch data in chunks and save to CSV
-    fetch_and_save_data(pair, interval, start_date, end_date, file_path)
+    # Fetch data in monthly chunks and save to CSV
+    fetch_and_save_data_monthly(pair, interval, start_date, end_date, file_path)
     
     log_info "Kraken data saved to: #{file_path}"
     @downloaded_file_path = file_path.to_s
@@ -137,19 +137,150 @@ class KrakenFlat < PipelineChainBase
   end
   
   def determine_date_range
+    # For Kraken, always start from historical beginning to ensure complete data
+    # Bitcoin trading on Kraken started around 2013-2014
+    historical_start = Date.new(2013, 9, 1) # Kraken launched September 2013
+    
+    # Check if we have substantial historical data
     if should_use_incremental_fetch?
-      start_date = get_start_date_from_latest_data.to_date
-      log_info "Using incremental fetch starting from #{start_date} (latest existing data + 1 day)"
+      latest_data_date = get_start_date_from_latest_data
+      earliest_data_date = get_earliest_data_date
+      
+      log_info "Data coverage check - Earliest: #{earliest_data_date}, Latest: #{latest_data_date}"
+      log_info "Historical start target: #{historical_start}"
+      
+      # For now, ALWAYS fetch from historical start to ensure complete data
+      # TODO: Re-enable incremental logic once we have complete historical coverage
+      start_date = historical_start
+      log_info "Forcing historical fetch from #{start_date} to ensure complete data coverage"
+      log_info "Current data range: #{earliest_data_date} to #{latest_data_date} (insufficient for incremental)"
     else
-      # Default to fetching from 2015 for historical data
-      start_date = Date.new(2015, 1, 1)
-      log_info "No existing data found, fetching from #{start_date}"
+      # No existing data, start from historical beginning
+      start_date = historical_start
+      log_info "No existing data found, fetching from historical start: #{start_date}"
     end
     
     end_date = Date.current
     [start_date, end_date]
   end
   
+  def get_earliest_data_date
+    return nil unless time_series
+    
+    case time_series.kind
+    when 'univariate'
+      time_series.univariates.minimum(:ts)
+    when 'aggregate'
+      time_series.aggregates.minimum(:ts)
+    end
+  end
+  
+  def fetch_and_save_data_monthly(pair, interval, start_date, end_date, file_path)
+    total_months = ((end_date.year - start_date.year) * 12) + (end_date.month - start_date.month) + 1
+    log_info "Processing #{total_months} months of data from #{start_date} to #{end_date}"
+    
+    CSV.open(file_path, 'w') do |csv|
+      csv << ['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Ticker']
+      
+      current_month_start = start_date.beginning_of_month
+      total_records = 0
+      month_count = 0
+      
+      while current_month_start <= end_date
+        month_count += 1
+        current_month_end = [current_month_start.end_of_month, end_date].min
+        
+        log_info "Processing month #{month_count}/#{total_months}: #{current_month_start.strftime('%Y-%m')} (#{current_month_start} to #{current_month_end})"
+        
+        begin
+          month_records = fetch_month_data(pair, interval, current_month_start, current_month_end)
+          
+          if month_records && month_records.any?
+            month_records.each do |record|
+              csv << [
+                record[:date],
+                record[:open],
+                record[:high], 
+                record[:low],
+                record[:close],
+                record[:volume],
+                ticker
+              ]
+              total_records += 1
+            end
+            
+            log_info "Month #{current_month_start.strftime('%Y-%m')}: fetched #{month_records.length} records"
+          else
+            log_warn "Month #{current_month_start.strftime('%Y-%m')}: no data returned"
+          end
+          
+          # Rate limiting between months
+          sleep(3) if current_month_start < end_date.beginning_of_month
+          
+        rescue StandardError => e
+          log_error "Failed to fetch month #{current_month_start.strftime('%Y-%m')}: #{e.message}"
+          # Continue with next month
+        end
+        
+        # Move to next month
+        current_month_start = current_month_start.next_month.beginning_of_month
+      end
+      
+      log_info "Total records fetched across all months: #{total_records}"
+    end
+  end
+  
+  def fetch_month_data(pair, interval, month_start, month_end)
+    all_records = []
+    current_date = month_start
+    last_timestamp = nil
+    
+    while current_date <= month_end
+      begin
+        data, last_ts = fetch_ohlc_chunk(pair, interval, current_date, last_timestamp)
+        
+        if data && data.any?
+          # Filter records to only include those within the current month
+          month_data = data.select do |record|
+            record_date = Date.parse(record[:date])
+            record_date >= month_start && record_date <= month_end
+          end
+          
+          all_records.concat(month_data)
+          
+          # Update current_date based on last timestamp received
+          if last_ts
+            last_timestamp = last_ts
+            next_date = Time.at(last_ts).to_date + 1.day
+            # If we've moved beyond the current month, break
+            break if next_date > month_end
+            current_date = next_date
+          else
+            # If no timestamp, move forward by max request period
+            current_date += (MAX_RECORDS_PER_REQUEST * interval_days(interval)).days
+          end
+        else
+          # Move forward by a reasonable amount
+          current_date += (MAX_RECORDS_PER_REQUEST * interval_days(interval)).days
+        end
+        
+        # Rate limiting between API calls
+        sleep(2)
+        
+        # Safety check to prevent infinite loops
+        break if current_date > month_end
+        
+      rescue StandardError => e
+        log_error "Failed to fetch chunk starting #{current_date} in month #{month_start.strftime('%Y-%m')}: #{e.message}"
+        # Skip ahead and continue
+        current_date += (MAX_RECORDS_PER_REQUEST * interval_days(interval)).days
+        break if current_date > month_end
+      end
+    end
+    
+    all_records
+  end
+
   def fetch_and_save_data(pair, interval, start_date, end_date, file_path)
     CSV.open(file_path, 'w') do |csv|
       csv << ['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Ticker']
@@ -289,11 +420,26 @@ class KrakenFlat < PipelineChainBase
       volume = Float(candle[6])
       count = candle[7].to_i       # Number of trades
       
-      # Convert timestamp to date
-      date = Time.at(timestamp).to_date
+      # Convert timestamp to datetime for proper timeframe handling
+      # For H1 (hourly), we need datetime precision, not just date
+      datetime = Time.at(timestamp)
+      
+      # Format based on timeframe
+      date_string = case timeframe
+                   when 'M1'  # 1 minute
+                     datetime.strftime('%Y-%m-%d %H:%M:00')
+                   when 'H1'  # 1 hour
+                     datetime.strftime('%Y-%m-%d %H:00:00')
+                   when 'D1'  # Daily
+                     datetime.strftime('%Y-%m-%d')
+                   when 'W1'  # Weekly
+                     datetime.strftime('%Y-%m-%d')
+                   else
+                     datetime.strftime('%Y-%m-%d %H:%M:%S')
+                   end
       
       {
-        date: date.strftime('%Y-%m-%d'),
+        date: date_string,
         open: open_price,
         high: high_price,
         low: low_price,
@@ -364,11 +510,18 @@ class KrakenFlat < PipelineChainBase
   end
   
   def parse_aggregate_row(row)
-    # Parse date
+    # Parse date/datetime
     date_str = row['Date']
     return nil if date_str.nil? || date_str.strip.empty?
 
-    date = Date.parse(date_str.strip)
+    # Parse as datetime to handle H1 (hourly) data properly
+    datetime = if date_str.include?(' ')
+                 # Has time component (e.g., "2015-01-01 12:00:00")
+                 DateTime.parse(date_str.strip)
+               else
+                 # Date only (e.g., "2015-01-01")
+                 Date.parse(date_str.strip).to_datetime
+               end
 
     # Parse OHLC values
     open_val = parse_float(row['Open'])
@@ -381,14 +534,14 @@ class KrakenFlat < PipelineChainBase
 
     # Validate OHLC consistency
     unless valid_ohlc?(open_val, high_val, low_val, close_val)
-      log_warn "Invalid OHLC data for #{date}: O=#{open_val}, H=#{high_val}, L=#{low_val}, C=#{close_val}"
+      log_warn "Invalid OHLC data for #{datetime}: O=#{open_val}, H=#{high_val}, L=#{low_val}, C=#{close_val}"
       return nil
     end
 
     {
       ticker: ticker,
       timeframe: timeframe,
-      ts: date.to_datetime,
+      ts: datetime,
       open: open_val,
       high: high_val,
       low: low_val,

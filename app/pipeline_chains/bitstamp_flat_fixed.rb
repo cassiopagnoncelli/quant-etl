@@ -7,7 +7,7 @@ require 'csv'
 require 'fileutils'
 require 'date'
 
-class BitstampFlat < PipelineChainBase
+class BitstampFlatFixed < PipelineChainBase
   BASE_URL = 'https://www.bitstamp.net/api/v2'
   TRIES = 3
   MAX_RECORDS_PER_REQUEST = 1000
@@ -47,15 +47,15 @@ class BitstampFlat < PipelineChainBase
       return
     end
 
-    # Determine date range for fetching
-    start_date, end_date = determine_date_range
+    # Determine date range for fetching - ALWAYS do full historical fetch for gap filling
+    start_date, end_date = determine_date_range_for_gap_filling
     
     log_info "Fetching Bitstamp OHLC data for #{pair}"
     log_info "Date range: #{start_date} to #{end_date}"
     log_info "Expected days: #{(end_date - start_date).to_i}"
     
     # Fetch data in chunks and save to CSV
-    fetch_and_save_data(pair, start_date, end_date, file_path)
+    fetch_and_save_data_with_gap_filling(pair, start_date, end_date, file_path)
     
     log_info "Bitstamp data saved to: #{file_path}"
     @downloaded_file_path = file_path.to_s
@@ -115,19 +115,17 @@ class BitstampFlat < PipelineChainBase
     end
   end
   
-  def determine_date_range
-    # For gap filling, always fetch from the beginning to ensure complete data
-    # The incremental approach was causing massive gaps
+  def determine_date_range_for_gap_filling
+    # For gap filling, we need to fetch from the earliest possible date
+    # Bitstamp has data from around 2011, but let's start from 2015 to be safe
     start_date = Date.new(2015, 1, 1)
     end_date = Date.current
     
     log_info "Using full historical fetch from #{start_date} to fill gaps"
-    log_info "This will ensure complete hourly data coverage"
-    
     [start_date, end_date]
   end
   
-  def fetch_and_save_data(pair, start_date, end_date, file_path)
+  def fetch_and_save_data_with_gap_filling(pair, start_date, end_date, file_path)
     CSV.open(file_path, 'w') do |csv|
       csv << ['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Ticker']
       
@@ -141,7 +139,7 @@ class BitstampFlat < PipelineChainBase
       log_info "Expected total records: #{expected_records}"
       log_info "Will fetch in chunks of #{MAX_RECORDS_PER_REQUEST} records"
       
-      # Start from the beginning and fetch in record-based chunks, not day-based
+      # Start from the beginning and fetch in record-based chunks
       current_timestamp = start_date.to_time.to_i
       end_timestamp = end_date.end_of_day.to_time.to_i
       
@@ -226,13 +224,6 @@ class BitstampFlat < PipelineChainBase
       log_warn "Response body: #{response.body[0..500]}..." if response.body.length > 500
       []
     end
-  end
-  
-  # Keep the old method for backward compatibility
-  def fetch_ohlc_chunk(pair, start_date, end_date)
-    start_timestamp = start_date.to_time.to_i
-    end_timestamp = end_date.end_of_day.to_time.to_i
-    fetch_ohlc_chunk_by_timestamp(pair, start_timestamp, end_timestamp)
   end
   
   def parse_bitstamp_ohlc(ohlc_data)

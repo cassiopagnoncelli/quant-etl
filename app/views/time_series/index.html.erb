@@ -1,9 +1,14 @@
 <% content_for :title, "Time Series" %>
 
 <div class="container" data-controller="pipeline-toggle">
-  <div class="header-section">
+  <div class="header-section" style="display: flex; justify-content: space-between; align-items: center;">
     <h1>Available Time Series</h1>
-    <div class="header-buttons">
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <input type="text" 
+             id="filter-input" 
+             placeholder="Filter series..." 
+             style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; width: 200px;"
+             oninput="filterTimeSeries(this.value)">
       <%= button_to sync_time_series_index_path, method: :post, class: "sync-clickable" do %>
         <span class="sync-icon-container">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -53,7 +58,14 @@
                            else
                              'no-active-pipelines'
                            end %>
-            <%= link_to time_series_path(ts_data[:time_series].ticker), class: "time-series-row #{row_class}" do %>
+            <%= link_to time_series_path(ts_data[:time_series].ticker), 
+                class: "time-series-row #{row_class}",
+                data: { 
+                  ticker: ts_data[:time_series].ticker.downcase,
+                  source: ts_data[:time_series].source.downcase,
+                  source_id: ts_data[:time_series].source_id&.downcase,
+                  description: ts_data[:time_series].description&.downcase
+                } do %>
               <div class="row-header">
                 <div class="ticker-info">
                   <h3 class="ticker-name"><%= ts_data[:time_series].ticker %></h3>
@@ -97,3 +109,56 @@
     <% end %>
   <% end %>
 </div>
+
+<script>
+function filterTimeSeries(query) {
+  const searchTerm = query.toLowerCase().trim();
+  const timeSeriesRows = document.querySelectorAll('.time-series-row');
+  const sourceGroups = document.querySelectorAll('.source-group');
+  
+  // If no search term, show all
+  if (searchTerm === '') {
+    timeSeriesRows.forEach(row => row.style.display = '');
+    sourceGroups.forEach(group => group.style.display = '');
+    updateSourceCounts();
+    return;
+  }
+  
+  // Filter time series rows
+  timeSeriesRows.forEach(row => {
+    const ticker = row.dataset.ticker || '';
+    const source = row.dataset.source || '';
+    const sourceId = row.dataset.sourceId || '';
+    const description = row.dataset.description || '';
+    
+    const matches = ticker.includes(searchTerm) || 
+                   source.includes(searchTerm) || 
+                   sourceId.includes(searchTerm) || 
+                   description.includes(searchTerm);
+    
+    row.style.display = matches ? '' : 'none';
+  });
+  
+  // Hide source groups that have no visible time series
+  sourceGroups.forEach(group => {
+    const visibleRows = group.querySelectorAll('.time-series-row[style=""], .time-series-row:not([style*="display: none"])');
+    group.style.display = visibleRows.length > 0 ? '' : 'none';
+  });
+  
+  updateSourceCounts();
+}
+
+function updateSourceCounts() {
+  const sourceGroups = document.querySelectorAll('.source-group');
+  
+  sourceGroups.forEach(group => {
+    const visibleRows = group.querySelectorAll('.time-series-row[style=""], .time-series-row:not([style*="display: none"])');
+    const countSpan = group.querySelector('h2 span');
+    const count = visibleRows.length;
+    
+    if (countSpan) {
+      countSpan.textContent = `(${count} ${count === 1 ? 'series' : 'series'})`;
+    }
+  });
+}
+</script>
