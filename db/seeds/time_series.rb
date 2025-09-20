@@ -682,6 +682,55 @@ class TimeSeriesSeeder
       }
     ]
 
+    # New Crypto Exchange Series - Aggregate Time Series
+    # Multiple sources for BTCUSD/BTCUSDT with redundancy and validation
+    # Format: {source}{ticker}{timeframe} - e.g., BSBTCUSDH1
+    crypto_exchange_series = [
+      # Bitstamp - Primary source (oldest exchange, 2011)
+      {
+        ticker: "BSBTCUSDH1",
+        timeframe: "H1",
+        source: "Bitstamp",
+        source_id: "btcusd",
+        kind: "aggregate",
+        description: "Bitcoin/USD Hourly OHLC from Bitstamp (Primary source)",
+        since: Date.new(2015, 1, 1)
+      },
+      
+      # Kraken - Secondary source (high quality, 2013)
+      {
+        ticker: "KRBTCUSDH1",
+        timeframe: "H1",
+        source: "Kraken",
+        source_id: "XBTUSD",
+        kind: "aggregate",
+        description: "Bitcoin/USD Hourly OHLC from Kraken (Secondary source)",
+        since: Date.new(2015, 1, 1)
+      },
+      
+      # CoinCap - Tertiary source (backup/validation)
+      {
+        ticker: "CCBTCUSDH1",
+        timeframe: "H1",
+        source: "CoinCap",
+        source_id: "bitcoin",
+        kind: "aggregate",
+        description: "Bitcoin/USD Hourly OHLC from CoinCap (Tertiary source)",
+        since: Date.new(2015, 1, 1)
+      },
+      
+      # Coinbase - Additional validation source
+      {
+        ticker: "CBBTCUSDH1",
+        timeframe: "H1",
+        source: "Coinbase",
+        source_id: "BTC-USD",
+        kind: "aggregate",
+        description: "Bitcoin/USD Hourly OHLC from Coinbase (Validation source)",
+        since: Date.new(2015, 1, 1)
+      }
+    ]
+
     # CoinGecko Crypto Series - Univariate Time Series
     # Source IDs match the ticker used in CoinGecko API calls
     coingecko_series = [
@@ -861,11 +910,14 @@ class TimeSeriesSeeder
     # Create Yahoo series
     yahoo_count = create_series(yahoo_series, "\n🏦 Creating Yahoo Finance series (aggregate)...")
 
+    # Create crypto exchange series
+    crypto_exchange_count = create_series(crypto_exchange_series, "\n₿ Creating crypto exchange series (aggregate)...")
+
     # Create CoinGecko series
     coingecko_count = create_series(coingecko_series, "\n🪙 Creating CoinGecko crypto series (univariate)...")
 
     # Summary
-    display_summary(vix_count, fred_count, polygon_count, yahoo_count, coingecko_count)
+    display_summary(vix_count, fred_count, polygon_count, yahoo_count, crypto_exchange_count, coingecko_count)
   end
 
   private
@@ -905,6 +957,14 @@ class TimeSeriesSeeder
                     'CoingeckoFlat'
                   when 'Yahoo'
                     'YahooFlat'
+                  when 'Bitstamp'
+                    'BitstampFlat'
+                  when 'Kraken'
+                    'KrakenFlat'
+                  when 'CoinCap'
+                    'CoincapFlat'
+                  when 'Coinbase'
+                    'CoinbaseFlat'
                   else
                     raise "Unknown source: #{time_series.source}"
                   end
@@ -919,7 +979,7 @@ class TimeSeriesSeeder
     end
   end
 
-  def self.display_summary(vix_count, fred_count, polygon_count, yahoo_count, coingecko_count)
+  def self.display_summary(vix_count, fred_count, polygon_count, yahoo_count, crypto_exchange_count, coingecko_count)
     puts "\n" + "="*80
     puts "🎯 SEED SUMMARY"
     puts "="*80
@@ -927,6 +987,7 @@ class TimeSeriesSeeder
     puts "📈 FRED Economic (univariate): #{fred_count} series created"
     puts "🏅 Polygon (univariate): #{polygon_count} series created"
     puts "🏦 Yahoo Finance (aggregate): #{yahoo_count} series created"
+    puts "₿ Crypto Exchanges (aggregate): #{crypto_exchange_count} series created"
     puts "🪙 CoinGecko Crypto (univariate): #{coingecko_count} series created"
     puts "📋 Total TimeSeries records: #{TimeSeries.count}"
     puts "🔗 Total Pipeline records: #{Pipeline.count}"

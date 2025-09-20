@@ -33,6 +33,39 @@
     </div>
   </div>
 
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <%= form_with url: (@pipeline ? pipeline_pipeline_runs_path(@pipeline) : pipeline_runs_path), 
+                  method: :get, 
+                  local: true, 
+                  class: "filters-form" do |form| %>
+      <div class="filter-group">
+        <%= form.label :status, "Status:", class: "filter-label" %>
+        <%= form.select :status, 
+            options_for_select([['All Statuses', '']] + PipelineRun::STATUSES.map { |s| [s.capitalize, s] }, @selected_status),
+            {}, 
+            { class: "filter-select" } %>
+      </div>
+      
+      <div class="filter-group">
+        <%= form.label :stage, "Stage:", class: "filter-label" %>
+        <%= form.select :stage, 
+            options_for_select([['All Stages', '']] + PipelineRun::STAGES.map { |s| [s.capitalize.gsub('_', ' '), s] }, @selected_stage),
+            {}, 
+            { class: "filter-select" } %>
+      </div>
+      
+      <div class="filter-actions">
+        <%= form.submit "Apply Filters", class: "btn btn-primary filter-btn" %>
+        <% if @selected_status.present? || @selected_stage.present? %>
+          <%= link_to "Clear Filters", 
+              (@pipeline ? pipeline_pipeline_runs_path(@pipeline) : pipeline_runs_path), 
+              class: "btn btn-secondary filter-btn" %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
   <% if @pipeline_runs.empty? %>
     <div class="empty-state">
       <h3>No pipeline runs available</h3>
@@ -125,7 +158,7 @@
       <div class="pagination-controls" style="display: flex; gap: 0.5rem; align-items: center;">
         <!-- First Page -->
         <% if @pipeline_runs.current_page > 1 %>
-          <%= link_to @pipeline ? pipeline_pipeline_runs_path(@pipeline, page: 1) : pipeline_runs_path(page: 1), 
+          <%= link_to @pipeline ? pipeline_pipeline_runs_path(@pipeline, filter_params.merge(page: 1)) : pipeline_runs_path(filter_params.merge(page: 1)), 
               class: 'pagination-btn', 
               style: 'padding: 0.5rem 0.75rem; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;',
               title: 'First Page' do %>
@@ -140,7 +173,7 @@
         
         <!-- Previous Page -->
         <% if @pipeline_runs.current_page > 1 %>
-          <%= link_to @pipeline ? pipeline_pipeline_runs_path(@pipeline, page: @pipeline_runs.current_page - 1) : pipeline_runs_path(page: @pipeline_runs.current_page - 1), 
+          <%= link_to @pipeline ? pipeline_pipeline_runs_path(@pipeline, filter_params.merge(page: @pipeline_runs.current_page - 1)) : pipeline_runs_path(filter_params.merge(page: @pipeline_runs.current_page - 1)), 
               class: 'pagination-btn', 
               style: 'padding: 0.5rem 0.75rem; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;' do %>
             &laquo; Previous
@@ -164,7 +197,7 @@
               <%= page_num %>
             </span>
           <% else %>
-            <%= link_to page_num, @pipeline ? pipeline_pipeline_runs_path(@pipeline, page: page_num) : pipeline_runs_path(page: page_num), 
+            <%= link_to page_num, @pipeline ? pipeline_pipeline_runs_path(@pipeline, filter_params.merge(page: page_num)) : pipeline_runs_path(filter_params.merge(page: page_num)), 
                 class: 'pagination-btn', 
                 style: 'padding: 0.5rem 0.75rem; background: #ecf0f1; color: #2c3e50; text-decoration: none; border-radius: 4px; font-size: 0.9rem;' %>
           <% end %>
@@ -172,7 +205,7 @@
         
         <!-- Next Page -->
         <% if @pipeline_runs.current_page < @pipeline_runs.total_pages %>
-          <%= link_to @pipeline ? pipeline_pipeline_runs_path(@pipeline, page: @pipeline_runs.current_page + 1) : pipeline_runs_path(page: @pipeline_runs.current_page + 1), 
+          <%= link_to @pipeline ? pipeline_pipeline_runs_path(@pipeline, filter_params.merge(page: @pipeline_runs.current_page + 1)) : pipeline_runs_path(filter_params.merge(page: @pipeline_runs.current_page + 1)), 
               class: 'pagination-btn', 
               style: 'padding: 0.5rem 0.75rem; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;' do %>
             Next &raquo;
@@ -186,7 +219,7 @@
         
         <!-- Last Page -->
         <% if @pipeline_runs.current_page < @pipeline_runs.total_pages %>
-          <%= link_to @pipeline ? pipeline_pipeline_runs_path(@pipeline, page: @pipeline_runs.total_pages) : pipeline_runs_path(page: @pipeline_runs.total_pages), 
+          <%= link_to @pipeline ? pipeline_pipeline_runs_path(@pipeline, filter_params.merge(page: @pipeline_runs.total_pages)) : pipeline_runs_path(filter_params.merge(page: @pipeline_runs.total_pages)), 
               class: 'pagination-btn', 
               style: 'padding: 0.5rem 0.75rem; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;',
               title: 'Last Page' do %>
@@ -455,5 +488,86 @@
   .pipeline-name {
     color: #3b82f6;
     font-weight: 600;
+  }
+
+  /* Filters Section Styles */
+  .filters-section {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .filters-form {
+    display: flex;
+    gap: 1.5rem;
+    align-items: end;
+    flex-wrap: wrap;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+  }
+
+  .filter-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+  }
+
+  .filter-select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    background: white;
+    font-size: 0.875rem;
+    color: #374151;
+    min-width: 150px;
+  }
+
+  .filter-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .filter-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  .btn-secondary {
+    background-color: #6b7280;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background-color: #4b5563;
+  }
+
+  @media (max-width: 768px) {
+    .filters-form {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .filter-group {
+      min-width: auto;
+    }
+    
+    .filter-actions {
+      justify-content: center;
+    }
   }
 </style>

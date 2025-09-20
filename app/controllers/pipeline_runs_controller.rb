@@ -3,14 +3,22 @@ class PipelineRunsController < ApplicationController
   before_action :set_pipeline_run, only: [:show, :rerun, :schedule_stop]
 
   def index
-    if params[:pipeline_id]
+    # Build base query
+    base_query = if params[:pipeline_id]
       # Nested route - show runs for specific pipeline
-      @pipeline_runs = @pipeline.pipeline_runs.includes(pipeline: :time_series).order(created_at: :desc).page(params[:page]).per(10)
+      @pipeline.pipeline_runs.includes(pipeline: :time_series)
     else
       # Standalone route - show all pipeline runs
-      @pipeline_runs = PipelineRun.includes(pipeline: :time_series).order(created_at: :desc).page(params[:page]).per(10)
       @pipeline = nil # Explicitly set to nil for standalone route
+      PipelineRun.includes(pipeline: :time_series)
     end
+
+    # Apply filters
+    @pipeline_runs = apply_filters(base_query).order(created_at: :desc).page(params[:page]).per(10)
+    
+    # Store filter values for the view
+    @selected_status = params[:status]
+    @selected_stage = params[:stage]
   end
 
   def show
@@ -49,6 +57,17 @@ class PipelineRunsController < ApplicationController
   end
 
   private
+
+  def apply_filters(query)
+    query = query.by_status(params[:status]) if params[:status].present?
+    query = query.by_stage(params[:stage]) if params[:stage].present?
+    query
+  end
+
+  def filter_params
+    params.slice(:status, :stage).reject { |_, v| v.blank? }
+  end
+  helper_method :filter_params
 
   def set_pipeline_if_needed
     @pipeline = Pipeline.find(params[:pipeline_id]) if params[:pipeline_id]
