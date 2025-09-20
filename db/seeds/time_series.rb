@@ -707,6 +707,17 @@ class TimeSeriesSeeder
         kind: "aggregate",
         description: "Bitcoin/USD Hourly OHLC from Coinbase (Validation source)",
         since: Date.new(2015, 1, 1)
+      },
+      
+      # TwelveData - Multi-exchange aggregated source
+      {
+        ticker: "TDBTCUSDH1",
+        timeframe: "H1",
+        source: "TwelveData",
+        source_id: "TDBTCUSDH1",
+        kind: "aggregate",
+        description: "Bitcoin/USD Hourly OHLC from TwelveData (Binance, Bitfinex, Coinbase Pro)",
+        since: Date.new(2017, 1, 1)
       }
     ]
 
@@ -940,6 +951,8 @@ class TimeSeriesSeeder
                     'BitstampFlat'
                   when 'Coinbase'
                     'CoinbaseFlat'
+                  when 'TwelveData'
+                    'TwelveDataFlat'
                   else
                     raise "Unknown source: #{time_series.source}"
                   end
