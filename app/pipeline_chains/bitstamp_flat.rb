@@ -14,6 +14,13 @@ class BitstampFlat < PipelineChainBase
   SECONDS_PER_DAY = 86400
   SECONDS_PER_HOUR = 3600
   
+  # API rate limiting and chunking configuration
+  RATE_LIMIT_DELAY = 2 # seconds between requests
+  MAX_CHUNK_MONTHS_HOURLY = 3 # Maximum months per chunk for hourly data
+  MAX_CHUNK_DAYS_DAILY = 365 # Maximum days per chunk for daily data (1 year)
+  API_LIMIT_ERRORS = ['Too Many Requests', 'Rate limit exceeded', '429'].freeze
+  MAX_CONSECUTIVE_FAILURES = 3 # Stop after this many consecutive failures
+  
   # Bitstamp pair mappings
   PAIR_MAPPINGS = {
     'BTCUSD' => 'btcusd',
@@ -130,33 +137,33 @@ class BitstampFlat < PipelineChainBase
       csv << ['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Ticker']
       
       total_records = 0
-      step_seconds = get_step_seconds
+      consecutive_failures = 0
       
-      # Calculate total expected records to better manage chunking
-      total_seconds = (end_date.end_of_day.to_time - start_date.to_time).to_i
-      expected_records = total_seconds / step_seconds
+      # Break the date range into smaller chunks to avoid API limits
+      date_chunks = create_date_chunks(start_date, end_date)
       
-      log_info "Expected total records: #{expected_records}"
-      log_info "Will fetch in chunks of #{MAX_RECORDS_PER_REQUEST} records"
+      # Determine chunk size for logging
+      timeframe_code = ticker[-2..-1].upcase
+      chunk_description = case timeframe_code
+                          when 'H1'
+                            "#{MAX_CHUNK_MONTHS_HOURLY} months (~#{MAX_CHUNK_MONTHS_HOURLY * 30} days)"
+                          when 'D1'
+                            "#{MAX_CHUNK_DAYS_DAILY} days (1 year)"
+                          else
+                            "#{MAX_CHUNK_MONTHS_HOURLY} months (~#{MAX_CHUNK_MONTHS_HOURLY * 30} days)"
+                          end
       
-      # Start from the beginning and fetch in record-based chunks
-      current_timestamp = start_date.to_time.to_i
-      end_timestamp = end_date.end_of_day.to_time.to_i
+      log_info "Total date chunks to process: #{date_chunks.length}"
+      log_info "Date range per chunk: #{chunk_description} maximum (#{timeframe_code} timeframe)"
       
-      while current_timestamp < end_timestamp
-        # Calculate the end timestamp for this chunk (MAX_RECORDS_PER_REQUEST * step_seconds)
-        chunk_end_timestamp = [
-          current_timestamp + (MAX_RECORDS_PER_REQUEST * step_seconds),
-          end_timestamp
-        ].min
-        
-        log_info "Fetching chunk: #{Time.at(current_timestamp)} to #{Time.at(chunk_end_timestamp)}"
+      date_chunks.each_with_index do |(chunk_start, chunk_end), index|
+        log_info "Processing chunk #{index + 1}/#{date_chunks.length}: #{chunk_start} to #{chunk_end}"
         
         begin
-          data = fetch_ohlc_chunk_by_timestamp(pair, current_timestamp, chunk_end_timestamp)
+          chunk_records = fetch_chunk_with_pagination(pair, chunk_start, chunk_end)
           
-          if data && data.any?
-            data.each do |record|
+          if chunk_records && chunk_records.any?
+            chunk_records.each do |record|
               csv << [
                 record[:date],
                 record[:open],
@@ -169,33 +176,39 @@ class BitstampFlat < PipelineChainBase
               total_records += 1
             end
             
-            log_info "Fetched #{data.length} records for chunk"
-            
-            # Update current_timestamp to the last record's timestamp + step_seconds
-            if data.any?
-              last_record_time = DateTime.parse(data.last[:date]).to_time.to_i
-              current_timestamp = last_record_time + step_seconds
-            else
-              current_timestamp = chunk_end_timestamp
-            end
+            log_info "Successfully fetched #{chunk_records.length} records for chunk"
+            consecutive_failures = 0 # Reset failure counter on success
           else
-            log_warn "No data returned for chunk #{Time.at(current_timestamp)} to #{Time.at(chunk_end_timestamp)}"
-            # Move forward by the chunk size even if no data
-            current_timestamp = chunk_end_timestamp
+            log_warn "No data returned for chunk #{chunk_start} to #{chunk_end}"
           end
           
-          # Rate limiting - be respectful to Bitstamp
-          sleep(1) # Increased to 1 second for better rate limiting
+          # Rate limiting between chunks
+          sleep(RATE_LIMIT_DELAY)
           
         rescue StandardError => e
-          log_error "Failed to fetch chunk #{Time.at(current_timestamp)} to #{Time.at(chunk_end_timestamp)}: #{e.message}"
-          # Skip this chunk and continue
-          current_timestamp = chunk_end_timestamp
-          sleep(2) # Longer sleep on error
+          consecutive_failures += 1
+          log_error "Failed to fetch chunk #{chunk_start} to #{chunk_end}: #{e.message}"
+          
+          # Check if this is an API limit error
+          if api_limit_error?(e.message)
+            log_error "API limit detected. Stopping fetch process to avoid further rate limiting."
+            log_info "Successfully fetched #{total_records} records before hitting API limit"
+            break
+          end
+          
+          # Stop if too many consecutive failures
+          if consecutive_failures >= MAX_CONSECUTIVE_FAILURES
+            log_error "Too many consecutive failures (#{consecutive_failures}). Stopping fetch process."
+            break
+          end
+          
+          # Longer sleep on error
+          sleep(RATE_LIMIT_DELAY * 2)
         end
       end
       
       log_info "Total records fetched: #{total_records}"
+      log_info "Fetch process completed #{consecutive_failures >= MAX_CONSECUTIVE_FAILURES ? 'with errors' : 'successfully'}"
     end
   end
   
@@ -531,6 +544,180 @@ class BitstampFlat < PipelineChainBase
       log_info "Cleaned up downloaded file: #{@downloaded_file_path}"
     rescue StandardError => e
       log_error "Failed to cleanup downloaded file #{@downloaded_file_path}: #{e.message}"
+    end
+  end
+  
+  # Create date chunks to break large date ranges into manageable pieces
+  def create_date_chunks(start_date, end_date)
+    chunks = []
+    current_date = start_date
+    
+    # Determine chunk size based on timeframe
+    timeframe_code = ticker[-2..-1].upcase
+    
+    while current_date < end_date
+      chunk_end = case timeframe_code
+                  when 'H1'
+                    # For hourly data: 3 months chunks
+                    chunk_end_3_months = current_date + (MAX_CHUNK_MONTHS_HOURLY * 30).days
+                    [chunk_end_3_months, end_date].min
+                  when 'D1'
+                    # For daily data: 1 year chunks
+                    [current_date + MAX_CHUNK_DAYS_DAILY.days, end_date].min
+                  else
+                    # Default to 3 months for hourly
+                    chunk_end_3_months = current_date + (MAX_CHUNK_MONTHS_HOURLY * 30).days
+                    [chunk_end_3_months, end_date].min
+                  end
+      
+      chunks << [current_date, chunk_end]
+      current_date = chunk_end + 1.day
+    end
+    
+    chunks
+  end
+  
+  # Fetch a single chunk with pagination to handle large datasets
+  def fetch_chunk_with_pagination(pair, start_date, end_date)
+    all_records = []
+    step_seconds = get_step_seconds
+    
+    # Convert dates to timestamps
+    start_timestamp = start_date.to_time.to_i
+    end_timestamp = end_date.end_of_day.to_time.to_i
+    
+    current_timestamp = start_timestamp
+    consecutive_empty_pages = 0
+    max_empty_pages = 3 # Stop after 3 consecutive empty responses
+    
+    # Paginate through the chunk if it's too large
+    while current_timestamp < end_timestamp
+      # Calculate the end timestamp for this page (limited by MAX_RECORDS_PER_REQUEST)
+      page_end_timestamp = [
+        current_timestamp + (MAX_RECORDS_PER_REQUEST * step_seconds),
+        end_timestamp
+      ].min
+      
+      log_info "Fetching page: #{Time.at(current_timestamp)} to #{Time.at(page_end_timestamp)}"
+      
+      page_data = fetch_ohlc_chunk_by_timestamp(pair, current_timestamp, page_end_timestamp)
+      
+      if page_data && page_data.any?
+        all_records.concat(page_data)
+        consecutive_empty_pages = 0 # Reset empty page counter
+        
+        # Update current_timestamp to continue from where we left off
+        last_record_time = DateTime.parse(page_data.last[:date]).to_time.to_i
+        new_timestamp = last_record_time + step_seconds
+        
+        # Ensure we're actually advancing - prevent infinite loops
+        if new_timestamp <= current_timestamp
+          log_warn "Timestamp not advancing (#{new_timestamp} <= #{current_timestamp}), forcing advance"
+          new_timestamp = current_timestamp + (MAX_RECORDS_PER_REQUEST * step_seconds)
+        end
+        
+        current_timestamp = new_timestamp
+        
+        # If we got fewer records than expected, we've reached the end of available data
+        if page_data.length < MAX_RECORDS_PER_REQUEST
+          log_info "Received fewer records than requested (#{page_data.length} < #{MAX_RECORDS_PER_REQUEST}), assuming end of data"
+          break
+        end
+      else
+        # No data returned, advance timestamp and count empty pages
+        consecutive_empty_pages += 1
+        log_warn "No data returned for page #{consecutive_empty_pages}/#{max_empty_pages}"
+        
+        # If we've had too many consecutive empty pages, stop trying
+        if consecutive_empty_pages >= max_empty_pages
+          log_warn "Too many consecutive empty pages, stopping pagination"
+          break
+        end
+        
+        # Move to next page by advancing the full page window
+        # Ensure we advance by at least the page window to prevent infinite loops
+        next_timestamp = page_end_timestamp + step_seconds
+        if next_timestamp <= current_timestamp
+          next_timestamp = current_timestamp + (MAX_RECORDS_PER_REQUEST * step_seconds)
+        end
+        current_timestamp = next_timestamp
+      end
+      
+      # Rate limiting between pages
+      sleep(RATE_LIMIT_DELAY / 2) # Shorter delay between pages within a chunk
+    end
+    
+    # Sort records by date to ensure chronological order
+    all_records.sort_by { |record| DateTime.parse(record[:date]) }
+  end
+  
+  # Check if an error message indicates an API rate limit
+  def api_limit_error?(error_message)
+    return false unless error_message.is_a?(String)
+    
+    API_LIMIT_ERRORS.any? { |limit_error| error_message.include?(limit_error) }
+  end
+  
+  # Enhanced fetch_with_retry that better handles rate limiting
+  def fetch_with_retry(uri)
+    tries = 0
+    begin
+      tries += 1
+      log_info "Attempt #{tries}/#{TRIES} to fetch data from #{uri}"
+      
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      http.read_timeout = 60 # Increased timeout for large requests
+      http.open_timeout = 30
+      
+      request = Net::HTTP::Get.new(uri)
+      request['User-Agent'] = @user_agent
+      request['Accept'] = 'application/json'
+      
+      response = http.request(request)
+      
+      # Handle rate limiting specifically
+      if response.code == '429' || response.message.include?('Too Many Requests')
+        retry_after = response['Retry-After']&.to_i || 60
+        log_warn "Rate limited. Waiting #{retry_after} seconds before retry..."
+        sleep(retry_after)
+        raise "Rate limit exceeded - will retry"
+      end
+      
+      unless response.is_a?(Net::HTTPSuccess)
+        error_details = ""
+        begin
+          error_data = JSON.parse(response.body)
+          if error_data['error']
+            error_details = " - #{error_data['error']}"
+          end
+        rescue JSON::ParserError
+          # Ignore JSON parsing errors, use default message
+        end
+        
+        error_message = "HTTP #{response.code} - #{response.message}#{error_details}"
+        
+        # Check if this is a rate limit error that should stop the process
+        if api_limit_error?(error_message)
+          raise StandardError.new(error_message)
+        end
+        
+        raise error_message
+      end
+      
+      response
+    rescue StandardError => e
+      if tries < TRIES && !api_limit_error?(e.message)
+        log_warn "Fetch attempt #{tries} failed: #{e.message}. Retrying..."
+        sleep(2 ** tries) # Exponential backoff: 2s, 4s, 8s
+        retry
+      else
+        if api_limit_error?(e.message)
+          raise e # Re-raise API limit errors without modification
+        else
+          raise "Failed to download Bitstamp data for source_id '#{source_id}' after #{TRIES} attempts: #{e.message}"
+        end
+      end
     end
   end
 end

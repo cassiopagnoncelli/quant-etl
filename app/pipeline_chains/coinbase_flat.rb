@@ -181,8 +181,12 @@ class CoinbaseFlat < PipelineChainBase
       
       current_date = start_date
       total_records = 0
+      api_limit_reached = false
       
-      while current_date <= end_date
+      while current_date <= end_date && !api_limit_reached
+        # Reset retry counter for each new chunk
+        chunk_retry_count = 0
+        
         # Calculate chunk end date based on max candles and granularity
         # Ensure we don't exceed the 300 candle limit
         chunk_days = calculate_safe_chunk_days(granularity)
@@ -248,7 +252,15 @@ class CoinbaseFlat < PipelineChainBase
           
           # If we get a "granularity too small" error, try with a smaller chunk
           if e.message.include?("granularity too small") || e.message.include?("exceeds 300")
-            log_warn "Chunk too large, trying with smaller chunk size"
+            chunk_retry_count += 1
+            
+            if chunk_retry_count > 3
+              log_warn "API limit reached: Maximum chunk retries (3) exceeded. Finalizing with data collected so far."
+              api_limit_reached = true
+              break
+            end
+            
+            log_warn "Chunk too large, trying with smaller chunk size (attempt #{chunk_retry_count}/3)"
             
             # More aggressive chunk size reduction based on timeframe
             case timeframe
@@ -261,9 +273,9 @@ class CoinbaseFlat < PipelineChainBase
               elsif chunk_days > 1.day
                 chunk_end = current_date + 1.day
               else
-                log_error "Cannot reduce chunk size further for H1 data, skipping this period"
-                current_date = chunk_end + 1.day
-                next
+                log_warn "API limit reached: Cannot reduce chunk size further for H1 data. Finalizing with data collected so far."
+                api_limit_reached = true
+                break
               end
             when 'D1'
               # For D1, try with smaller day chunks
@@ -274,9 +286,9 @@ class CoinbaseFlat < PipelineChainBase
               elsif chunk_days > 1.day
                 chunk_end = current_date + 1.day
               else
-                log_error "Cannot reduce chunk size further for D1 data, skipping this period"
-                current_date = chunk_end + 1.day
-                next
+                log_warn "API limit reached: Cannot reduce chunk size further for D1 data. Finalizing with data collected so far."
+                api_limit_reached = true
+                break
               end
             else
               # Fallback: try with half the chunk size
@@ -284,9 +296,9 @@ class CoinbaseFlat < PipelineChainBase
               if smaller_chunk_days >= 1.day
                 chunk_end = current_date + smaller_chunk_days
               else
-                log_error "Cannot reduce chunk size further, skipping this period"
-                current_date = chunk_end + 1.day
-                next
+                log_warn "API limit reached: Cannot reduce chunk size further. Finalizing with data collected so far."
+                api_limit_reached = true
+                break
               end
             end
             
@@ -296,12 +308,17 @@ class CoinbaseFlat < PipelineChainBase
             retry
           end
           
-          # Skip this chunk and continue
+          # For other errors, skip this chunk and continue
           current_date = chunk_end + 1.day
         end
       end
       
-      log_info "Total records fetched: #{total_records}"
+      if api_limit_reached
+        log_info "Pipeline completed early due to API limits. Total records fetched: #{total_records}"
+        log_info "Data collection stopped at #{current_date}. Consider running again later to fetch remaining data."
+      else
+        log_info "Total records fetched: #{total_records}"
+      end
     end
   end
   

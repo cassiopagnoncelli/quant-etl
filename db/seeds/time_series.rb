@@ -697,17 +697,6 @@ class TimeSeriesSeeder
         since: Date.new(2015, 1, 1)
       },
       
-      # Kraken - Secondary source (high quality, 2013)
-      {
-        ticker: "KRBTCUSDH1",
-        timeframe: "H1",
-        source: "Kraken",
-        source_id: "XBTUSD",
-        kind: "aggregate",
-        description: "Bitcoin/USD Hourly OHLC from Kraken (Secondary source)",
-        since: Date.new(2015, 1, 1)
-      },
-      
       
       # Coinbase - Additional validation source
       {
@@ -949,8 +938,6 @@ class TimeSeriesSeeder
                     'YahooFlat'
                   when 'Bitstamp'
                     'BitstampFlat'
-                  when 'Kraken'
-                    'KrakenFlat'
                   when 'Coinbase'
                     'CoinbaseFlat'
                   else
