@@ -49,7 +49,7 @@ class PipelineRun < ApplicationRecord
   end
 
   def run_async!
-    PipelineJob.perform_later(id)
+    PipelineJob.perform_async(id)
   end
 
   def execute!

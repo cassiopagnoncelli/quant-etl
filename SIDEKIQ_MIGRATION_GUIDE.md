@@ -192,7 +192,7 @@ Job tests remain the same - no changes needed:
 RSpec.describe MyJob, type: :job do
   it "enqueues the job" do
     expect {
-      MyJob.perform_later(arg)
+      MyJob.perform_async(arg)
     }.to have_enqueued_job(MyJob)
   end
 end
