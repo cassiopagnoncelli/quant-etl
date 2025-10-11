@@ -30,7 +30,7 @@ This service provides a Ruby interface for downloading and processing Polygon.io
 
 ```ruby
 # Initialize the service for a specific ticker
-service = Etl::Import::PolygonFlatFile.new('AAPL')
+service = QuantETL::Import::PolygonFlatFile.new('AAPL')
 
 # Download trades data for a specific date
 file_path = service.download(date: '2024-03-07')
@@ -53,7 +53,7 @@ VIX is an index, so you need to use the `:indices` asset class:
 
 ```ruby
 # Initialize service for VIX
-vix_service = Etl::Import::PolygonFlatFile.new('VIX')
+vix_service = QuantETL::Import::PolygonFlatFile.new('VIX')
 
 # Download VIX minute aggregates for a specific date
 file_path = vix_service.download(
@@ -90,7 +90,7 @@ end
 ### Download Multiple Days
 
 ```ruby
-service = Etl::Import::PolygonFlatFile.new('AAPL')
+service = QuantETL::Import::PolygonFlatFile.new('AAPL')
 
 # Download a range of dates
 files = service.download_range(
@@ -107,7 +107,7 @@ end
 ### Process Downloaded Files
 
 ```ruby
-service = Etl::Import::PolygonFlatFile.new('AAPL')
+service = QuantETL::Import::PolygonFlatFile.new('AAPL')
 
 # Download and process in one step
 service.download_and_process(date: '2024-03-07') do |row|
@@ -125,7 +125,7 @@ end
 ### List Available Files
 
 ```ruby
-service = Etl::Import::PolygonFlatFile.new('AAPL')
+service = QuantETL::Import::PolygonFlatFile.new('AAPL')
 
 # List all available files for stocks trades
 files = service.list_files
@@ -266,7 +266,7 @@ Run the test suite:
 
 ```bash
 # Run all tests
-bundle exec rspec spec/services/etl/import/polygon_flat_file_spec.rb
+bundle exec rspec spec/services/qetl/import/polygon_flat_file_spec.rb
 
 # Run with real API (requires valid credentials)
 # Remove the 'skip' from integration tests in the spec file

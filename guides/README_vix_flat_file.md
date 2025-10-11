@@ -2,7 +2,7 @@
 
 ## Overview
 
-The VIX Flat File Import Service (`Etl::Import::Flat::Cboe::VixFlatFile`) is a comprehensive service that orchestrates the download and import of CBOE VIX (Volatility Index) data from flat files into the Aggregate model. This service combines the functionality of downloading data from CBOE and loading it into the database.
+The VIX Flat File Import Service (`QuantETL::Import::Flat::Cboe::VixFlatFile`) is a comprehensive service that orchestrates the download and import of CBOE VIX (Volatility Index) data from flat files into the Aggregate model. This service combines the functionality of downloading data from CBOE and loading it into the database.
 
 ## Architecture
 
@@ -47,7 +47,7 @@ The service supports 10 different VIX indices:
 
 ```ruby
 # Initialize the service
-service = Etl::Import::Flat::Cboe::VixFlatFile.new
+service = QuantETL::Import::Flat::Cboe::VixFlatFile.new
 
 # Import a single VIX index
 result = service.import(symbol: :vix)
@@ -177,7 +177,7 @@ Date,Open,High,Low,Close
 ### Example 1: Import with Date Range
 
 ```ruby
-service = Etl::Import::Flat::Cboe::VixFlatFile.new
+service = QuantETL::Import::Flat::Cboe::VixFlatFile.new
 
 # Import only data from 2024
 result = service.import(
@@ -219,7 +219,7 @@ done
 ### Example 4: Validate Before Import
 
 ```ruby
-service = Etl::Import::Flat::Cboe::VixFlatFile.new
+service = QuantETL::Import::Flat::Cboe::VixFlatFile.new
 
 # Validate file first
 validation = service.validate_file('/path/to/vix_data.csv')
@@ -303,8 +303,8 @@ Info.create!(
 
 ## Related Services
 
-- `Etl::Import::Flat::Cboe::VixHistorical` - Downloads VIX data from CBOE
-- `Etl::Load::Flat::Cboe::VixHistorical` - Loads CSV files into Aggregate model
+- `QuantETL::Import::Flat::Cboe::VixHistorical` - Downloads VIX data from CBOE
+- `QuantETL::Load::Flat::Cboe::VixHistorical` - Loads CSV files into Aggregate model
 - `PopulateInfoMetadata` - Populates Info model with VIX metadata
 
 ## Future Enhancements

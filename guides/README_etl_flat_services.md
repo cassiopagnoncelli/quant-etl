@@ -5,7 +5,7 @@ This directory contains services for importing flat file data from various finan
 ## Directory Structure
 
 ```
-app/services/etl/import/flat/
+app/services/qetl/import/flat/
 ├── cboe/                    # Chicago Board Options Exchange data
 │   └── vix_historical.rb    # VIX volatility index historical data
 ├── polygon/                 # Polygon.io data
@@ -16,7 +16,7 @@ app/services/etl/import/flat/
 ## Available Services
 
 ### Generic CSV File Importer
-**Module:** `Etl::Import::Flat::FileCsv`
+**Module:** `QuantETL::Import::Flat::FileCsv`
 
 Imports CSV files with standard OHLCV (Open, High, Low, Close, Volume) data format.
 
@@ -28,7 +28,7 @@ Imports CSV files with standard OHLCV (Open, High, Low, Close, Volume) data form
 
 **Usage:**
 ```ruby
-service = Etl::Import::Flat::FileCsv.new(
+service = QuantETL::Import::Flat::FileCsv.new(
   ticker: 'AAPL',
   file_path: 'path/to/data.csv',
   timeframe: 'D1',
@@ -38,7 +38,7 @@ service.call
 ```
 
 ### CBOE VIX Historical Data
-**Module:** `Etl::Import::Flat::Cboe::VixHistorical`
+**Module:** `QuantETL::Import::Flat::Cboe::VixHistorical`
 
 Downloads and imports historical VIX (Volatility Index) data from CBOE.
 
@@ -50,7 +50,7 @@ Downloads and imports historical VIX (Volatility Index) data from CBOE.
 
 **Usage:**
 ```ruby
-service = Etl::Import::Flat::Cboe::VixHistorical.new
+service = QuantETL::Import::Flat::Cboe::VixHistorical.new
 data = service.download(symbol: :vix)
 service.import_to_database(symbol: :vix, start_date: '2024-01-01')
 ```
@@ -63,7 +63,7 @@ rails cboe:vix:stats[vix,30]
 ```
 
 ### Polygon Flat Files
-**Module:** `Etl::Import::Flat::Polygon::FlatFile`
+**Module:** `QuantETL::Import::Flat::Polygon::FlatFile`
 
 Downloads compressed flat files from Polygon.io's S3-compatible storage.
 
@@ -75,7 +75,7 @@ Downloads compressed flat files from Polygon.io's S3-compatible storage.
 
 **Usage:**
 ```ruby
-service = Etl::Import::Flat::Polygon::FlatFile.new('AAPL')
+service = QuantETL::Import::Flat::Polygon::FlatFile.new('AAPL')
 file_path = service.download(date: '2024-03-07', asset_class: :stocks, data_type: :trades)
 service.process_file(file_path) do |row|
   # Process each row
@@ -125,10 +125,10 @@ Each service has comprehensive RSpec tests:
 
 ```bash
 # Test CBOE VIX service
-rspec spec/services/etl/import/flat/cboe/vix_historical_spec.rb
+rspec spec/services/qetl/import/flat/cboe/vix_historical_spec.rb
 
 # Test Polygon flat file service
-rspec spec/services/etl/import/flat/polygon/flat_file_spec.rb
+rspec spec/services/qetl/import/flat/polygon/flat_file_spec.rb
 ```
 
 ## Documentation
@@ -143,13 +143,13 @@ To add a new flat file import service:
 
 1. Create a new directory under `flat/` for the provider
 2. Implement the service class following the existing patterns
-3. Add corresponding tests in `spec/services/etl/import/flat/`
+3. Add corresponding tests in `spec/services/qetl/import/flat/`
 4. Create rake tasks in `lib/tasks/`
 5. Document in `guides/`
 
 Example structure for a new provider:
 ```ruby
-module Etl
+module QuantETL
   module Import
     module Flat
       module NewProvider

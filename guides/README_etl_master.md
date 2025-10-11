@@ -13,7 +13,7 @@ The ETL Master Import System provides a unified interface to import all data sou
 ```
 ┌─────────────────────────────────────┐
 │       ETL Master Rake Task          │
-│         (etl:import_all)            │
+│         (qetl:import_all)            │
 └──────────┬──────────────────────────┘
            │
            ├─── Step 1: VIX Import
@@ -38,31 +38,31 @@ The ETL Master Import System provides a unified interface to import all data sou
 
 ```bash
 # Import all data sources (VIX, FRED, Info)
-rake etl:import_all
+rake qetl:import_all
 
 # Or use the convenience shortcut
-rake etl_import_all
+rake qetl_import_all
 ```
 
 ### Update Commands
 
 ```bash
 # Update all data sources with latest data only
-rake etl:update_all
+rake qetl:update_all
 
 # Or use the convenience shortcut
-rake etl_update_all
+rake qetl_update_all
 ```
 
 ### Status and Maintenance
 
 ```bash
 # Show current status of all data sources
-rake etl:status
-# Or: rake etl_status
+rake qetl:status
+# Or: rake qetl_status
 
 # Clean up temporary downloaded files
-rake etl:cleanup
+rake qetl:cleanup
 ```
 
 ## Data Models
@@ -118,7 +118,7 @@ rake etl:cleanup
 
 ```bash
 # Import everything for the first time
-rake etl:import_all
+rake qetl:import_all
 
 # Expected output:
 # ================================================================================
@@ -144,7 +144,7 @@ rake etl:import_all
 
 ```bash
 # Update with latest data only
-rake etl:update_all
+rake qetl:update_all
 
 # This will:
 # - Download only new VIX data
@@ -155,7 +155,7 @@ rake etl:update_all
 ### Check Status
 
 ```bash
-rake etl:status
+rake qetl:status
 
 # Shows:
 # - Record counts for each ticker
@@ -186,11 +186,11 @@ For production use, schedule regular updates:
 ```ruby
 # Example using whenever gem (schedule.rb)
 every 1.day, at: '9:30 am' do
-  rake "etl:update_all"
+  rake "qetl:update_all"
 end
 
 every :sunday, at: '12am' do
-  rake "etl:cleanup"
+  rake "qetl:cleanup"
 end
 ```
 
@@ -201,7 +201,7 @@ end
 1. **No data imported**
    - Check API keys in credentials
    - Verify network connectivity
-   - Check if data already exists (use `rake etl:status`)
+   - Check if data already exists (use `rake qetl:status`)
 
 2. **Partial imports**
    - Review error messages in output
@@ -217,11 +217,11 @@ end
 
 ```ruby
 # Test VIX import
-service = Etl::Import::Flat::Cboe::VixFlatFile.new
+service = QuantETL::Import::Flat::Cboe::VixFlatFile.new
 result = service.import(symbol: :vix)
 
 # Test FRED import
-service = Etl::Load::Flat::Fred::EconomicSeries.new
+service = QuantETL::Load::Flat::Fred::EconomicSeries.new
 result = service.import_series(:gdp)
 
 # Test Info population
@@ -250,19 +250,19 @@ Downloaded files are stored temporarily in:
 
 ### Adding New Data Sources
 
-1. Create import service in `app/services/etl/import/`
-2. Create load service in `app/services/etl/load/`
-3. Add to master rake task in `lib/tasks/etl_master.rake`
+1. Create import service in `app/services/qetl/import/`
+2. Create load service in `app/services/qetl/load/`
+3. Add to master rake task in `lib/tasks/qetl_master.rake`
 4. Update Info metadata population
 
 ### Testing
 
 ```bash
 # Run all ETL tests
-rspec spec/services/etl/
+rspec spec/services/qetl/
 
 # Test specific service
-rspec spec/services/etl/import/flat/cboe/vix_flat_file_spec.rb
+rspec spec/services/qetl/import/flat/cboe/vix_flat_file_spec.rb
 ```
 
 ## Related Documentation
@@ -270,4 +270,4 @@ rspec spec/services/etl/import/flat/cboe/vix_flat_file_spec.rb
 - [VIX Flat File Import](README_vix_flat_file.md)
 - [FRED Setup Guide](README_fred_setup.md) - **Required for FRED data import**
 - [FRED Economic Series](README_fred_economic.md)
-- [ETL Flat Services](README_etl_flat_services.md)
+- [ETL Flat Services](README_qetl_flat_services.md)

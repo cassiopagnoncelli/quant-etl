@@ -92,15 +92,15 @@ end
 def download_time_series(time_series)
   case time_series.source
   when 'CBOE'
-    cboe_service = Etl::Import::Flat::Cboe::VixHistorical.new
+    cboe_service = QuantETL::Import::Flat::Cboe::VixHistorical.new
     cboe_service.download(symbol: time_series.source_id.downcase.to_sym)
   when 'FRED'
-    fred_service = Etl::Import::Flat::Fred::EconomicSeries.new
+    fred_service = QuantETL::Import::Flat::Fred::EconomicSeries.new
     series_key = fred_service.class::FRED_SERIES.find { |k, v| v[:series_id] == time_series.source_id }&.first
     fred_service.download(series: series_key) if series_key
   when 'POLYGON'
     # Polygon implementation would use source_id as ticker
-    polygon_service = Etl::Import::Flat::Polygon::FlatFile.new(time_series.source_id)
+    polygon_service = QuantETL::Import::Flat::Polygon::FlatFile.new(time_series.source_id)
     polygon_service.download(date: Date.current)
   end
 end

@@ -4,7 +4,7 @@ This service provides functionality to download and import historical VIX (Volat
 
 ## Overview
 
-The CBOE VIX Historical Data service (`Etl::Import::Flat::Cboe::VixHistorical`) allows you to:
+The CBOE VIX Historical Data service (`QuantETL::Import::Flat::Cboe::VixHistorical`) allows you to:
 - Download historical data for various VIX indices
 - Import data directly into the database
 - Calculate statistics on VIX data
@@ -39,7 +39,7 @@ The service supports the following VIX indices:
 
 ```ruby
 # Initialize the service
-service = Etl::Import::Flat::Cboe::VixHistorical.new
+service = QuantETL::Import::Flat::Cboe::VixHistorical.new
 
 # Download VIX data
 data = service.download(symbol: :vix)
@@ -172,14 +172,14 @@ The `calculate_statistics` method provides comprehensive analysis:
 ### Example 1: Daily VIX Import
 ```ruby
 # Run this daily to keep VIX data current
-service = Etl::Import::Flat::Cboe::VixHistorical.new
+service = QuantETL::Import::Flat::Cboe::VixHistorical.new
 count = service.import_to_database(symbol: :vix)
 puts "Imported #{count} new VIX records"
 ```
 
 ### Example 2: Volatility Analysis
 ```ruby
-service = Etl::Import::Flat::Cboe::VixHistorical.new
+service = QuantETL::Import::Flat::Cboe::VixHistorical.new
 
 # Get 30-day statistics
 stats = service.calculate_statistics(symbol: :vix, days: 30)
@@ -194,7 +194,7 @@ end
 
 ### Example 3: Term Structure Analysis
 ```ruby
-service = Etl::Import::Flat::Cboe::VixHistorical.new
+service = QuantETL::Import::Flat::Cboe::VixHistorical.new
 
 # Compare short-term vs long-term volatility
 vix9d = service.get_latest(symbol: :vix9d)
@@ -212,13 +212,13 @@ end
 Run the test suite:
 ```bash
 # Run all CBOE VIX tests
-rspec spec/services/etl/import/flat/cboe/vix_historical_spec.rb
+rspec spec/services/qetl/import/flat/cboe/vix_historical_spec.rb
 
 # Run with VCR cassettes for offline testing
-rspec spec/services/etl/import/flat/cboe/vix_historical_spec.rb --tag vcr
+rspec spec/services/qetl/import/flat/cboe/vix_historical_spec.rb --tag vcr
 
 # Run integration tests (requires internet)
-RUN_INTEGRATION_TESTS=1 rspec spec/services/etl/import/flat/cboe/vix_historical_spec.rb --tag integration
+RUN_INTEGRATION_TESTS=1 rspec spec/services/qetl/import/flat/cboe/vix_historical_spec.rb --tag integration
 ```
 
 ## Error Handling

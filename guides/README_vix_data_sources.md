@@ -6,7 +6,7 @@ This document clarifies the authoritative data sources for VIX (Volatility Index
 ## Primary VIX Data Source: CBOE
 
 ### Service: CBOE VIX Historical
-- **Location**: `app/services/etl/import/flat/cboe/vix_historical.rb`
+- **Location**: `app/services/qetl/import/flat/cboe/vix_historical.rb`
 - **Source**: Direct from CBOE API (Chicago Board Options Exchange)
 - **Data Type**: Full OHLC (Open, High, Low, Close) data
 - **Model**: Aggregate model (aggregate data)
@@ -39,7 +39,7 @@ rails cboe:vix:import[vix,2024-01-01,2024-12-31]
 ## Backup VIX Data Source: Flat Files
 
 ### Service: VIX Flat File
-- **Location**: `app/services/etl/import/flat/cboe/vix_flat_file.rb`
+- **Location**: `app/services/qetl/import/flat/cboe/vix_flat_file.rb`
 - **Source**: CSV files (typically downloaded from CBOE)
 - **Use Case**: When you have CSV files to import
 - **Model**: Aggregate model
@@ -89,5 +89,5 @@ As of the last import:
 ## Related Documentation
 
 - [CBOE VIX Guide](README_cboe_vix.md)
-- [ETL Flat Services Guide](README_etl_flat_services.md)
+- [ETL Flat Services Guide](README_qetl_flat_services.md)
 - [FRED Economic Series Guide](README_fred_economic.md)

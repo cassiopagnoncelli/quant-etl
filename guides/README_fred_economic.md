@@ -7,8 +7,8 @@ The FRED (Federal Reserve Economic Data) services provide comprehensive function
 ## Architecture
 
 The system follows the ETL (Extract, Transform, Load) pattern:
-- **Import Service** (`Etl::Import::Flat::Fred::EconomicSeries`): Downloads data from FRED API
-- **Load Service** (`Etl::Load::Flat::Fred::EconomicSeries`): Processes CSV files into the database
+- **Import Service** (`QuantETL::Import::Flat::Fred::EconomicSeries`): Downloads data from FRED API
+- **Load Service** (`QuantETL::Load::Flat::Fred::EconomicSeries`): Processes CSV files into the database
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ To use these services, you need a free FRED API key:
      fred:
        api_key: your_api_key_here
      ```
-   - Pass directly to service: `Etl::Import::Flat::Fred::EconomicSeries.new(api_key: 'your_key')`
+   - Pass directly to service: `QuantETL::Import::Flat::Fred::EconomicSeries.new(api_key: 'your_key')`
 
 ## Available Economic Series
 
@@ -74,7 +74,7 @@ To use these services, you need a free FRED API key:
 
 ```ruby
 # Initialize the import service
-service = Etl::Import::Flat::Fred::EconomicSeries.new
+service = QuantETL::Import::Flat::Fred::EconomicSeries.new
 
 # Download M2 money supply data
 data = service.download(series: :m2)
@@ -102,7 +102,7 @@ puts "S&P 500 1-year return: #{stats[:change_percent]}%"
 
 ```ruby
 # Initialize the load service
-load_service = Etl::Load::Flat::Fred::EconomicSeries.new
+load_service = QuantETL::Load::Flat::Fred::EconomicSeries.new
 
 # Load from CSV file
 result = load_service.load_from_file('/path/to/M2SL_data.csv')
@@ -228,7 +228,7 @@ treasury_2024 = Aggregate.where(ticker: 'DGS10', timeframe: 'D1')
 ```ruby
 class EconomicDashboardJob < ApplicationJob
   def perform
-    service = Etl::Import::Flat::Fred::EconomicSeries.new
+    service = QuantETL::Import::Flat::Fred::EconomicSeries.new
     
     # Key indicators to update
     indicators = [:treasury_10y, :dollar_index, :oil_wti, :sp500]
@@ -257,7 +257,7 @@ end
 ```ruby
 class EconomicAnalysisService
   def initialize
-    @fred_service = Etl::Import::Flat::Fred::EconomicSeries.new
+    @fred_service = QuantETL::Import::Flat::Fred::EconomicSeries.new
   end
   
   def yield_curve_analysis
@@ -306,7 +306,7 @@ end
 ```ruby
 class MarketRiskMonitor
   def check_risk_indicators
-    service = Etl::Import::Flat::Fred::EconomicSeries.new
+    service = QuantETL::Import::Flat::Fred::EconomicSeries.new
     
     risks = []
     
@@ -403,7 +403,7 @@ Date,Value,Series,Units
    ```ruby
    # Schedule daily updates for key indicators
    every 1.day, at: '9:00 am' do
-     runner "Etl::Import::Flat::Fred::EconomicSeries.new.import_to_database(series: :treasury_10y)"
+     runner "QuantETL::Import::Flat::Fred::EconomicSeries.new.import_to_database(series: :treasury_10y)"
    end
    ```
 
@@ -437,7 +437,7 @@ Date,Value,Series,Units
 # Enable detailed logging
 logger = Logger.new(STDOUT)
 logger.level = Logger::DEBUG
-service = Etl::Import::Flat::Fred::EconomicSeries.new
+service = QuantETL::Import::Flat::Fred::EconomicSeries.new
 service.instance_variable_set(:@logger, logger)
 ```
 

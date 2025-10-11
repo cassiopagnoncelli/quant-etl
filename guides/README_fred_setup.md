@@ -25,7 +25,7 @@ Set the `FRED_API_KEY` environment variable:
 export FRED_API_KEY="your_api_key_here"
 
 # Or set it when running the rake task
-FRED_API_KEY="your_api_key_here" bundle exec rake etl:import_all
+FRED_API_KEY="your_api_key_here" bundle exec rake qetl:import_all
 ```
 
 ### Option 2: Rails Credentials (Recommended for Production)
@@ -48,7 +48,7 @@ fred:
 When using the service directly in code:
 
 ```ruby
-fred_service = Etl::Import::Flat::Fred::EconomicSeries.new(
+fred_service = QuantETL::Import::Flat::Fred::EconomicSeries.new(
   api_key: 'your_api_key_here'
 )
 ```
@@ -60,13 +60,13 @@ Once you've configured the API key, test the FRED import:
 ```bash
 # Test a single series
 bundle exec rails runner "
-  service = Etl::Import::Flat::Fred::EconomicSeries.new
+  service = QuantETL::Import::Flat::Fred::EconomicSeries.new
   result = service.import_to_database(series: :sp500)
   puts \"Imported #{result} records\"
 "
 
 # Or run the full import
-bundle exec rake etl:import_all
+bundle exec rake qetl:import_all
 ```
 
 ## Available FRED Series
@@ -120,6 +120,6 @@ FRED data is stored in the `Univariate` model with the following structure:
 ## Next Steps
 
 After successfully importing FRED data, you can:
-1. View the imported data using `rake etl:status`
+1. View the imported data using `rake qetl:status`
 2. Query the data using the Univariate model
-3. Set up scheduled updates using `rake etl:update_all`
+3. Set up scheduled updates using `rake qetl:update_all`

@@ -2,13 +2,13 @@
 
 ## Overview
 
-The `Etl::Load::Flat::Cboe::VixHistorical` service is designed to load VIX historical data from CSV flat files into the Aggregate model. This service complements the Import service by providing a way to process previously downloaded VIX data files.
+The `QuantETL::Load::Flat::Cboe::VixHistorical` service is designed to load VIX historical data from CSV flat files into the Aggregate model. This service complements the Import service by providing a way to process previously downloaded VIX data files.
 
 ## Architecture
 
 The ETL system follows a separation of concerns:
-- **Import Service** (`Etl::Import::Flat::Cboe::VixHistorical`): Downloads data from external sources
-- **Load Service** (`Etl::Load::Flat::Cboe::VixHistorical`): Processes flat files into the database
+- **Import Service** (`QuantETL::Import::Flat::Cboe::VixHistorical`): Downloads data from external sources
+- **Load Service** (`QuantETL::Load::Flat::Cboe::VixHistorical`): Processes flat files into the database
 
 ## Features
 
@@ -41,7 +41,7 @@ The ETL system follows a separation of concerns:
 
 ```ruby
 # Initialize the service
-service = Etl::Load::Flat::Cboe::VixHistorical.new
+service = QuantETL::Load::Flat::Cboe::VixHistorical.new
 
 # Load from a single file
 result = service.load_from_file('/path/to/VIX_data.csv')
@@ -300,11 +300,11 @@ The service implements several error recovery strategies:
 
 ```ruby
 # Step 1: Download fresh data
-import_service = Etl::Import::Flat::Cboe::VixHistorical.new
+import_service = QuantETL::Import::Flat::Cboe::VixHistorical.new
 import_service.download(symbol: :vix)
 
 # Step 2: Load into database
-load_service = Etl::Load::Flat::Cboe::VixHistorical.new
+load_service = QuantETL::Load::Flat::Cboe::VixHistorical.new
 result = load_service.load_from_directory(
   Rails.root.join('tmp', 'cboe_vix_data'),
   pattern: "VIX_#{Date.today.strftime('%Y%m%d')}*.csv"
@@ -318,7 +318,7 @@ puts "Imported #{result.sum { |r| r[:imported] }} new records"
 ```ruby
 class VixDataLoadJob < ApplicationJob
   def perform
-    service = Etl::Load::Flat::Cboe::VixHistorical.new
+    service = QuantETL::Load::Flat::Cboe::VixHistorical.new
     
     # Load all pending CSV files
     results = service.load_from_directory(
@@ -348,11 +348,11 @@ end
 class VixDataPipeline
   def self.run(date_range: 30.days.ago..Date.today)
     # Download data
-    import_service = Etl::Import::Flat::Cboe::VixHistorical.new
+    import_service = QuantETL::Import::Flat::Cboe::VixHistorical.new
     download_result = import_service.download(symbol: :vix)
     
     # Load into database
-    load_service = Etl::Load::Flat::Cboe::VixHistorical.new
+    load_service = QuantETL::Load::Flat::Cboe::VixHistorical.new
     load_result = load_service.load_from_directory(
       Rails.root.join('tmp', 'cboe_vix_data'),
       start_date: date_range.begin,
@@ -382,13 +382,13 @@ end
 
 ```bash
 # Run all Load service tests
-rspec spec/services/etl/load/flat/cboe/vix_historical_spec.rb
+rspec spec/services/qetl/load/flat/cboe/vix_historical_spec.rb
 
 # Run specific test
-rspec spec/services/etl/load/flat/cboe/vix_historical_spec.rb -e "loads data into Aggregate model"
+rspec spec/services/qetl/load/flat/cboe/vix_historical_spec.rb -e "loads data into Aggregate model"
 
 # Run with coverage
-COVERAGE=true rspec spec/services/etl/load/flat/cboe/vix_historical_spec.rb
+COVERAGE=true rspec spec/services/qetl/load/flat/cboe/vix_historical_spec.rb
 ```
 
 ### Test Coverage
@@ -429,7 +429,7 @@ The test suite covers:
 # Enable detailed logging
 logger = Logger.new(STDOUT)
 logger.level = Logger::DEBUG
-service = Etl::Load::Flat::Cboe::VixHistorical.new(logger: logger)
+service = QuantETL::Load::Flat::Cboe::VixHistorical.new(logger: logger)
 ```
 
 ## Best Practices
@@ -460,5 +460,5 @@ service = Etl::Load::Flat::Cboe::VixHistorical.new(logger: logger)
 ## Related Documentation
 
 - [CBOE VIX Import Service](README_cboe_vix.md) - For downloading VIX data
-- [ETL Flat Services Overview](README_etl_flat_services.md) - General ETL architecture
+- [ETL Flat Services Overview](README_qetl_flat_services.md) - General ETL architecture
 - [Aggregate Model Documentation](../app/models/aggregate.rb) - Database schema details

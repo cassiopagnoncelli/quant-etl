@@ -16,7 +16,9 @@
 # end
 
 ActiveSupport::Inflector.inflections(:en) do |inflect|
+  inflect.acronym "ETL"
   inflect.acronym "Meta"
+
   inflect.irregular "series", "series"
   inflect.irregular "time_series", "time_series"
 end
