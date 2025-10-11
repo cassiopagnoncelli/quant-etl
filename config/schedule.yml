@@ -1,0 +1,15 @@
+# Sidekiq-cron schedule configuration
+# Format: https://github.com/sidekiq-cron/sidekiq-cron
+#
+# Example:
+# cleanup_job:
+#   cron: "0 */12 * * *"  # Every 12 hours
+#   class: "CleanupJob"
+#   queue: default
+#
+# send_notifications:
+#   cron: "0 9 * * MON-FRI"  # 9am on weekdays
+#   class: "SendNotificationsJob"
+#   queue: high_priority
+
+# Add your recurring jobs here

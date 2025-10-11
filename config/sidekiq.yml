@@ -1,0 +1,9 @@
+:concurrency: <%= ENV.fetch("SIDEKIQ_CONCURRENCY", 3) %>
+:max_retries: 3
+:queues:
+  - default
+  - mailers
+  - low_priority
+
+:schedule:
+  # Recurring jobs are now managed by config/schedule.yml

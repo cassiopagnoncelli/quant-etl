@@ -1,6 +1,12 @@
+require 'sidekiq/web'
+require 'sidekiq/throttled/web'
+require 'sidekiq/cron/web'
+
 Rails.application.routes.draw do
   get '/health-check', to: 'pages#health_check'
   get 'up' => 'rails/health#show', as: :rails_health_check
+
+  mount Sidekiq::Web => '/sk'
 
   get 'pages', to: 'pages#home'
 

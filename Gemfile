@@ -26,7 +26,11 @@ gem "rubocop-rails-omakase", require: false, groups: %i[development test]
 gem "shoulda-matchers", groups: %i[test]
 gem "solid_cable"
 gem "solid_cache"
-gem "solid_queue"
+gem "sidekiq"
+gem "sidekiq-cron"
+gem "sidekiq-status"
+gem "sidekiq-throttled"
+gem "redis"
 gem "stimulus-rails"
 gem "thruster", require: false
 gem "turbo-rails"
