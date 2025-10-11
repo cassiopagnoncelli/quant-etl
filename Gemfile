@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 ruby '3.4.2'
 
-gem "rails", "~> 8.0.2", ">= 8.0.2.1"
+gem "rails", "~> 8.0.3"
 
 gem "awesome_print", groups: %i[development production]
 gem "dotenv-rails", groups: %i[development test]
